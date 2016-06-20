@@ -154,17 +154,17 @@ const char *dograph(const char *dot)
 {
   const char *data = NULL;
   unsigned int length = 0;
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 1; i++) {
     G = agmemread(dot);
 
     if (G) {
       gvLayoutJobs(Gvc, G);  /* take layout engine from command line */
       gvRenderData(Gvc, G, "svg", &data, &length);
-      gvFreeLayout(Gvc, G);
-      agclose(G);
+      //gvFreeLayout(Gvc, G);
+      //agclose(G);
     }
 
-    if (i != 99)
+    if (i != 0)
       free(data);
   }
 
