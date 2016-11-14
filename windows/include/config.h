@@ -10,9 +10,6 @@
    */
 /* #undef CRAY_STACKSEG_END */
 
-/* Define to 1 if using `alloca.c'. */
-/* #undef C_ALLOCA */
-
 /* Define for Darwin-style shared library names. */
 /* #undef DARWIN_DYLIB */
 
@@ -25,21 +22,17 @@
 /* Define if you want DIGCOLA */
 #define DIGCOLA 1
 
+/* Filename for plugin configuration file. */
+#define GVPLUGIN_CONFIG_FILE "config6"
+
+/* Compatibility version number for plugins. */
+#define GVPLUGIN_VERSION 6
+
 /* Define if you want on-demand plugin loading */
 #define ENABLE_LTDL 1
 
-/* Define to 1 if you have `alloca', as a function or macro. */
-#define HAVE_ALLOCA 1
-
-/* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
-   */
-/* #undef HAVE_ALLOCA_H */
-
 /* Define if you have the ann library */
 #define HAVE_ANN 1
-
-/* Define to 1 if compiler supports bool */
-#define HAVE_BOOL 1
 
 /* Define to 1 if you have the `cbrt' function. */
 //#define HAVE_CBRT 1
@@ -141,12 +134,6 @@
 /* Define to 1 if you have the `getenv' function. */
 #define HAVE_GETENV 1
 
-/* Define if getopt externs are declared */
-#define HAVE_GETOPT_DECL 1
-
-/* Define to 1 if you have the <getopt.h> header file. */
-#define HAVE_GETOPT_H 1
-
 /* Define to 1 if you have the `getrusage' function. */
 /* #undef HAVE_GETRUSAGE */
 
@@ -169,7 +156,8 @@
 #define HAVE_GTKGLEXT 1
 
 /* Define if you have the gts library */
-#define HAVE_GTS 1
+#undef HAVE_GTS
+#define HAVE_GTS 0
 
 /* Define if you have the iconv() function. */
 #define HAVE_ICONV 1
@@ -185,9 +173,6 @@
 
 /* Define if intptr_t is declared */
 #define HAVE_INTPTR_T 1
-
-/* Define to 1 if you have the <inttypes.h> header file. */
-//#define HAVE_INTTYPES_H 1
 
 /* Define to 1 if you have the <langinfo.h> header file. */
 /* #undef HAVE_LANGINFO_H */
@@ -294,12 +279,6 @@
 /* Define to 1 if you have the <stddef.h> header file. */
 #define HAVE_STDDEF_H 1
 
-/* Define to 1 if you have the <stdint.h> header file. */
-//#define HAVE_STDINT_H 1
-
-/* Define to 1 if you have the <stdlib.h> header file. */
-#define HAVE_STDLIB_H 1
-
 /* Define to 1 if you have the `strcasecmp' function. */
 //#define HAVE_STRCASECMP 1
 
@@ -315,9 +294,6 @@
 /* Define to 1 if you have the <strings.h> header file. */
 //#define HAVE_STRINGS_H 1
 
-/* Define to 1 if you have the <string.h> header file. */
-#define HAVE_STRING_H 1
-
 /* Define to 1 if you have the `strncasecmp' function. */
 //#define HAVE_STRNCASECMP 1
 
@@ -332,9 +308,6 @@
 
 /* Define to 1 if you have the `strtoull' function. */
 #define HAVE_STRTOULL 1
-
-/* Define to 1 if you have struct dioattr */
-/* #undef HAVE_STRUCT_DIOATTR */
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
@@ -438,6 +411,24 @@
 /* #undef ORTHO */
 #define ORTHO 1
 
+/* Define to the address where bug reports for this package should be sent. */
+#define PACKAGE_BUGREPORT "http://www.graphviz.org/"
+
+/* Define to the full name of this package. */
+#define PACKAGE_NAME "graphviz"
+
+/* Define to the full name and version of this package. */
+#define PACKAGE_STRING "graphviz 2.39.20160612.1140"
+
+/* Define to the one symbol short name of this package. */
+#define PACKAGE_TARNAME "graphviz"
+
+/* Define to the home page for this package. */
+#define PACKAGE_URL ""
+
+/* Define to the version of this package. */
+#define PACKAGE_VERSION "2.39.20160612.1140"
+
 /* Path separator character. */
 #define PATHSEPARATOR ":"
 
@@ -486,9 +477,6 @@
 
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 /* #undef size_t */
-
-/* Define to unsigned if socklet_t is missing */
-#define socklen_t unsigned
 
 /* Define to `int' if <sys/types.h> does not define. */
 //#define ssize_t int

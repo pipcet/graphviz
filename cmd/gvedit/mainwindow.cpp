@@ -16,9 +16,7 @@
 #include "mainwindow.h"
 #include "mdichild.h"
 #include "csettings.h"
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include	<string.h>
 
@@ -289,7 +287,7 @@ void CMainWindow::setChild ()
 	msg.append("working on ");
 	msg.append(activeMdiChild()->currentFile());
 	msg.append("\n");
-	errorPipe((char *) msg.toAscii().constData());
+	errorPipe((char *) msg.toLatin1().constData());
 	prevChild = activeMdiChild();
     }
 }

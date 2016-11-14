@@ -304,16 +304,38 @@ if test "x$TCLSH" = "x"; then
 #  fi
 fi
 
+
 dnl -----------------------------------
 dnl checks for compilers
 
 AM_PROG_CC_C_O
-#AC_PROG_CC
+AC_PROG_CC_C99
 AC_PROG_CXX
 AC_PROG_OBJC
 
 AC_C_INLINE
 
+dnl ===========================================================================
+dnl Set GCC compiler flags
+
+if [test "${GCC}" == "yes"]
+then
+  # Enable common warnings flags
+  CFLAGS="${CFLAGS} -Wall"
+  
+  # Enable common extra flags
+  CFLAGS="${CFLAGS} -Wextra"
+  
+  # Enable specific warning flags not included by -Wall or -Wextra
+  CFLAGS="${CFLAGS} -Wmissing-include-dirs -Wswitch-default -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wconversion -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs"
+
+ # if C99, then enable additional warnings
+# if [test "${ac_cv_prog_cc_c99}" != "no"]
+# then
+    # FIXME - not available on centos[56]: gcc-4.1.2, gcc-4.4.7
+    # CFLAGS="${CFLAGS} -Wdouble-promotion -Wtrampolines -Wlogical-op"
+#  fi
+fi
 # Workaround for native compilers
 #  HP  : http://bugs.gnome.org/db/31/3163.html
 #  DEC : Enable NaN/Inf
@@ -403,9 +425,9 @@ dnl -----------------------------------
 dnl Checks for header files
 
 # AC_HEADER_STDC
-AC_CHECK_HEADERS(stdarg.h stddef.h stddef.h stdlib.h stdint.h malloc.h \
-	fcntl.h search.h getopt.h pthread.h values.h float.h limits.h termios.h \
-	errno.h time.h unistd.h fenv.h string.h strings.h inttypes.h setjmp.h \
+AC_CHECK_HEADERS(stdarg.h stddef.h stddef.h malloc.h \
+	fcntl.h search.h pthread.h values.h float.h limits.h termios.h \
+	errno.h time.h unistd.h fenv.h strings.h setjmp.h \
 	sys/time.h sys/times.h sys/types.h sys/select.h fpu_control.h \
 	sys/fpu.h sys/socket.h sys/stat.h sys/mman.h \
 	sys/ioctl.h sys/inotify.h langinfo.h libintl.h crt_externs.h)
@@ -415,50 +437,6 @@ AC_HEADER_STDBOOL
 
 # Internationalization macros
 # AM_GNU_GETTEXT
-
-# Check for socklen_t
-AC_MSG_CHECKING([for socklen_t])
-AC_CACHE_VAL(ac_cv_type_socklen_t,[AC_EGREP_CPP(changequote(<<,>>)dnl
-<<(^|[^a-zA-Z_0-9])socklen_t[^a-zA-Z_0-9]>>dnl
-changequote([,]),[
-    #include <sys/types.h>
-    #include <sys/socket.h>
-    #if STDC_HEADERS
-    #include <stdlib.h>
-    #include <stddef.h>
-    #endif
-    ], ac_cv_type_socklen_t=yes, ac_cv_type_socklen_t=no)])
-AC_MSG_RESULT($ac_cv_type_socklen_t)
-if test $ac_cv_type_socklen_t = no; then
-    AC_DEFINE(socklen_t, unsigned, [Define to unsigned if socklet_t is missing])
-fi
-
-# -----------------------------------
-# Test if compiler supports bool
-AC_MSG_CHECKING([for bool])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-    #ifdef HAVE_STDBOOL_H>
-    #include <stdbool.h>
-    #endif
-    ]], [[
-    bool foo==true, bar=false;
-    ]])],[
-AC_MSG_RESULT(yes)
-AC_DEFINE(HAVE_BOOL, 1,[Define to 1 if compiler supports bool])
-    ],[
-AC_MSG_RESULT(no)])
-
-# -----------------------------------
-# Test for direct I/O
-AC_MSG_CHECKING([for struct dioattr])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <fcntl.h>
-#include <stdio.h>]], [[
-struct dioattr dio;]])],[
-AC_MSG_RESULT(yes)
-AC_DEFINE(HAVE_STRUCT_DIOATTR, 1,
-[Define to 1 if you have struct dioattr])],[
-AC_MSG_RESULT(no)])
 
 dnl -----------------------------------
 dnl Checks for -lm library
@@ -490,8 +468,6 @@ AC_SUBST([LIBGEN_LIBS])
 # -----------------------------------
 
 # Checks for library functions
-AC_FUNC_ALLOCA
-
 AC_CHECK_FUNCS([lrand48 drand48 srand48 setmode setenv getenv \
 	__freadable _sysconf getrusage strerror cbrt lsqrt vsnprintf \
 	strtoul strtoll strtoull uname memset nl_langinfo pow sqrt \
@@ -1126,7 +1102,7 @@ else
         if test -d /usr/include/php5; then
           PHP_INCLUDES="-I/usr/include/php5 -I/usr/include/php5/main -I/usr/include/php5/Zend -I/usr/include/php5/TSRM"
         else
-          PHP_INCLUDES="-I/usr/include/php -I/usr/include/php/main -I/usr/include/php/Zend -I/usr/include/php/TSRM"
+          PHP_INCLUDES="-I/usr/include/php -I/usr/include/php/main -I/usr/include/php/TSRM -I/usr/include/php/Zend -I/usr/include/php/ext -I/usr/include/php/ext/date/lib"
         fi
         PHP_INSTALL_DIR="/usr/lib${LIBPOSTFIX}/php/modules"
         PHP_INSTALL_DATADIR="/usr/share/php"
@@ -1800,7 +1776,7 @@ TCL_LIBS=
 AC_SUBST([TCL_LIBS])
 
 #AC_SUBST([TCL_PREFIX])
-#AC_SUBST([TCL_EXEC_PREFIX])
+AC_SUBST([TCL_EXEC_PREFIX])
 #AC_SUBST([TCL_SHLIB_CFLAGS])
 #AC_SUBST([TCL_SHLIB_CXXFLAGS])
 #AC_SUBST([TCL_EXTRA_CFLAGS])
@@ -3061,28 +3037,9 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>
 
 # -----------------------------------
 
-AC_MSG_CHECKING(if getopt externs are declared)
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdlib.h>
-	#include <stdio.h>
-	#if HAVE_UNISTD_H
-	#include <unistd.h>
-	#endif
-	]], [[if ( optopt ) exit(0); else exit(1);
-	]])],[AC_MSG_RESULT(yes)
-	AC_DEFINE_UNQUOTED(HAVE_GETOPT_DECL,1,Define if getopt externs are declared)
-	],[AC_MSG_RESULT(no)
-	])
-
-# -----------------------------------
-
 AC_MSG_CHECKING(if intptr_t is declared)
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdlib.h>
-	#if HAVE_STDINT_H
-	#include <stdint.h>
-	#endif
-	#if HAVE_INTTYPES_H
-	#include <inttypes.h>
-	#endif
+  #include <stdint.h>
 	#if HAVE_UNISTD_H
 	#include <unistd.h>
 	#endif
@@ -3099,6 +3056,7 @@ cat > conftest.$ac_ext <<EOF
 #include "confdefs.h"
 #include "assert.h"
 int main(int argc, char **argv) {
+(void)argv;
 assert(argc);
 ; return 0; }
 EOF
@@ -3126,6 +3084,25 @@ AM_CONDITIONAL(WITH_CGRAPH, [true])
 
 # -----------------------------------------------------------------------
 
+# Checking for unit testing framework Criterion
+# This framework is used for the unit tests
+AC_CHECK_LIB(
+  criterion,
+  main,
+  [
+    use_criterion="Yes"
+    AC_DEFINE_UNQUOTED(HAVE_CRITERION,1,[Criterion unit testing framework is installed and available for use.])
+  ],
+  [
+    use_criterion="No (Criterion unit testing framework not installed)"
+    AC_MSG_WARN(Criterion unit testing framework not installed)
+  ],
+  []
+)
+AM_CONDITIONAL(HAVE_CRITERION, test "$use_criterion" = "Yes")
+
+# -----------------------------------------------------------------------
+
 # Generate Makefiles
 AC_CONFIG_FILES(Makefile
 	debian/changelog
@@ -3149,6 +3126,7 @@ AC_CONFIG_FILES(Makefile
 	lib/ast/Makefile
 	lib/sfio/Makefile
 	lib/sfio/Sfio_f/Makefile
+	lib/spine/Makefile
 	lib/vmalloc/Makefile
 	lib/dotgen/Makefile
 	lib/neatogen/Makefile
@@ -3167,7 +3145,6 @@ AC_CONFIG_FILES(Makefile
 	lib/twopigen/Makefile
 	lib/patchwork/Makefile
 	lib/pack/Makefile
-	lib/rxspencer/Makefile
 	lib/ortho/Makefile
 	lib/expr/Makefile
 	lib/expr/libexpr.pc
@@ -3244,6 +3221,9 @@ AC_CONFIG_FILES(Makefile
 	tclpkg/gv/demo/Makefile
 	tclpkg/gv/META.gv
 	rtest/Makefile
+  tests/Makefile
+  tests/lib/Makefile
+  tests/lib/common/Makefile
 	share/Makefile
 	share/examples/Makefile
 	share/gui/Makefile
@@ -3285,7 +3265,7 @@ echo ""
 echo "graphviz-$VERSION will be compiled with the following:"
 echo ""
 echo "options:"
-echo "  cgraph:        $use_cgraph"
+echo "  cgraph:        Yes (always enabled)"
 echo "  digcola:       $use_digcola"
 echo "  expat:         $use_expat"
 echo "  fontconfig:    $use_fontconfig"
@@ -3360,4 +3340,6 @@ echo ""
 echo "  tcldot:        $use_tcldot"
 echo "  tclpathplan:   $use_tclpathplan"
 echo "  gdtclft:       $use_gdtclft"
-
+echo ""
+echo "Testing utilities:"
+echo "  criterion:     $use_criterion"

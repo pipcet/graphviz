@@ -31,9 +31,7 @@
 /* uses PRIVATE interface */
 #define FDP_PRIVATE 1
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #else
@@ -41,6 +39,7 @@
 #include <values.h>
 #endif
 #endif
+#include <inttypes.h>
 #include <assert.h>
 #include "tlayout.h"
 #include "neatoprocs.h"
@@ -334,10 +333,10 @@ static char *portName(graph_t * g, bport_t * p)
     len += strlen(agnameof(g)) + strlen(agnameof(h)) + strlen(agnameof(t));
     if (len >= BSZ)
 	sprintf(buf, "_port_%s_%s_%s_%ld", agnameof(g), agnameof(t), agnameof(h),
-		(unsigned long)AGSEQ(e));
+		(uint64_t)AGSEQ(e));
     else
 	sprintf(buf, "_port_%s_(%d)_(%d)_%ld",agnameof(g), ND_id(t), ND_id(h),
-		(unsigned long)AGSEQ(e));
+		(uint64_t)AGSEQ(e));
     return buf;
 }
 

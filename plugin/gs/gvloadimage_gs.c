@@ -11,17 +11,10 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <stdlib.h>
-#ifdef HAVE_STDINT_H
 #include <stdint.h>
-#endif
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
 #include <sys/stat.h>
 
 #include "gvplugin_loadimage.h"
