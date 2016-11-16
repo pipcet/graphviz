@@ -148,80 +148,53 @@ static graph_t *create_test_graph(void)
     return g;
 }
 
-const char *dograph(const char *dot)
-{
-  const char *data = NULL;
-  unsigned int length = 0;
-  for (int i = 0; i < 1; i++) {
-    G = agmemread(dot);
-
-    if (G) {
-      gvLayoutJobs(Gvc, G);  /* take layout engine from command line */
-      gvRenderData(Gvc, G, "svg", &data, &length);
-      //gvFreeLayout(Gvc, G);
-      //agclose(G);
-    }
-
-    if (i != 0)
-      free(data);
-  }
-
-  return data;
-}
-
-const char *str = "hi there";
-const char **pstr = &str;
-const char ***ppstr = &pstr;
-
-__attribute__((jsexport)) typeof(str) str;
-__attribute__((jsexport)) typeof(pstr) pstr;
-__attribute__((jsexport)) typeof(ppstr) ppstr;
-
-struct __attribute__((jsexport)) st {
-  const char *str;
-  const char **pstr;
-  const char ***ppstr;
-};
-
-struct st st1 = { "hey", &st1.str, &st1.pstr };
-struct st *pst1 = &st1;
-struct st **ppst1 = &pst1;
-
-__attribute__((jsexport)) typeof(st1) st1;
-__attribute__((jsexport)) typeof(pst1) pst1;
-__attribute__((jsexport)) typeof(ppst1) ppst1;
-
-__attribute__((jsexport)) typeof(dograph) dograph;
-__attribute__((jsexport)) typeof(free) free;
-__attribute__((jsexport)) typeof(malloc) malloc;
-
-#define JSEXPORT_PASTE(a,b) a ## b
-#define JSEXPORT_TYPE2(type, line) JSEXPORT_PASTE(typedef __attribute__((jsexport)) typeof(type) t_, line);
-#define JSEXPORT_TYPE(type) JSEXPORT_TYPE2(type, __COUNTER__)
-
-JSEXPORT_TYPE(G);
-JSEXPORT_TYPE(G->e_id);
-
-static __attribute__((jsexport)) typeof(G) G;
-
-struct __attribute__((jsexport)) s2 {
-  int x;
-  int y;
-  int z;
-  int *ip;
-  int **ipp;
-
-  struct s2 *next;
-  struct s2 **pprev;
-};
-
-__attribute__((jsexport)) struct s2 s;
-
 int main(int argc, char **argv)
 {
-  Gvc = gvContextPlugins(lt_preloaded_symbols, DEMAND_LOADING);
-  GvExitOnUsage = 1;
-  gvParseArgs(Gvc, argc, argv);
+    graph_t *prev = NULL;
+    int r, rc = 0;
 
-  return 0;
+    Gvc = gvContextPlugins(lt_preloaded_symbols, DEMAND_LOADING);
+    GvExitOnUsage = 1;
+    gvParseArgs(Gvc, argc, argv);
+#ifndef WIN32
+    signal(SIGUSR1, gvToggle);
+    signal(SIGINT, intr);
+#ifndef NO_FPERR
+    fpinit();
+    signal(SIGFPE, fperr);
+#endif
+#endif
+
+    if (MemTest) {
+	while (MemTest--) {
+	    /* Create a test graph */
+	    G = create_test_graph();
+
+	    /* Perform layout and cleanup */
+	    gvLayoutJobs(Gvc, G);  /* take layout engine from command line */
+	    gvFreeLayout(Gvc, G);
+	    agclose (G);
+	}
+    }
+    else if ((G = gvPluginsGraph(Gvc))) {
+	    gvLayoutJobs(Gvc, G);  /* take layout engine from command line */
+	    gvRenderJobs(Gvc, G);
+    }
+    else {
+	while ((G = gvNextInputGraph(Gvc))) {
+	    if (prev) {
+		gvFreeLayout(Gvc, prev);
+		agclose(prev);
+	    }
+	    gvLayoutJobs(Gvc, G);  /* take layout engine from command line */
+	    gvRenderJobs(Gvc, G);
+	    r = agreseterrors();
+	    rc = MAX(rc,r);
+	    prev = G;
+	}
+    }
+    gvFinalize(Gvc);
+    
+    r = gvFreeContext(Gvc);
+    return (MAX(rc,r));
 }
