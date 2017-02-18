@@ -25,10 +25,11 @@ extern "C" {
 **	Written by Kiem-Phong Vo
 */
 
-#if defined(_PACKAGE_ast)
-#include	<ast_std.h>
-#else
-#include	<ast_common.h>
+#include "config.h"
+
+#ifdef HAVE_SYS_TYPES_H
+#   include <sys/types.h>
+#endif // HAVE_SYS_TYPES_H
 
 #include <stdarg.h>
 
@@ -93,15 +94,13 @@ extern "C" {
 #endif
 #endif
 
-#endif				/* defined(_PACKAGE_ast) */
-
 /* Sfoff_t should be large enough for largest file address */
 
 
-#define Sfoff_t		_ast_intmax_t
-#define Sflong_t	_ast_intmax_t
-#define Sfulong_t	unsigned _ast_intmax_t
-#define Sfdouble_t	_ast_fltmax_t
+#define Sfoff_t		long long
+#define Sflong_t	long long
+#define Sfulong_t	unsigned long long
+#define Sfdouble_t	long double
 
 	typedef struct _sfio_s Sfio_t;
 
@@ -426,55 +425,7 @@ extern "C" {
 #define __sf_stacked(f)	((f) ? (_SF_(f)->push != (Sfio_t*)0) : 0)
 #define __sf_value(f)	((f) ? (_SF_(f)->val) : 0)
 #define __sf_slen()	(_Sfi)
-#if defined(__INLINE__) && !defined(_BLD_sfio)
-     __INLINE__ int sfputd(Sfio_t * f, Sfdouble_t v) {
-	return __sf_putd(f, v);
-    } __INLINE__ int sfputl(Sfio_t * f, Sflong_t v) {
-	return __sf_putl(f, v);
-    }
-    __INLINE__ int sfputu(Sfio_t * f, Sfulong_t v) {
-	return __sf_putu(f, v);
-    }
-    __INLINE__ int sfputm(Sfio_t * f, Sfulong_t v, Sfulong_t m) {
-	return __sf_putu(f, v);
-    }
 
-    __INLINE__ int sfputc(Sfio_t * f, int c) {
-	return __sf_putc(f, c);
-    }
-    __INLINE__ int sfgetc(Sfio_t * f) {
-	return __sf_getc(f);
-    }
-
-    __INLINE__ int sfdlen(Sfdouble_t v) {
-	return __sf_dlen(v);
-    }
-    __INLINE__ int sfllen(Sflong_t v) {
-	return __sf_llen(v);
-    }
-    __INLINE__ int sfulen(Sfulong_t v) {
-	return __sf_ulen(v);
-    }
-
-    __INLINE__ int sffileno(Sfio_t * f) {
-	return __sf_fileno(f);
-    }
-    __INLINE__ int sfeof(Sfio_t * f) {
-	return __sf_eof(f);
-    }
-    __INLINE__ int sferror(Sfio_t * f) {
-	return __sf_error(f);
-    }
-    __INLINE__ int sfclrerr(Sfio_t * f) {
-	return __sf_clrerr(f);
-    }
-    __INLINE__ int sfstacked(Sfio_t * f) {
-	return __sf_stacked(f);
-    }
-    __INLINE__ ssize_t sfvalue(Sfio_t * f) {
-	return __sf_value(f);
-    }
-#else
 #define sfputd(f,v)				( __sf_putd((f),(v))		)
 #define sfputl(f,v)				( __sf_putl((f),(v))		)
 #define sfputu(f,v)				( __sf_putu((f),(v))		)
@@ -491,7 +442,6 @@ extern "C" {
 #define sfstacked(f)				( __sf_stacked(f)		)
 #define sfvalue(f)				( __sf_value(f)			)
 #define sfslen()				( __sf_slen()			)
-#endif /*__INLINE__*/
 #endif				/* _SFIO_H */
 #ifdef __cplusplus
 }

@@ -137,8 +137,8 @@ case "${host_os}" in
   *uwin* )
 	UWIN=yes
 	DEFAULT_FONTPATH="C:/WINDOWS/FONTS;C:/WINNT/Fonts;C:/winnt/fonts"
-	CFLAGS="${CFLAGS} -DWIN32 -DMSWIN32"
-	CXXFLAGS="${CXXFLAGS} -DWIN32 -DMSWIN32"
+	CFLAGS="${CFLAGS} -DMSWIN32"
+	CXXFLAGS="${CXXFLAGS} -DMSWIN32"
 	PATHSEPARATOR=";"
         NO_POSTSCRIPT_ALIAS=1
 	BROWSER="xdg-open"
@@ -212,15 +212,10 @@ AM_INIT_AUTOMAKE([no-define])
 # Suppress verbose compile lines
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
-AC_CONFIG_HEADERS([config.h lib/common/types.h])
+AC_CONFIG_HEADERS([config.h])
 
 # put BUILDDATE in its own file so that only targets that use it get rebuilt
 echo "#define BUILDDATE \"$GRAPHVIZ_VERSION_DATE\"" > builddate.h
-
-# only update ast_common.h (for GNU builds) from master if changed
-if ! `cmp -s $srcdir/ast_common.h.in ast_common.h`; then
-	cp $srcdir/ast_common.h.in ast_common.h;
-fi
 
 AC_PREFIX_DEFAULT([/usr/local])
 if test "x${prefix}" = "xNONE"; then
@@ -413,11 +408,8 @@ AM_CONDITIONAL(RC_IS_WINDRES, [test "x$RC" = "xwindres"])
 
 dnl -----------------------------------
 dnl Check for various typedefs and provide substitutes if they do not exist.
-                                                                                
-AC_C_CONST
-AC_TYPE_MODE_T
+
 AC_TYPE_PID_T
-AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
 AC_TYPE_UID_T
 
@@ -425,12 +417,12 @@ dnl -----------------------------------
 dnl Checks for header files
 
 # AC_HEADER_STDC
-AC_CHECK_HEADERS(stdarg.h stddef.h stddef.h malloc.h \
-	fcntl.h search.h pthread.h values.h float.h limits.h termios.h \
-	errno.h time.h unistd.h fenv.h strings.h setjmp.h \
-	sys/time.h sys/times.h sys/types.h sys/select.h fpu_control.h \
-	sys/fpu.h sys/socket.h sys/stat.h sys/mman.h \
-	sys/ioctl.h sys/inotify.h langinfo.h libintl.h crt_externs.h)
+AC_CHECK_HEADERS(malloc.h \
+	fcntl.h search.h termios.h \
+	unistd.h strings.h stat.h vfork.h \
+	sys/time.h sys/types.h sys/select.h \
+	sys/stat.h sys/mman.h sys/vfork.h \
+	sys/ioctl.h sys/inotify.h crt_externs.h)
 AC_HEADER_TIME
 AC_HEADER_DIRENT
 AC_HEADER_STDBOOL
@@ -447,31 +439,15 @@ AC_SUBST([MATH_LIBS])
 
 # Check for functions that might need -lm
 LIBS="$LIBS $MATH_LIBS"
-AC_CHECK_FUNCS([feenableexcept fesetenv log2 sincos])
+AC_CHECK_FUNCS([log2 sincos])
 
 LIBS=$save_LIBS
-
-dnl -----------------------------------
-dnl INCLUDES and LIBS for libgen (provides basename function)
-
-save_CPPFLAGS=$CPPFLAGS
-save_LDFLAGS=$LDFLAGS
-AC_CHECK_HEADER(libgen.h,
-        AC_CHECK_LIB(gen,basename,
-                [LIBGEN_LIBS="-lgen"
-                AC_DEFINE_UNQUOTED(HAVE_LIBGEN,1,[Define if the LIBGEN library has the basename feature])]),
-        AC_MSG_WARN(libgen.h header not available))
-LDFLAGS=$save_LDFLAGS
-CPPFLAGS=$save_CPPFLAGS
-AC_SUBST([LIBGEN_LIBS])
 
 # -----------------------------------
 
 # Checks for library functions
 AC_CHECK_FUNCS([lrand48 drand48 srand48 setmode setenv getenv \
-	__freadable _sysconf getrusage strerror cbrt lsqrt vsnprintf \
-	strtoul strtoll strtoull uname memset nl_langinfo pow sqrt \
-	strchr strdup strerror strstr _NSGetEnviron])
+	cbrt vsnprintf _NSGetEnviron mallopt mallinfo mstats getpagesize])
 
 AC_REPLACE_FUNCS([strcasecmp strncasecmp strcasestr])
 
@@ -1087,22 +1063,30 @@ else
   if test "x$use_swig" != "xYes"; then
     use_php="No (swig not available)"
   else
-    if test `$SWIG -php5 2>&1 | $EGREP -c 'Unable'` -eq 1; then
-      SWIG_PHP_OPT='-php'
+    if test `$SWIG -php7 2>&1 | $EGREP -c 'Unable'` -eq 1; then
+      if test `$SWIG -php5 2>&1 | $EGREP -c 'Unable'` -eq 1; then
+        SWIG_PHP_OPT='-php'
+      else
+        SWIG_PHP_OPT='-php5'
+      fi
     else
-      SWIG_PHP_OPT='-php5'
+      SWIG_PHP_OPT='-php7'
     fi
     if test `$SWIG -help 2>&1 | $EGREP -c '\-php5* *- Generate'` = 0 ; then
       use_php="No (swig does not support -php or -php5 option)"
     else
-      AC_CHECK_PROGS(PHP,php5 php)
+      AC_CHECK_PROGS(PHP,php7,php,php5)
       if test "x$PHP" = "x"; then
         use_php="No (php not available)"
       else
-        if test -d /usr/include/php5; then
-          PHP_INCLUDES="-I/usr/include/php5 -I/usr/include/php5/main -I/usr/include/php5/Zend -I/usr/include/php5/TSRM"
+        if test -d /usr/include/php7; then
+          PHP_INCLUDES="-I/usr/include/php7 -I/usr/include/php7/main -I/usr/include/php7/Zend -I/usr/include/php7/TSRM"
         else
-          PHP_INCLUDES="-I/usr/include/php -I/usr/include/php/main -I/usr/include/php/TSRM -I/usr/include/php/Zend -I/usr/include/php/ext -I/usr/include/php/ext/date/lib"
+          if test -d /usr/include/php5; then
+            PHP_INCLUDES="-I/usr/include/php5 -I/usr/include/php5/main -I/usr/include/php5/Zend -I/usr/include/php5/TSRM"
+          else
+            PHP_INCLUDES="-I/usr/include/php -I/usr/include/php/main -I/usr/include/php/TSRM -I/usr/include/php/Zend -I/usr/include/php/ext -I/usr/include/php/ext/date/lib"
+          fi
         fi
         PHP_INSTALL_DIR="/usr/lib${LIBPOSTFIX}/php/modules"
         PHP_INSTALL_DATADIR="/usr/share/php"
@@ -2160,7 +2144,7 @@ fi
 AM_CONDITIONAL(WITH_VISIO, [test "x$use_visio" = "xYes"])
 
 dnl -----------------------------------
-dnl INCLUDES and LIBS for PANGO, CAIRO et.al.
+dnl INCLUDES and LIBS for PANGOCAIRO
                                                                                 
 AC_ARG_WITH(pangocairo,
   [AS_HELP_STRING([--with-pangocairo=yes],[pangocairo library])],
@@ -3026,17 +3010,6 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>
 
 # -----------------------------------
 
-AC_MSG_CHECKING(if errno externs are declared)
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>
-	#include <errno.h>
-	]], [[if ( errno < sys_nerr ) return sys_errlist[errno];
-	]])],[AC_MSG_RESULT(yes)
-	AC_DEFINE_UNQUOTED(HAVE_ERRNO_DECL,1,Define if errno externs are declared)
-	],[AC_MSG_RESULT(no)
-	])
-
-# -----------------------------------
-
 AC_MSG_CHECKING(if intptr_t is declared)
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdlib.h>
   #include <stdint.h>
@@ -3222,8 +3195,11 @@ AC_CONFIG_FILES(Makefile
 	tclpkg/gv/META.gv
 	rtest/Makefile
   tests/Makefile
-  tests/lib/Makefile
-  tests/lib/common/Makefile
+  tests/unit_tests/Makefile
+  tests/unit_tests/lib/Makefile
+  tests/unit_tests/lib/common/Makefile
+  tests/regression_tests/Makefile
+  tests/regression_tests/shapes/Makefile
 	share/Makefile
 	share/examples/Makefile
 	share/gui/Makefile

@@ -13,7 +13,7 @@
 
 #include <stdio.h>
 #include <cghdr.h>
-#if defined(WIN32)
+#if defined(_WIN32)
 #include <io.h>
 #endif
 
@@ -142,8 +142,13 @@ Agraph_t *agmemread(const char *cp)
 
     disc.mem = &AgMemDisc;
     disc.id = &AgIdDisc;
-    disc.io = &memIoDisc;
+    disc.io = &memIoDisc;  
     g = agread (&rdr, &disc);
+    /* Null out filename and reset line number 
+     * The name may have been set with a ppDirective, and
+     * we want to reset line_num.
+     */
+    agsetfile(NULL);
     return g;
 }
 

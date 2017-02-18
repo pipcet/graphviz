@@ -20,40 +20,23 @@ extern "C" {
 #ifndef _BLD_vmalloc
 #define _BLD_vmalloc	1
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 #include <io.h>
 #endif
-
-#include <inttypes.h>
 
 /*	Common types, and macros for vmalloc functions.
 **
 **	Written by Kiem-Phong Vo, kpv@research.att.com, 01/16/94.
 */
 
+#include "config.h"
 
-#if defined(_PACKAGE_ast)
+#include <inttypes.h>
+#include <stdlib.h>
 
-#if defined(__STDPP__directive) && defined(__STDPP__hide)
-    __STDPP__directive pragma pp:hide getpagesize
-#else
-#define getpagesize	______getpagesize
-#endif
-
-#include	<ast.h>
-
-#if defined(__STDPP__directive) && defined(__STDPP__hide)
-    __STDPP__directive pragma pp:nohide getpagesize
-#else
-#undef	getpagesize
-#endif
-
-#else
-
-#include	<ast_common.h>
-#include	"FEATURE/vmalloc"
-
-#endif /*defined(_PACKAGE_ast)*/
+#ifdef HAVE_SYS_TYPES_H
+#   include <sys/types.h>
+#endif // HAVE_SYS_TYPES_H
 
 #undef free
 #undef malloc
@@ -98,7 +81,7 @@ extern "C" {
 #define COUNT(n)	((n) += 1)
 #endif /*DEBUG*/
 #define VMPAGESIZE	8192
-#if _lib_getpagesize
+#ifdef HAVE_GETPAGESIZE
 #define GETPAGESIZE(x)	((x) ? (x) : \
 			 (((x)=getpagesize()) < VMPAGESIZE ? ((x)=VMPAGESIZE) : (x)) )
 #else
@@ -432,12 +415,9 @@ extern "C" {
 
      extern Vmextern_t _Vmextern;
 
-
-#if !defined(_PACKAGE_ast)
-
     extern size_t getpagesize(void);
 
-#ifndef WIN32
+#ifndef _WIN32
     extern void abort(void);
     extern ssize_t write(int, const void *, size_t);
 #endif
@@ -450,25 +430,20 @@ extern "C" {
 #include	<string.h>
 
 /* for malloc.c */
-#ifndef WIN32
+#ifndef _WIN32
     extern int creat(const char *, int);
     extern int close(int);
 #endif
     extern int getpid(void);
 
 /* for vmexit.c */
-#ifndef WIN32
+#ifndef _WIN32
     extern int onexit(void(*)(void));
     extern void _exit(int);
 #endif
     extern void _cleanup(void);
 
-#endif				/*!PACKAGE_ast */
-
 /* for vmdcsbrk.c */
-#if !_typ_ssize_t
-    typedef int ssize_t;
-#endif
 #if !defined(_WIN32)
     extern Vmuchar_t *sbrk(ssize_t);
 #endif

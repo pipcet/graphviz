@@ -34,14 +34,8 @@ static char *Version = "\n@(#)sfio (AT&T Labs - kpv) 2001-02-01\0\n";
 */
 
 /* the below is for protecting the application from SIGPIPE */
-#if defined(_PACKAGE_ast)
-#include		<sig.h>
-#include		<wait.h>
-#define Sfsignal_f	Sig_handler_t
-#else
 #include		<signal.h>
 typedef void (*Sfsignal_f) (int);
-#endif
 static int _Sfsigp = 0;		/* # of streams needing SIGPIPE protection */
 
 /* done at exiting time */
@@ -233,18 +227,12 @@ int _sfpclose(reg Sfio_t * f)
 	    CLOSE(p->file);
 
 	/* wait for process termination */
-#if defined(_PACKAGE_ast)
-	sigcritical(1);
-#endif
-#ifndef WIN32
+#ifndef _WIN32
 	while ((pid = waitpid(p->pid, &status, 0)) == -1
 	       && errno == EINTR);
 #endif
 	if (pid < 0)
 	    status = -1;
-#if defined(_PACKAGE_ast)
-	sigcritical(0);
-#endif
 
 #ifdef SIGPIPE
 	vtmtxlock(_Sfmutex);
@@ -342,12 +330,6 @@ int _sfmode(reg Sfio_t * f, reg int wanted, reg int local)
 
     if (f->mode & SF_GETR) {
 	f->mode &= ~SF_GETR;
-#ifdef MAP_TYPE
-	if ((f->bits & SF_MMAP) && (f->tiny[0] += 1) >= (4 * SF_NMAP)) {	/* turn off mmap to avoid page faulting */
-	    sfsetbuf(f, (void *) f->tiny, (size_t) SF_UNBOUND);
-	    f->tiny[0] = 0;
-	} else
-#endif
 	if (f->getr) {
 	    f->next[-1] = f->getr;
 	    f->getr = 0;
@@ -446,12 +428,6 @@ int _sfmode(reg Sfio_t * f, reg int wanted, reg int local)
 	    if ((f->flags & (SF_SHARE | SF_PUBLIC)) ==
 		(SF_SHARE | SF_PUBLIC)
 		&& (addr = SFSK(f, 0, SEEK_CUR, f->disc)) != f->here) {
-#ifdef MAP_TYPE
-		if ((f->bits & SF_MMAP) && f->data) {
-		    SFMUNMAP(f, f->data, f->endb - f->data);
-		    f->data = NIL(uchar *);
-		}
-#endif
 		f->endb = f->endr = f->endw = f->next = f->data;
 		f->here = addr;
 	    } else {
@@ -492,13 +468,6 @@ int _sfmode(reg Sfio_t * f, reg int wanted, reg int local)
 	}
 
 	f->mode = SF_WRITE | SF_LOCK;
-#ifdef MAP_TYPE
-	if (f->bits & SF_MMAP) {
-	    if (f->data)
-		SFMUNMAP(f, f->data, f->endb - f->data);
-	    (void) SFSETBUF(f, (void *) f->tiny, (size_t) SF_UNBOUND);
-	}
-#endif
 	if (f->data == f->tiny) {
 	    f->endb = f->data = f->next = NIL(uchar *);
 	    f->size = 0;

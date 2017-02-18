@@ -52,7 +52,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)windows\include;$(SolutionDir)lib\cdt</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CGRAPH_EXPORTS;WIN32_DLL;YY_NO_UNISTD_H;_DLL_BLD;_dll_import;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;CGRAPH_EXPORTS;WIN32_DLL;YY_NO_UNISTD_H;_DLL_BLD;_dll_import;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -71,14 +71,14 @@
       <ModuleDefinitionFile>cgraph.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
-      <Command>"%BISON%" -dy grammar.y -o grammar.c
-"%FLEX%" -o scan.c scan.l</Command>
+      <Command>bison -dy grammar.y -o grammar.c
+flex -oscan.c scan.l</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)windows\include;$(SolutionDir)lib\cdt</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CGRAPH_EXPORTS;WIN32_DLL;YY_NO_UNISTD_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;CGRAPH_EXPORTS;WIN32_DLL;YY_NO_UNISTD_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
@@ -96,8 +96,8 @@
       <ModuleDefinitionFile>cgraph.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
-      <Command>"%BISON%" -dy grammar.y -o grammar.c
-"%FLEX%" -o scan.c scan.l</Command>
+      <Command>bison -dy grammar.y -o grammar.c
+flex -oscan.c scan.l</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
