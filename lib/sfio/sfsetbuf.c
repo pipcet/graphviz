@@ -41,13 +41,9 @@ extern "C" {
 **
 **	Written by Kiem-Phong Vo.
 */
-#if !_sys_stat
-    struct stat {
-    int st_mode;
-    int st_size;
-};
-#define fstat(fd,st)	(-1)
-#endif /*_sys_stat*/
+
+#include <sys/stat.h>
+typedef struct stat Stat_t;
 
 /**
  * @param f stream to be buffered
