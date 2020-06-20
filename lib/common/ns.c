@@ -484,6 +484,7 @@ subtree_t *merge_trees(Agedge_t *e)   /* entering tree edge */
 /* Construct initial tight tree. Graph must be connected, feasible.
  * Adjust ND_rank(v) as needed.  add_tree_edge() on tight tree edges.
  * trees are basically lists of nodes stored in nodequeues.
+ * Return 1 if input graph is not connected; 0 on success.
  */
 static
 int feasible_tree(void)
@@ -493,6 +494,7 @@ int feasible_tree(void)
   subtree_t **tree, *tree0, *tree1;
   int i, subtree_count = 0;
   STheap_t *heap;
+  int error = 0;
 
   /* initialization */
   for (n = GD_nlist(G); n; n = ND_next(n)) {
@@ -512,7 +514,10 @@ int feasible_tree(void)
   heap = STbuildheap(tree,subtree_count);
   while (STheapsize(heap) > 1) {
     tree0 = STextractmin(heap);
-    ee = inter_tree_edge(tree0);
+    if (!(ee = inter_tree_edge(tree0))) {
+      error = 1;
+      break;
+    }
     tree1 = merge_trees(ee);
     STheapify(heap,tree1->heap_index);
   }
@@ -520,6 +525,7 @@ int feasible_tree(void)
   free(heap);
   for (i = 0; i < subtree_count; i++) free(tree[i]);
   free(tree);
+  if (error) return 1;
   assert(Tree_edge.size == N_nodes - 1);
   init_cutvalues();
   return 0;
@@ -664,12 +670,22 @@ static void LR_balance(void)
     freeTreeList (G);
 }
 
+static int decreasingrankcmpf(node_t **n0, node_t **n1) {
+  return ND_rank(*n1) - ND_rank(*n0);
+}
+
+static int increasingrankcmpf(node_t **n0, node_t **n1) {
+  return ND_rank(*n0) - ND_rank(*n1);
+}
+
 static void TB_balance(void)
 {
     node_t *n;
     edge_t *e;
-    int i, low, high, choice, *nrank;
+    int i, ii, low, high, choice, *nrank;
     int inweight, outweight;
+    int adj = 0;
+    char *s;
 
     scan_and_normalize();
 
@@ -677,37 +693,60 @@ static void TB_balance(void)
     nrank = N_NEW(Maxrank + 1, int);
     for (i = 0; i <= Maxrank; i++)
 	nrank[i] = 0;
-    for (n = GD_nlist(G); n; n = ND_next(n))
-	if (ND_node_type(n) == NORMAL)
-	    nrank[ND_rank(n)]++;
-    for (n = GD_nlist(G); n; n = ND_next(n)) {
-	if (ND_node_type(n) != NORMAL)
-	    continue;
-	inweight = outweight = 0;
-	low = 0;
-	high = Maxrank;
-	for (i = 0; (e = ND_in(n).list[i]); i++) {
-	    inweight += ED_weight(e);
-	    low = MAX(low, ND_rank(agtail(e)) + ED_minlen(e));
-	}
-	for (i = 0; (e = ND_out(n).list[i]); i++) {
-	    outweight += ED_weight(e);
-	    high = MIN(high, ND_rank(aghead(e)) - ED_minlen(e));
-	}
-	if (low < 0)
-	    low = 0;		/* vnodes can have ranks < 0 */
-	if (inweight == outweight) {
-	    choice = low;
-	    for (i = low + 1; i <= high; i++)
-		if (nrank[i] < nrank[choice])
-		    choice = i;
-	    nrank[ND_rank(n)]--;
-	    nrank[choice]++;
-	    ND_rank(n) = choice;
-	}
-	free_list(ND_tree_in(n));
-	free_list(ND_tree_out(n));
-	ND_mark(n) = FALSE;
+    if ( (s = agget(G,"TBbalance")) ) {
+         if (streq(s,"min")) adj = 1;
+         else if (streq(s,"max")) adj = 2;
+         if (adj) for (n = GD_nlist(G); n; n = ND_next(n))
+              if (ND_node_type(n) == NORMAL)
+                if (ND_out(n).size == 0)
+                   ND_rank(n) = ((adj == 1)? Minrank : Maxrank);
+    }
+    for (ii = 0, n = GD_nlist(G); n; ii++, n = ND_next(n)) {
+      Tree_node.list[ii] = n;
+    }
+    Tree_node.size = ii;
+    qsort(Tree_node.list, Tree_node.size, sizeof(Tree_node.list[0]),
+        adj > 1? decreasingrankcmpf : increasingrankcmpf);
+    for (i = 0; i < Tree_node.size; i++) {
+        n = Tree_node.list[i];
+        if (ND_node_type(n) == NORMAL)
+          nrank[ND_rank(n)]++;
+    }
+    for (ii = 0; ii < Tree_node.size; ii++) {
+      n = Tree_node.list[ii];
+      if (ND_node_type(n) != NORMAL)
+        continue;
+      inweight = outweight = 0;
+      low = 0;
+      high = Maxrank;
+      for (i = 0; (e = ND_in(n).list[i]); i++) {
+        inweight += ED_weight(e);
+        low = MAX(low, ND_rank(agtail(e)) + ED_minlen(e));
+      }
+      for (i = 0; (e = ND_out(n).list[i]); i++) {
+        outweight += ED_weight(e);
+        high = MIN(high, ND_rank(aghead(e)) - ED_minlen(e));
+      }
+      if (low < 0)
+        low = 0;		/* vnodes can have ranks < 0 */
+      if (adj) {
+        if (inweight == outweight)
+            ND_rank(n) = (adj == 1? low : high);
+      }
+      else {
+                if (inweight == outweight) {
+                    choice = low;
+                    for (i = low + 1; i <= high; i++)
+                        if (nrank[i] < nrank[choice])
+                            choice = i;
+                    nrank[ND_rank(n)]--;
+                    nrank[choice]++;
+                    ND_rank(n) = choice;
+                }
+      }
+      free_list(ND_tree_in(n));
+      free_list(ND_tree_out(n));
+      ND_mark(n) = FALSE;
     }
     free(nrank);
 }
@@ -782,7 +821,7 @@ graphSize (graph_t * g, int* nn, int* ne)
  *   Out and in edges lists stored in ND_out and ND_in, even if the node
  *  doesn't have any out or in edges.
  * The node rank values are stored in ND_rank.
- * Returns 0 if successful; returns 1 if `he graph was not connected;
+ * Returns 0 if successful; returns 1 if the graph was not connected;
  * returns 2 if something seriously wrong;
  */
 int rank2(graph_t * g, int balance, int maxiter, int search_size)

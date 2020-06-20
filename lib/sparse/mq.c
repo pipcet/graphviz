@@ -63,6 +63,7 @@
 #include "SparseMatrix.h"
 #include "mq.h"
 #include "LinkedList.h"
+#include <string.h>
 
 static real get_mq(SparseMatrix A, int *assignment, int *ncluster0, real *mq_in0, real *mq_out0, real **dout0){
   /* given a symmetric matrix representation of a graph and an assignment of nodes into clusters, calculate the modularity quality.
@@ -152,7 +153,7 @@ static real get_mq(SparseMatrix A, int *assignment, int *ncluster0, real *mq_in0
   }
 }
 
-Multilevel_MQ_Clustering Multilevel_MQ_Clustering_init(SparseMatrix A, int level){
+static Multilevel_MQ_Clustering Multilevel_MQ_Clustering_init(SparseMatrix A, int level){
   Multilevel_MQ_Clustering grid;
   int n = A->n, i;
   int *matching;
@@ -206,7 +207,7 @@ Multilevel_MQ_Clustering Multilevel_MQ_Clustering_init(SparseMatrix A, int level
   return grid;
 } 
 
-void Multilevel_MQ_Clustering_delete(Multilevel_MQ_Clustering grid){
+static void Multilevel_MQ_Clustering_delete(Multilevel_MQ_Clustering grid){
   if (!grid) return;
   if (grid->A){
     if (grid->level == 0) {
@@ -225,7 +226,7 @@ void Multilevel_MQ_Clustering_delete(Multilevel_MQ_Clustering grid){
   FREE(grid);
 }
 
-Multilevel_MQ_Clustering Multilevel_MQ_Clustering_establish(Multilevel_MQ_Clustering grid, int maxcluster){
+static Multilevel_MQ_Clustering Multilevel_MQ_Clustering_establish(Multilevel_MQ_Clustering grid, int maxcluster){
   int *matching = grid->matching;
   SparseMatrix A = grid->A;
   int n = grid->n, level = grid->level, nc = 0, nclusters = n;
@@ -340,7 +341,7 @@ Multilevel_MQ_Clustering Multilevel_MQ_Clustering_establish(Multilevel_MQ_Cluste
 	double mq2, mq_in2, mq_out2, *dout2;
 	int *matching2, nc2 = nc;
 	matching2 = MALLOC(sizeof(int)*A->m);
-	matching2 = MEMCPY(matching2, matching, sizeof(real)*A->m);
+	memcpy(matching2, matching, sizeof(real)*A->m);
 	if (jc != UNMATCHED) {
 	  matching2[i] = jc;
 	} else {
@@ -508,7 +509,7 @@ Multilevel_MQ_Clustering Multilevel_MQ_Clustering_establish(Multilevel_MQ_Cluste
   return grid;
 }
 
-Multilevel_MQ_Clustering Multilevel_MQ_Clustering_new(SparseMatrix A0, int maxcluster){
+static Multilevel_MQ_Clustering Multilevel_MQ_Clustering_new(SparseMatrix A0, int maxcluster){
   /* maxcluster is used to specify the maximum number of cluster desired, e.g., maxcluster=10 means that a maximum of 10 clusters
      is desired. this may not always be realized, and mq may be low when this is specified. Default: maxcluster = 0 */
   Multilevel_MQ_Clustering grid;

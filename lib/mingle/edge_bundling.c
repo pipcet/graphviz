@@ -19,6 +19,7 @@
 #include "clustering.h"
 #include "ink.h"
 #include "agglomerative_bundling.h"
+#include <string.h>
 
 #define SMALL 1.e-10
 
@@ -54,7 +55,7 @@ pedge pedge_new(int np, int dim, real *x){
   e->dim = dim;
   e->len = np;
   e->x = MALLOC(dim*(e->len)*sizeof(real));
-  MEMCPY(e->x, x, dim*(e->len)*sizeof(real));
+  memcpy(e->x, x, dim*(e->len)*sizeof(real));
   e->edge_length = dist(dim, &(x[0*dim]), &(x[(np-1)*dim]));
   e->wgt = 1.;
   e->wgts = NULL;
@@ -70,7 +71,7 @@ pedge pedge_wgt_new(int np, int dim, real *x, real wgt){
   e->dim = dim;
   e->len = np;
   e->x = MALLOC(dim*(e->len)*sizeof(real));
-  MEMCPY(e->x, x, dim*(e->len)*sizeof(real));
+  memcpy(e->x, x, dim*(e->len)*sizeof(real));
   e->edge_length = dist(dim, &(x[0*dim]), &(x[(np-1)*dim]));
   e->wgt = wgt;
   e->wgts = MALLOC(sizeof(real)*(np - 1));
@@ -92,9 +93,9 @@ pedge pedge_flip(pedge e){
 
   y = MALLOC(sizeof(real)*e->dim);
   for (i = 0; i < (e->npoints)/2; i++){
-    MEMCPY(y, &(x[i*dim]), sizeof(real)*dim);
-    MEMCPY(&(x[(n-1-i)*dim]), &(x[i*dim]), sizeof(real)*dim);
-    MEMCPY(&(x[i*dim]), y, sizeof(real)*dim);
+    memcpy(y, &(x[i*dim]), sizeof(real)*dim);
+    memcpy(&(x[(n-1-i)*dim]), &(x[i*dim]), sizeof(real)*dim);
+    memcpy(&(x[i*dim]), y, sizeof(real)*dim);
   }
   FREE(y);
   return e;
@@ -157,19 +158,19 @@ static real edge_compatibility_full(pedge e1, pedge e2){
   len2 = MAX(dist(dim, u2, v2), SMALL);
   len = 0.5*(len1+len2);
 
-  /* angle compatability */
+  /* angle compatibility */
   ca = 0;
   for (i = 0; i < dim; i++) 
     ca += (v1[i]-u1[i])*(v2[i]-u2[i]);
   ca = ABS(ca/(len1*len2));
   assert(ca > -0.001);
 
-  /* scale compatability */
+  /* scale compatibility */
   //cs = 2/(len1/len2+len2/len1);
   cs = 2/(MAX(len1,len2)/len + len/MIN(len1, len2));
   assert(cs > -0.001 && cs < 1.001);
  
-  /* position compatability */
+  /* position compatibility */
   cp = 0;
   for (i = 0; i < dim; i++) {
     tmp = .5*(v1[i]+u1[i])-.5*(v2[i]+u2[i]);
@@ -179,7 +180,7 @@ static real edge_compatibility_full(pedge e1, pedge e2){
   cp = len/(len + cp);
   assert(cp > -0.001 && cp < 1.001);
 
-  /* visibility compatability */
+  /* visibility compatibility */
 
   //dist1 = MAX(0.1, dist1/(len1+len2+dist1));
   dist1 = cp*ca*cs;
@@ -251,7 +252,7 @@ void pedge_export_gv(FILE *fp, int ne, pedge *edges){
 
   }
 
-  /* figure out max number of bundled origional edges in a pedge */
+  /* figure out max number of bundled original edges in a pedge */
   for (i = 0; i < ne; i++){
     edge = edges[i];
     if (edge->wgts){
@@ -707,7 +708,7 @@ static pedge* modularity_ink_bundling(int dim, int ne, SparseMatrix B, pedge* ed
 }
 
 static SparseMatrix check_compatibility(SparseMatrix A, int ne, pedge *edges, int compatibility_method, real tol){
-  /* go through the links and make sure edges are compatable */
+  /* go through the links and make sure edges are compatible */
   SparseMatrix B, C;
   int *ia, *ja, i, j, jj;
   real start;
@@ -789,7 +790,7 @@ pedge* edge_bundling(SparseMatrix A0, int dim, real *x, int maxit_outer, real K,
   if (Verbose) start = clock();
   if (method == METHOD_INK){
 
-    /* go through the links and make sure edges are compatable */
+    /* go through the links and make sure edges are compatible */
     B = check_compatibility(A, ne, edges, compatibility_method, tol);
 
     edges = modularity_ink_bundling(dim, ne, B, edges, angle_param, angle);
@@ -805,7 +806,7 @@ pedge* edge_bundling(SparseMatrix A0, int dim, real *x, int maxit_outer, real K,
 #endif
   } else if (method == METHOD_FD){/* FD method */
     
-    /* go through the links and make sure edges are compatable */
+    /* go through the links and make sure edges are compatible */
     B = check_compatibility(A, ne, edges, compatibility_method, tol);
 
 

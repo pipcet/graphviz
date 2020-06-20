@@ -402,7 +402,7 @@ Agedge_t *agsubedge(Agraph_t * g, Agedge_t * e, int cflag)
 }
 
 /* edge comparison.  AGTYPE(e) == 0 means ID is a wildcard. */
-int agedgeidcmpf(Dict_t * d, void *arg_e0, void *arg_e1, Dtdisc_t * disc)
+static int agedgeidcmpf(Dict_t * d, void *arg_e0, void *arg_e1, Dtdisc_t * disc)
 {
     Agedge_t *e0, *e1;
 
@@ -422,7 +422,7 @@ int agedgeidcmpf(Dict_t * d, void *arg_e0, void *arg_e1, Dtdisc_t * disc)
 }
 
 /* edge comparison.  for ordered traversal. */
-int agedgeseqcmpf(Dict_t * d, void *arg_e0, void *arg_e1, Dtdisc_t * disc)
+static int agedgeseqcmpf(Dict_t * d, void *arg_e0, void *arg_e1, Dtdisc_t * disc)
 {
     Agedge_t *e0, *e1;
 
@@ -498,15 +498,31 @@ and to expose them to foreign languages without C preprocessor. */
 #ifdef ageqedge
 #undef ageqedge
 #endif
-Agnode_t *ageqedge(Agedge_t * e, Agedge_t * f)
+CGRAPH_API int ageqedge(Agedge_t * e, Agedge_t * f)
 {
     return AGEQEDGE(e, f);
+}
+
+#ifdef agmkout
+#undef agmkout
+#endif
+CGRAPH_API Agedge_t *agmkout(Agedge_t * e)
+{
+    return AGMKOUT(e);
+}
+
+#ifdef agmkin
+#undef agmkin
+#endif
+CGRAPH_API Agedge_t *agmkin(Agedge_t * e)
+{
+    return AGMKIN(e);
 }
 
 #ifdef agtail
 #undef agtail
 #endif
-Agnode_t *agtail(Agedge_t * e)
+CGRAPH_API Agnode_t *agtail(Agedge_t * e)
 {
     return AGTAIL(e);
 }
@@ -514,7 +530,7 @@ Agnode_t *agtail(Agedge_t * e)
 #ifdef aghead
 #undef aghead
 #endif
-Agnode_t *aghead(Agedge_t * e)
+CGRAPH_API Agnode_t *aghead(Agedge_t * e)
 {
     return AGHEAD(e);
 }
@@ -522,7 +538,7 @@ Agnode_t *aghead(Agedge_t * e)
 #ifdef agopp
 #undef agopp
 #endif
-Agedge_t *agopp(Agedge_t * e)
+CGRAPH_API Agedge_t *agopp(Agedge_t * e)
 {
     return AGOPP(e);
 }

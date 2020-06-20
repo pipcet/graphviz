@@ -33,7 +33,7 @@ LUA_PACKAGE       = $(CURDIR)/debian/libgv-lua
 
 DEV_PACKAGE       = $(CURDIR)/debian/libgraphviz-dev
 
-PYTHON_VERSIONS   = $(shell pyversions -s)
+PYTHON_VERSIONS   = $(shell python2 --version |& sed 's/.* \(.*\)\..*/\1/'; python3 --version |& sed 's/.* \(.*\)\..*/\1/')
 PYTHON_PACKAGE    = $(CURDIR)/debian/libgv-python
 
 RUBY_VERSION      = 1.8
@@ -156,6 +156,9 @@ install: build
 		--override s/libgvc$(GVC_SONAME)-dev//      \
 		--override s/libexpr$(EXPR_SONAME)-dev//      \
 		--override s/libgts-0.7-5-dev/libgts-dev/ \
+		--override s/libexpat1-dev// \
+		--override s/libltdl7-dev// \
+		--override s/zlib1g-dev// \
 		$(CURDIR)/debian/libgraphviz-dev.substvars \
 		$(CURDIR)/debian/tmp/usr/lib/*.so
 
@@ -195,15 +198,14 @@ install: build
 	rm -rf $(OCAML_PACKAGE)/usr/lib/graphviz
 
 	# Some additional work for libgv-python
-	# Note the sed call because of python{24,25} instead of python{2.4,2.5}
 	# Note gv.py isn't really duplicated, it's just installed in a location
 	# where python-support will find it. Both being identical, python-support
 	# will just do the right thing.
 	for i in $(PYTHON_VERSIONS); do \
 		install -d $(PYTHON_PACKAGE)/usr/lib/$$i/site-packages ; \
-		cp $(PYTHON_PACKAGE)/usr/lib/graphviz/python/gv.py \
+		cp $(PYTHON_PACKAGE)/usr/lib/graphviz/python*/gv.py \
 			$(PYTHON_PACKAGE)/usr/lib/$$i/site-packages ; \
-		mv $(PYTHON_PACKAGE)/usr/lib/graphviz/$$(echo $$i|sed -e 's/\.//')/*.so \
+		mv $(PYTHON_PACKAGE)/usr/lib/graphviz/python*/*.so \
 			$(PYTHON_PACKAGE)/usr/lib/$$i/site-packages ; \
 	done
 	rm -rf $(PYTHON_PACKAGE)/usr/lib/graphviz
@@ -232,7 +234,7 @@ binary-indep: build install
 	dh_testroot -i
 	dh_installdocs -i
 	dh_installmenu -i
-	dh_installchangelogs ChangeLog -i
+	dh_installchangelogs CHANGELOG.md -i
 	dh_perl -i
 	dh_link -i
 	dh_strip -i
@@ -254,7 +256,7 @@ binary-arch: build install
 	dh_installexamples -a
 	dh_installmenu -a
 	dh_installman -a
-	dh_installchangelogs ChangeLog -a
+	dh_installchangelogs CHANGELOG.md -a
 	dh_perl -a
 	dh_python2 -a
 	dh_link -a

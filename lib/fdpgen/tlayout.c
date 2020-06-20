@@ -2,7 +2,7 @@
 /* vim:set shiftwidth=4 ts=8: */
 
 /*************************************************************************
- * Copyright (c) 2011 AT&T Intellectual Property 
+ * Copyright (c) 2011 AT&T Intellectual Property
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,7 @@
  * Written by Emden R. Gansner
  *
  * Module for initial layout, using point nodes and ports.
- * 
+ *
  * Note: If interior nodes are not connected, they tend to fly apart,
  * despite being tied to port nodes. This occurs because, as initially
  * coded, as the nodes tend to straighten into a line, the radius
@@ -135,7 +135,7 @@ static void reset_params(void)
  * layout parameters. If T0 is not set, we set it here
  * based on the size of the graph. In this case, we
  * return 1, so that fdp_tLayout can unset T0, to be
- * reset by a recursive call to fdp_tLayout. 
+ * reset by a recursive call to fdp_tLayout.
  */
 static int init_params(graph_t * g, xparams * xpms)
 {
@@ -537,7 +537,7 @@ static pointf initPositions(graph_t * g, bport_t * pp)
     if (T_smode == INIT_RANDOM)
 	local_seed = T_seed;
     else {
-#if defined(MSWIN32) || defined(_WIN32)
+#if defined(_WIN32)
 	local_seed = time(NULL);
 #else
 	local_seed = getpid() ^ time(NULL);
@@ -546,7 +546,7 @@ static pointf initPositions(graph_t * g, bport_t * pp)
     srand48(local_seed);
 
     /* If ports, place ports on and nodes within an ellipse centered at origin
-     * with halfwidth Wd and halfheight Ht. 
+     * with halfwidth Wd and halfheight Ht.
      * If no ports, place nodes within a rectangle centered at origin
      * with halfwidth Wd and halfheight Ht. Nodes with a given position
      * are translated. Wd and Ht are set to contain all positioned points.
@@ -593,17 +593,17 @@ static pointf initPositions(graph_t * g, bport_t * pp)
 		if (cnt > 1) {
 		    ND_pos(np)[0] = p.x;
 		    ND_pos(np)[1] = p.y;
-/* fprintf (stderr, "%s 1 (%g,%g)\n", np->name, p.x, p.y); */
+/* fprintf (stderr, "%s 1 (%g,%g)\n", agnameof(np), p.x, p.y); */
 		} else if (cnt == 1) {
 		    ND_pos(np)[0] = 0.98 * p.x + 0.1 * ctr.x;
 		    ND_pos(np)[1] = 0.9 * p.y + 0.1 * ctr.y;
-/* fprintf (stderr, "%s %d (%g,%g)\n", np->name, cnt, ND_pos(np)[0], ND_pos(np)[1]); */
+/* fprintf (stderr, "%s %d (%g,%g)\n", agnameof(np), cnt, ND_pos(np)[0], ND_pos(np)[1]); */
 		} else {
 		    double angle = PItimes2 * drand48();
 		    double radius = 0.9 * drand48();
 		    ND_pos(np)[0] = radius * T_Wd * cos(angle);
 		    ND_pos(np)[1] = radius * T_Ht * sin(angle);
-/* fprintf (stderr, "%s 0 (%g,%g)\n", np->name, ND_pos(np)[0], ND_pos(np)[1]); */
+/* fprintf (stderr, "%s 0 (%g,%g)\n", agnameof(np), ND_pos(np)[0], ND_pos(np)[1]); */
 		}
 		ND_pinned(np) = P_SET;
 	    }

@@ -90,7 +90,7 @@ extern Dt_t * textfont_dict_open(GVC_t *gvc);
 
  */
 
-static gvplugin_package_t * gvplugin_package_record(GVC_t * gvc, char *path, char *name)
+static gvplugin_package_t * gvplugin_package_record(GVC_t * gvc, const char *path, const char *name)
 {
     gvplugin_package_t *package = gmalloc(sizeof(gvplugin_package_t));
     package->path = (path) ? strdup(path) : NULL;
@@ -437,7 +437,7 @@ static void config_rescan(GVC_t *gvc, char *config_path)
 #if defined(_WIN32)
     rc = glob(gvc, config_glob, GLOB_NOSORT, NULL, &globbuf);
 #else
-    rc = glob(config_glob, GLOB_NOSORT, NULL, &globbuf);
+    rc = glob(config_glob, 0, NULL, &globbuf);
 #endif
     if (rc == 0) {
 	for (i = 0; i < globbuf.gl_pathc; i++) {
@@ -543,14 +543,13 @@ void gvconfig(GVC_t * gvc, boolean rescan)
     	        sz = fread(config_text, 1, config_st.st_size, f);
     	        if (sz == 0) {
     		    agerr(AGERR,"%s is zero sized, or other read error.\n", gvc->config_path);
-    		    free(config_text);
     	        }
     	        else {
     	            gvc->config_found = TRUE;
     	            config_text[sz] = '\0';  /* make input into a null terminated string */
     	            rc = gvconfig_plugin_install_from_config(gvc, config_text);
-    		    /* NB. config_text not freed because we retain char* into it */
     	        }
+    	        free(config_text);
     	    }
     	    if (f) {
     	        fclose(f);

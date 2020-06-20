@@ -18,15 +18,6 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#ifdef _UWIN
-#ifndef _POSIX_			/* ncc doesn't define _POSIX_ */
-/* i.e. if this is the win32 build using nmake with CC=ncc (native C) */
-/* this was the easiest way to get some simple libc interfaces. */
-#include "C:\Program Files\UWIN\usr\include\astwin32.h"
-#undef _UWIN			/* don't assume ANY _UWIN features in the execution environment */
-#endif				/* _POSIX_ */
-#endif				/* _UWIN */
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -109,7 +100,7 @@ extern "C" {
 	*N_fontsize, *N_fontname, *N_fontcolor, *N_margin,
 	*N_label, *N_xlabel, *N_nojustify, *N_style, *N_showboxes,
 	*N_sides, *N_peripheries, *N_ordering, *N_orientation,
-	*N_skew, *N_distortion, *N_fixed, *N_imagescale, *N_layer,
+	*N_skew, *N_distortion, *N_fixed, *N_imagescale, *N_imagepos, *N_layer,
 	*N_group, *N_comment, *N_vertices, *N_z,
 	*N_penwidth, *N_gradientangle;
     EXTERN Agsym_t

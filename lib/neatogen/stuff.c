@@ -2,7 +2,7 @@
 /* vim:set shiftwidth=4 ts=8: */
 
 /*************************************************************************
- * Copyright (c) 2011 AT&T Intellectual Property 
+ * Copyright (c) 2011 AT&T Intellectual Property
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -261,6 +261,15 @@ int scan_graph_mode(graph_t * G, int mode)
 	    ND_heapindex(np) = -1;
 	    total_len += setEdgeLen(G, np, lenx, dfltlen);
 	}
+    } else if (mode == MODE_SGD) {
+	Epsilon = .01;
+	getdouble(G, "epsilon", &Epsilon);
+	GD_neato_nlist(G) = N_NEW(nV + 1, node_t *); // not sure why but sometimes needs the + 1
+	for (i = 0, np = agfstnode(G); np; np = agnxtnode(G, np)) {
+	    GD_neato_nlist(G)[i] = np;
+	    ND_id(np) = i++;
+	    total_len += setEdgeLen(G, np, lenx, dfltlen);
+	}
     } else {
 	Epsilon = DFLT_TOLERANCE;
 	getdouble(G, "epsilon", &Epsilon);
@@ -336,7 +345,7 @@ void initial_positions(graph_t * G, int nG)
     if (init == INIT_REGULAR)
 	return;
     if ((init == INIT_SELF) && (once == 0)) {
-	agerr(AGWARN, "start=%s not supported with mode=self - ignored\n");
+	agerr(AGWARN, "start=0 not supported with mode=self - ignored\n");
 	once = 1;
     }
 
@@ -442,7 +451,7 @@ void solve_model(graph_t * G, int nG)
 	      MaxIter, agnameof(G));
 }
 
-void update_arrays(graph_t * G, int nG, int i)
+static void update_arrays(graph_t * G, int nG, int i)
 {
     int j, k;
     double del[MAXDIM], dist, old;
@@ -724,51 +733,4 @@ void make_spring(graph_t * G, node_t * u, node_t * v, double f)
     i = ND_id(u);
     j = ND_id(v);
     GD_dist(G)[i][j] = GD_dist(G)[j][i] = f;
-}
-
-int allow_edits(int nsec)
-{
-#ifdef INTERACTIVE
-    static int onetime = TRUE;
-    static FILE *fp;
-    static fd_set fd;
-    static struct timeval tv;
-
-    char buf[256], name[256];
-    double x, y;
-    node_t *np;
-
-    if (onetime) {
-	fp = fopen("/dev/tty", "r");
-	if (fp == NULL)
-	    exit(1);
-	setbuf(fp, NULL);
-	tv.tv_usec = 0;
-	onetime = FALSE;
-    }
-    tv.tv_sec = nsec;
-    FD_ZERO(&fd);
-    FD_SET(fileno(fp), &fd);
-    if (select(32, &fd, (fd_set *) 0, (fd_set *) 0, &tv) > 0) {
-	fgets(buf, sizeof(buf), fp);
-	switch (buf[0]) {
-	case 'm':		/* move node */
-	    if (sscanf(buf + 1, "%s %lf%lf", name, &x, &y) == 3) {
-		np = getnode(G, name);
-		if (np) {
-		    NP_pos(np)[0] = x;
-		    NP_pos(np)[1] = y;
-		    diffeq_model();
-		}
-	    }
-	    break;
-	case 'q':
-	    return FALSE;
-	default:
-	    agerr(AGERR, "unknown command '%s', ignored\n", buf);
-	}
-	return TRUE;
-    }
-#endif
-    return FALSE;
 }

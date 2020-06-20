@@ -1,4 +1,4 @@
-# $Id$ $Revision$ 
+# $Id$ $Revision$
 ## Process this file with automake to produce Makefile.in
 
 CGRAPH_VERSION="6:0:0"
@@ -8,10 +8,11 @@ pkgconfigdir = $(libdir)/pkgconfig
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
-	-I$(top_srcdir)/lib/cdt
+	-I$(top_srcdir)/lib/cdt \
+	-Iinclude
 
 pkginclude_HEADERS = cgraph.h
-noinst_HEADERS = agxbuf.h cghdr.h malloc.h
+noinst_HEADERS = agxbuf.h cghdr.h include/malloc.h
 noinst_LTLIBRARIES = libcgraph_C.la
 lib_LTLIBRARIES = libcgraph.la
 pkgconfig_DATA = libcgraph.pc
@@ -48,11 +49,14 @@ y.tab.c y.tab.h: y.output
 y.output: $(top_srcdir)/lib/cgraph/grammar.y
 	@YACC@ -dv $(top_srcdir)/lib/cgraph/grammar.y
 
-cgraph.3.pdf: $(srcdir)/cgraph.3
-	- @GROFF@ -Tps -man $(srcdir)/cgraph.3 | @PS2PDF@ - - >cgraph.3.pdf
+cgraph.3.pdf: cgraph.3.ps
+	@PS2PDF@ $< $@
+
+cgraph.3.ps: $(srcdir)/cgraph.3
+	@GROFF@ -Tps -man $< >$@
 
 EXTRA_DIST = $(man_MANS) $(pdf_DATA) cmpnd.c \
 	main.c tester.c grammar.c grammar.h scan.c \
-	y.tab.c y.tab.h y.output cgraph.vcxproj* cgraph.def
+	y.tab.c y.tab.h y.output cgraph.vcxproj*
 
-DISTCLEANFILES = $(pdf_DATA) grammar.[ch] scan.c y.output y.tab.[ch]
+DISTCLEANFILES = $(pdf_DATA) grammar.[ch] scan.c y.output y.tab.[ch] cgraph.3.ps

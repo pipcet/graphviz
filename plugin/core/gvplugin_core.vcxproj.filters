@@ -53,10 +53,11 @@
     <ClCompile Include="gvrender_core_vml.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="gvplugin_core.def">
+    <ClCompile Include="gvrender_core_json.c">
       <Filter>Source Files</Filter>
-    </None>
+    </ClCompile>
+    <ClCompile Include="gvrender_core_mp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

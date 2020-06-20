@@ -48,43 +48,86 @@ cleanup1(graph_t * g)
     int c;
 
     for (c = 0; c < GD_comp(g).size; c++) {
-	GD_nlist(g) = GD_comp(g).list[c];
-	for (n = GD_nlist(g); n; n = ND_next(n)) {
-	    renewlist(&ND_in(n));
-	    renewlist(&ND_out(n));
-	    ND_mark(n) = FALSE;
-	}
+	    GD_nlist(g) = GD_comp(g).list[c];
+	    for (n = GD_nlist(g); n; n = ND_next(n)) {
+	        renewlist(&ND_in(n));
+	        renewlist(&ND_out(n));
+	        ND_mark(n) = FALSE;
+	    }
     }
     for (n = agfstnode(g); n; n = agnxtnode(g, n)) {
-	for (e = agfstout(g, n); e; e = agnxtout(g, e)) {
-	    f = ED_to_virt(e);
-	    /* Null out any other references to f to make sure we don't 
-	     * handle it a second time. For example, parallel multiedges 
-	     * share a virtual edge.
-	     */
-	    if (f && (e == ED_to_orig(f))) {
-		edge_t *e1, *f1;
-		node_t *n1;
-		for (n1 = agfstnode(g); n1; n1 = agnxtnode(g, n1)) {
-		    for (e1 = agfstout(g, n1); e1; e1 = agnxtout(g, e1)) {
-			if (e != e1) {
-			    f1 = ED_to_virt(e1);
-			    if (f1 && (f == f1)) {
-				ED_to_virt(e1) = NULL;
-			    }
-			}
-		    }
-		}
-		free(f->base.data);
-		free(f);
+        for (e = agfstout(g, n); e; e = agnxtout(g, e)) {
+            f = ED_to_virt(e);
+            /* Null out any other references to f to make sure we don't
+             * handle it a second time. For example, parallel multiedges
+             * share a virtual edge.
+             */
+            if (f && (e != ED_to_orig(f))) {
+                ED_to_virt(e) = NULL;
+            }
+        }
+    }
+    for (n = agfstnode(g); n; n = agnxtnode(g, n)) {
+        for (e = agfstout(g, n); e; e = agnxtout(g, e)) {
+            f = ED_to_virt(e);
+            if (f && ED_to_orig(f) == e) {
+		        free(f->base.data);
+		        free(f);
+                ED_to_virt(e) = NULL;
+            }
 	    }
-	    ED_to_virt(e) = NULL;
-	}
     }
     free(GD_comp(g).list);
     GD_comp(g).list = NULL;
     GD_comp(g).size = 0;
 }
+
+/*static void
+cleanup1(graph_t * g)
+{
+    node_t *n;
+    edge_t *e, *f;
+    int c;
+
+    for (c = 0; c < GD_comp(g).size; c++) {
+        GD_nlist(g) = GD_comp(g).list[c];
+        for (n = GD_nlist(g); n; n = ND_next(n)) {
+            renewlist(&ND_in(n));
+            renewlist(&ND_out(n));
+            ND_mark(n) = FALSE;
+        }
+    }
+    for (n = agfstnode(g); n; n = agnxtnode(g, n)) {
+        for (e = agfstout(g, n); e; e = agnxtout(g, e)) {
+            f = ED_to_virt(e);
+            * Null out any other references to f to make sure we don't
+             * handle it a second time. For example, parallel multiedges
+             * share a virtual edge.
+             *
+            if (f && (e == ED_to_orig(f))) {
+                edge_t *e1, *f1;
+                node_t *n1;
+                for (n1 = agfstnode(g); n1; n1 = agnxtnode(g, n1)) {
+                    for (e1 = agfstout(g, n1); e1; e1 = agnxtout(g, e1)) {
+                        if (e != e1) {
+                            f1 = ED_to_virt(e1);
+                            if (f1 && (f == f1)) {
+                                ED_to_virt(e1) = NULL;
+                            }
+                        }
+                    }
+                }
+                free(f->base.data);
+                free(f);
+            }
+            ED_to_virt(e) = NULL;
+        }
+    }
+    free(GD_comp(g).list);
+    GD_comp(g).list = NULL;
+    GD_comp(g).size = 0;
+}
+*/
 
 /* When there are edge labels, extra ranks are reserved here for the virtual
  * nodes of the labels.  This is done by doubling the input edge lengths.
@@ -96,7 +139,7 @@ edgelabel_ranks(graph_t * g)
     node_t *n;
     edge_t *e;
 
-    if (GD_has_labels(g->root) & EDGE_LABEL) {
+    if (GD_has_labels(g) & EDGE_LABEL) {
 	for (n = agfstnode(g); n; n = agnxtnode(g, n))
 	    for (e = agfstout(g, n); e; e = agnxtout(g, e))
 		ED_minlen(e) *= 2;
@@ -584,7 +627,8 @@ void dot_rank(graph_t * g, aspect_t* asp)
 
 int is_cluster(graph_t * g)
 {
-    return (strncmp(agnameof(g), "cluster", 7) == 0);
+    //return (strncmp(agnameof(g), "cluster", 7) == 0);
+    return is_a_cluster(g);   // from utils.c
 }
 
 #ifdef OBSOLETE
@@ -1037,7 +1081,7 @@ static void break_cycles(graph_t * g)
 }
 /* setMinMax:
  * This will only be called with the root graph or a cluster
- * which are guarenteed to contain nodes. Thus, leader will be
+ * which are guaranteed to contain nodes. Thus, leader will be
  * set.
  */
 static void setMinMax (graph_t* g, int doRoot)

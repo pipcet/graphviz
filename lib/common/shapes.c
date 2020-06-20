@@ -349,7 +349,7 @@ char *findFillDflt(node_t * n, char *dflt)
 
     color = late_nnstring(n, N_fillcolor, "");
     if (!color[0]) {
-	/* for backward compatibilty, default fill is same as pen */
+	/* for backward compatibility, default fill is same as pen */
 	color = late_nnstring(n, N_color, "");
 	if (!color[0]) {
 	    color = dflt;
@@ -2965,7 +2965,8 @@ static void poly_gencode(GVJ_t * job, node_t * n)
 	    }
 	}
 	gvrender_usershape(job, name, AF, sides, filled,
-			   late_string(n, N_imagescale, "false"));
+			   late_string(n, N_imagescale, "false"),
+			   late_string(n, N_imagepos, "mc"));
 	filled = FALSE;		/* with user shapes, we have done the fill if needed */
     }
 

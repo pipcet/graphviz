@@ -64,18 +64,25 @@
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Lib />
+    <Lib>
+      <AdditionalDependencies>gvortho.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\gvc;$(SolutionDir)lib\ortho;$(SolutionDir)lib\pathplan;$(SolutionDir)lib\pack;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;_LIB;WIN32_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
       <EnablePREfast>true</EnablePREfast>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Lib />
+    <Lib>
+      <AdditionalDependencies>gvortho.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="aspect.h" />

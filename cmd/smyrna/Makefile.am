@@ -19,9 +19,11 @@ AM_CPPFLAGS = \
         -I$(top_srcdir)/lib/gvpr \
         -I$(top_srcdir)/lib/common \
         -I$(top_srcdir)/cmd/smyrna/gui \
-	$(GTK_CFLAGS) $(GLUT_CFLAGS) $(GTKGLEXT_CFLAGS) $(GLADE_CFLAGS) $(FREETYPE2_CFLAGS) $(FONTCONFIG_CFLAGS) $(GTS_CFLAGS)
+	$(GTK_CFLAGS) $(GLUT_CFLAGS) $(GTKGLEXT_CFLAGS) $(GLADE_CFLAGS) $(FREETYPE2_CFLAGS) $(FONTCONFIG_CFLAGS) $(GTS_CFLAGS) $(XRENDER_CFLAGS)
 
 bin_PROGRAMS =
+man_MANS = 
+pdf_DATA = 
 if WITH_SMYRNA
 if ENABLE_SHARED
 bin_PROGRAMS += smyrna 
@@ -29,10 +31,9 @@ endif
 if ENABLE_STATIC
 bin_PROGRAMS += smyrna_static
 endif
+man_MANS += smyrna.1
+pdf_DATA += smyrna.1.pdf
 endif
-
-man_MANS = smyrna.1
-pdf_DATA = smyrna.1.pdf
 
 noinst_HEADERS = arcball.h draw.h glexpose.h \
 	glmotion.h gltemplate.h gui/appmouse.h gui/callbacks.h \
@@ -79,10 +80,13 @@ smyrna_static_LDADD = $(top_builddir)/lib/cgraph/libcgraph_C.la \
 		$(top_builddir)/lib/neatogen/libneatogen_C.la \
 		$(GTK_LIBS) $(GLUT_LIBS) $(GTKGLEXT_LIBS) $(GLADE_LIBS) $(X_LIBS) $(EXPAT_LIBS) $(GTS_LIBS) $(MATH_LIBS)
 
-smyrna.1.pdf: $(srcdir)/smyrna.1
-	- @GROFF@ -Tps -man $(srcdir)/smyrna.1 | @PS2PDF@ - - >smyrna.1.pdf
+smyrna.1.pdf: smyrna.1.ps
+	@PS2PDF@ $< $@
 
-EXTRA_DIST = smyrna.vcxproj* $(man_MANS) $(pdf_DATA)
+smyrna.1.ps: $(srcdir)/smyrna.1
+	@GROFF@ -Tps -man $< >$@
 
-DISTCLEANFILES = $(pdf_DATA)
+EXTRA_DIST = smyrna.vcxproj* $(man_MANS) $(pdf_DATA) smyrna.1
+
+DISTCLEANFILES = $(pdf_DATA) smyrna.1.ps
 

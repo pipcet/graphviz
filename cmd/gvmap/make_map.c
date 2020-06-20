@@ -652,16 +652,16 @@ static void dot_polygon(char **sbuff, int *len, int *len_max, int np, float *xp,
   if (np > 0){
     /* figure out the size needed */
     if (fill >= 0){/* poly*/
-      ret += sprintf(buf, " c %d -%s C %d -%s P %d ",(int) strlen(cstring), cstring, (int) strlen(cstring), cstring, np);
+      ret += snprintf(buf, sizeof(buf), " c %d -%s C %d -%s P %d ",(int) strlen(cstring), cstring, (int) strlen(cstring), cstring, np);
     } else {/* line*/
       assert(line_width >= 0);
       if (line_width > 0){
 	sprintf(swidth,"%f",line_width);
 	len_swidth = strlen(swidth);
 	sprintf(swidth,"S %d -setlinewidth(%f)",len_swidth+14, line_width);
-	ret += sprintf(buf, " c %d -%s %s L %d ",(int) strlen(cstring), cstring, swidth, np);
+	ret += snprintf(buf, sizeof(buf), " c %d -%s %s L %d ",(int) strlen(cstring), cstring, swidth, np);
       } else {
-	ret += sprintf(buf, " c %d -%s L %d ",(int) strlen(cstring), cstring, np);
+	ret += snprintf(buf, sizeof(buf), " c %d -%s L %d ",(int) strlen(cstring), cstring, np);
       }
     }
     for (i = 0; i < np; i++){
@@ -891,8 +891,8 @@ void plot_dot_map(Agraph_t* gr, int n, int dim, real *x, SparseMatrix polys, Spa
   /* background color + plot label?*/
 
   if (!gr) fprintf(f, "}\n");
-  
- 
+
+  FREE(sbuff);
 }
 
 #if 0
@@ -1713,7 +1713,7 @@ static void get_polygons(int exclude_random, int n, int nrandom, int dim, Sparse
     }
     ncomps = i + 1;
     if (Verbose) fprintf(stderr,"ncomps = %d\n",ncomps);
-  } else {/* alwasy exclud bounding box */
+  } else {/* always exclude bounding box */
     for (i = ncomps - 1; i >= 0; i--) {
       if (groups[comps[comps_ptr[i]]] != GRP_BBOX) break;
     }
@@ -1895,7 +1895,7 @@ int make_map_internal(int exclude_random, int include_OK_points,
       int *grouping2;
       nzok0 = nzok = *nrandom - 1;/* points that are within tolerance of real or artificial points */
       grouping2 = MALLOC(sizeof(int)*(n + *nrandom));
-      MEMCPY(grouping2, grouping, sizeof(int)*n);
+      memcpy(grouping2, grouping, sizeof(int)*n);
       grouping = grouping2;
     }
     nn = n;
@@ -1996,7 +1996,7 @@ int make_map_internal(int exclude_random, int include_OK_points,
       for (i = nh; i < n; i++){
 	grouping[i] = 2;
       }
-      MEMCPY(*xcombined, xtemp, n*dim*sizeof(real));
+      memcpy(*xcombined, xtemp, n*dim*sizeof(real));
       *nrandom = *nrandom + n - nh;/* count everything except cluster HIGHLIGHT_SET as random */
       n = nh;
       if (Verbose) fprintf(stderr,"nh = %d\n",nh);
@@ -2276,7 +2276,7 @@ int make_map_from_rectangle_groups(int exclude_random, int include_OK_points,
     /* add artificial points in an anti-clockwise fashion */
 
     if (K > 0){
-      delta[0] = .5*avgsize[0]/K; delta[1] = .5*avgsize[1]/K;/* small pertubation to make boundary between labels looks more fractal */
+      delta[0] = .5*avgsize[0]/K; delta[1] = .5*avgsize[1]/K;/* small perturbation to make boundary between labels looks more fractal */
     } else {
       delta[0] = delta[1] = 0.;
     }

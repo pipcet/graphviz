@@ -13,9 +13,6 @@
 
 #include "config.h"
 
-#ifdef _WIN32
-#include <io.h>
-#endif
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -25,8 +22,6 @@
 #include "gvplugin_render.h"
 #include "gvplugin_device.h"
 #include "gvcint.h"	/* for gvc->g for agget */
-
-#ifdef HAVE_LIBGD
 #include "gd.h"
 
 #ifndef INT32_MAX
@@ -288,14 +283,17 @@ static void gdgen_missingfont(char *err, char *fontreq)
     }
 }
 
-gdFontPtr gdFontTiny, gdFontSmall, gdFontMediumBold, gdFontLarge, gdFontGiant;
-
 /* fontsize at which text is omitted entirely */
 #define FONTSIZE_MUCH_TOO_SMALL 0.15
 /* fontsize at which text is rendered by a simple line */
 #define FONTSIZE_TOO_SMALL 1.5
 
-gdFontPtr gdFontTiny, gdFontSmall, gdFontMediumBold, gdFontLarge, gdFontGiant;
+#ifdef _WIN32
+#   define GD_IMPORT __declspec(dllimport)
+#else
+#   define GD_IMPORT extern
+#endif
+GD_IMPORT gdFontPtr gdFontTiny, gdFontSmall, gdFontMediumBold, gdFontLarge, gdFontGiant;
 
 void gdgen_text(gdImagePtr im, pointf spf, pointf epf, int fontcolor, double fontsize, int fontdpi, double fontangle, char *fontname, char *str)
 {
@@ -663,17 +661,12 @@ static gvdevice_features_t device_features_gd_tc_no_writer = {
     {96.,96.},			/* default dpi */
 };
 
-#endif
-
 gvplugin_installed_t gvrender_gd_types[] = {
-#ifdef HAVE_LIBGD
     {FORMAT_GD, "gd", 1, &gdgen_engine, &render_features_gd},
-#endif
     {0, NULL, 0, NULL, NULL}
 };
 
 gvplugin_installed_t gvdevice_gd_types2[] = {
-#ifdef HAVE_LIBGD
 #ifdef HAVE_GD_GIF
     {FORMAT_GIF, "gif:gd", 1, NULL, &device_features_gd_tc},  /* pretend gif is truecolor because it supports transparency */
     {FORMAT_WBMP, "wbmp:gd", 1, NULL, &device_features_gd},
@@ -700,8 +693,6 @@ gvplugin_installed_t gvdevice_gd_types2[] = {
 #ifdef HAVE_GD_XPM
     {FORMAT_XBM, "xbm:gd", 1, NULL, &device_features_gd},
 #endif
-#endif
-
 #endif
     {0, NULL, 0, NULL, NULL}
 };

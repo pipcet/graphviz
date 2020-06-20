@@ -51,8 +51,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir);$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\gvc;$(SolutionDir)lib\pathplan;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;GVPLUGIN_CORE_EXPORTS;WIN32_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir);$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\gvc;$(SolutionDir)lib\pathplan;$(SolutionDir)lib\xdot;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -65,7 +64,6 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
-      <ModuleDefinitionFile>gvplugin_core.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <DataExecutionPrevention />
@@ -78,9 +76,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir);$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\gvc;$(SolutionDir)lib\pathplan;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;GVPLUGIN_CORE_EXPORTS;WIN32_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir);$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\gvc;$(SolutionDir)lib\pathplan;$(SolutionDir)lib\xdot;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
       <EnablePREfast>true</EnablePREfast>
@@ -88,7 +84,6 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
-      <ModuleDefinitionFile>gvplugin_core.def</ModuleDefinitionFile>
       <GenerateDebugInformation>No</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -109,16 +104,15 @@
     <ClCompile Include="gvplugin_core.c" />
     <ClCompile Include="gvrender_core_dot.c" />
     <ClCompile Include="gvrender_core_fig.c" />
+    <ClCompile Include="gvrender_core_json.c" />
     <ClCompile Include="gvrender_core_map.c" />
+    <ClCompile Include="gvrender_core_mp.c" />
     <ClCompile Include="gvrender_core_pic.c" />
     <ClCompile Include="gvrender_core_pov.c" />
     <ClCompile Include="gvrender_core_ps.c" />
     <ClCompile Include="gvrender_core_svg.c" />
     <ClCompile Include="gvrender_core_tk.c" />
     <ClCompile Include="gvrender_core_vml.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="gvplugin_core.def" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\lib\cdt\cdt.vcxproj">

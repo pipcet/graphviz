@@ -22,10 +22,12 @@ if WITH_TCL
 pkgtcl_LTLIBRARIES = libgdtclft.la
 man_MANS = $(man)
 pdf_DATA = $(pdf)
+noinst_LTLIBRARIES = libgdtclft_C.la
 endif
 endif
 
 libgdtclft_la_SOURCES = gdtclft.c
+libgdtclft_C_la_SOURCES = gdtclft.c
 
 libgdtclft_la_LDFLAGS = -no-undefined
 
@@ -45,11 +47,14 @@ test:
 endif
 endif
 
-gdtclft.3tcl.pdf: $(srcdir)/gdtclft.3tcl
-	- @GROFF@ -Tps -man $(srcdir)/gdtclft.3tcl | @PS2PDF@ - - >gdtclft.3tcl.pdf
+gdtclft.3tcl.pdf: gdtclft.3tcl.ps
+	@PS2PDF@ $< $@
+
+gdtclft.3tcl.ps: $(srcdir)/gdtclft.3tcl
+	@GROFF@ -Tps -man $< >$@
 
 EXTRA_DIST = $(man) $(pdf)
 
 CLEANFILES = pkgIndex.tcl
 
-DISTCLEANFILES = $(pdf)
+DISTCLEANFILES = $(pdf) gdtclft.3tcl.ps

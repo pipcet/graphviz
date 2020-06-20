@@ -24,11 +24,14 @@ Vector Vector_new(int maxlen, size_t size_of_elem, void (*deallocator)(void *v))
   v->size_of_elem = size_of_elem;
   v->deallocator = deallocator;
   v->v = malloc(size_of_elem*maxlen);
-  if (!v->v) return NULL;
+  if (!v->v){
+    free(v);
+    return NULL;
+  }
   return v;
 }
 
-Vector Vector_assign(Vector v, void *stuff, int i){
+static Vector Vector_assign(Vector v, void *stuff, int i){
   memcpy(((char*) v->v)+(v->size_of_elem)*i/sizeof(char), stuff, v->size_of_elem);
   return v;
 }
@@ -74,7 +77,7 @@ int Vector_get_length(Vector v){
 
 /*---------------- integer vector --------------- */
 
-void intdealloactor(void *v){
+static void intdealloactor(void *v){
 }
 
 Vector IntegerVector_new(int len){
@@ -109,10 +112,10 @@ Vector IntegerVector_reset(Vector v, int content, int pos){
 
 /*---------------- string vector --------------- */
 
-void nulldealloactor(void *v){
+static void nulldealloactor(void *v){
   return;
 }
-void strdealloactor(void *v){
+static void strdealloactor(void *v){
   char **s;
   s = (char**) v;
   free(*s);

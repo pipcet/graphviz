@@ -24,11 +24,11 @@
  * In particular, note that Verbose is declared but undefined.
  */
 #ifndef STANDALONE
-#include <cgraph.h>
-#include <globals.h>
-#include <logic.h>
-#include <arith.h>
-#include <memory.h>
+#include "cgraph.h"
+#include "globals.h"
+#include "logic.h"
+#include "arith.h"
+#include "memory.h"
 #endif  /* STANDALONE */
 
 #define real double
@@ -71,7 +71,6 @@ extern unsigned char Verbose;
 #endif    /* STANDALONE */
 
 #define FREE free
-#define MEMCPY memcpy
 
 #ifndef DEBUG
 #ifndef NDEBUG
@@ -107,7 +106,7 @@ void vector_float_take(int n, float *v, int m, int *p, float **u);
 /* give the position of the lagest, second largest etc in vector v if ascending = TRUE
    or
    give the position of the smallest, second smallest etc  in vector v if ascending = TRUE.
-   results in p. If *p == NULL, p is asigned.
+   results in p. If *p == NULL, p is assigned.
 */
 void vector_ordering(int n, real *v, int **p, int ascending);
 void vector_sort_real(int n, real *v, int ascending);

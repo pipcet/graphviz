@@ -38,6 +38,8 @@
 #include "gvio.h"
 #include "gvcint.h"
 
+#define LOCALNAMEPREFIX		'%'
+
 typedef enum { FORMAT_SVG, FORMAT_SVGZ, } format_type;
 
 /* SVG dash array */
@@ -201,7 +203,7 @@ static void svg_begin_graph(GVJ_t * job)
     obj_state_t *obj = job->obj;
 
     gvputs(job, "<!--");
-    if (agnameof(obj->u.g)[0]) {
+    if (agnameof(obj->u.g)[0] && agnameof(obj->u.g)[0] != LOCALNAMEPREFIX) {
 	gvputs(job, " Title: ");
 	gvputs(job, xml_string(agnameof(obj->u.g)));
     }
@@ -262,7 +264,7 @@ static void svg_begin_page(GVJ_t * job)
     gvprintdouble(job, -job->translation.y);
     gvputs(job, ")\">\n");
     /* default style */
-    if (agnameof(obj->u.g)[0]) {
+    if (agnameof(obj->u.g)[0] && agnameof(obj->u.g)[0] != LOCALNAMEPREFIX) {
 	gvputs(job, "<title>");
 	gvputs(job, xml_string(agnameof(obj->u.g)));
 	gvputs(job, "</title>\n");
@@ -350,7 +352,7 @@ svg_begin_anchor(GVJ_t * job, char *href, char *tooltip, char *target,
 #endif
     if (href && href[0]) {
 	gvputs(job, " xlink:href=\"");
-	gvputs(job, href);
+	gvputs(job, xml_url_string(href));
 	gvputs(job, "\"");
     }
 #if 0
@@ -481,6 +483,8 @@ static void svg_textspan(GVJ_t * job, pointf p, textspan_t * span)
 	gvprintf(job, " fill=\"#%02x%02x%02x\"",
 		 obj->pencolor.u.rgba[0], obj->pencolor.u.rgba[1],
 		 obj->pencolor.u.rgba[2]);
+	if (obj->pencolor.u.rgba[3] > 0 && obj->pencolor.u.rgba[3] < 255)
+	    gvprintf(job, " fill-opacity=\"%f\"", ((float) obj->pencolor.u.rgba[3] / 255.0));
 	break;
     default:
 	assert(0);		/* internal error */

@@ -517,8 +517,7 @@ static void newPos(void)
 /* cleanup:
  * Cleanup voronoi memory.
  * Note that PQcleanup and ELcleanup rely on the number
- * of sites, so should at least be reset everytime we use
- * vAdjust.
+ * of sites, so should at least be reset every time we use vAdjust.
  * This could be optimized, over multiple components or
  * even multiple graphs, but probably not worth it.
  */
@@ -671,7 +670,7 @@ static void updateGraph(Agraph_t * graph)
 double *getSizes(Agraph_t * g, pointf pad, int* n_elabels, int** elabels)
 {
     Agnode_t *n;
-    real *sizes = N_GNEW(2 * agnnodes(g), real);
+    real *sizes = N_GNEW(Ndim * agnnodes(g), real);
     int i, nedge_nodes = 0;
     int* elabs;
 
@@ -679,8 +678,8 @@ double *getSizes(Agraph_t * g, pointf pad, int* n_elabels, int** elabels)
 	if (elabels && IS_LNODE(n)) nedge_nodes++;
 
 	i = ND_id(n);
-	sizes[i * 2] = ND_width(n) * .5 + pad.x;
-	sizes[i * 2 + 1] = ND_height(n) * .5 + pad.y;
+	sizes[i * Ndim] = ND_width(n) * .5 + pad.x;
+	sizes[i * Ndim + 1] = ND_height(n) * .5 + pad.y;
     }
 
     if (elabels && nedge_nodes) {

@@ -64,18 +64,25 @@
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Lib />
+    <Lib>
+      <AdditionalDependencies>gvortho.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)windows\include;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\gvc;$(SolutionDir)lib\pack;$(SolutionDir)lib\pathplan;$(SolutionDir)lib\ortho;$(SolutionDir)lib\rbtree;$(SolutionDir)lib\sfdpgen;$(SolutionDir)lib\sparse;$(SolutionDir)lib\vpsc</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;_LIB;WIN32_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
       <EnablePREfast>true</EnablePREfast>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Lib />
+    <Lib>
+      <AdditionalDependencies>gvortho.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="adjust.h" />
@@ -106,6 +113,8 @@
     <ClInclude Include="poly.h" />
     <ClInclude Include="quad_prog_solver.h" />
     <ClInclude Include="quad_prog_vpsc.h" />
+    <ClInclude Include="randomkit.h" />
+    <ClInclude Include="sgd.h" />
     <ClInclude Include="site.h" />
     <ClInclude Include="sparsegraph.h" />
     <ClInclude Include="stress.h" />
@@ -147,6 +156,8 @@
     <ClCompile Include="printvis.c" />
     <ClCompile Include="quad_prog_solve.c" />
     <ClCompile Include="quad_prog_vpsc.c" />
+    <ClCompile Include="randomkit.c" />
+    <ClCompile Include="sgd.c" />
     <ClCompile Include="site.c" />
     <ClCompile Include="smart_ini_x.c" />
     <ClCompile Include="solve.c" />

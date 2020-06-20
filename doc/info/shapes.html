@@ -210,6 +210,7 @@ The possible polygon-based shapes are displayed below.
     <TD><A NAME=d:larrow>larrow</A>
     <TD><A NAME=d:lpromoter>lpromoter</A>
   </TR>
+
 </TABLE>
 As the figures suggest, the shapes <TT>rect</TT> and <TT>rectangle</TT> are synonyms for <TT>box</TT>, and <TT>none</TT> is a synonym for <TT>plaintext</TT>.
 The shape <TT>plain</TT> is similar to these two, except that it also enforces 
@@ -305,7 +306,7 @@ which has the following schema:
   <TABLE>
   <TR><TD ALIGN=right><I>rlabel</I><TD>=<TD><I>field</I> ( '|' <I>field</I> )*</TR>
   <TR><TD ALIGN=right>where <I>field</I><TD>=<TD>fieldId</I> or '{' <I>rlabel</I> '}'</TR>
-  <TR><TD ALIGN=right>and <I>fieldId</I><TD>=<TD> [ '<' <I>string</I> '>'] [ <I>string</I> ]</TR>
+  <TR><TD ALIGN=right>and <I>fieldId</I><TD>=<TD> [ '&lt;' <I>string</I> '&gt;'] [ <I>string</I> ]</TR>
   </TABLE>
 Braces, vertical bars and angle brackets must be escaped with
 a backslash character if you wish them to appear as a literal character.
@@ -450,7 +451,7 @@ that are newer than mid-November 2003. In particular, it is not part
 of release 1.10.</EM>
 <P>
 <B>NOTE:</B><EM>The font markups for bold, italic, underlining, subscript and 
-superscript </EM>(<TT>&lt;B&gt;</TT>, <TT>&lt;I&gt;</TT>, <TT>&lt;U&gt;</TT>, <TT>&lt;SUB&gt</TT> and <TT>&lt;SUP&gt;</TT>) 
+superscript </EM>(<TT>&lt;B&gt;</TT>, <TT>&lt;I&gt;</TT>, <TT>&lt;U&gt;</TT>, <TT>&lt;SUB&gt;</TT> and <TT>&lt;SUP&gt;</TT>) 
 <EM>are only available in versions after 14 October 2011, and 
 the markup for strike-through (<TT>&lt;S&gt;</TT>) requires versions later than 15 September 2013.
 In addition, all of these markups are
@@ -499,7 +500,7 @@ In particular, if a node has set its
 attribute to <TT>none</TT> or <TT>plaintext</TT>, the HTML label will be the node's
 shape. On the other hand, if the node has any other shape (except 
 <TT>point</TT>), the HTML label will be embedded within the node the
-same way an ordinary label would be.
+same way an ordinary label would be. Adding HTML labels to record-based shapes (record and Mrecord) is discouraged and may lead to unexpected behavior because of their conflicting label schemas and overlapping functionality.
 <P>
 The following is an abstract grammar for HTML labels.
 Terminals, corresponding to elements, are shown in bold font,
@@ -518,7 +519,7 @@ Note that, as in HTML, element and attribute names are case-insensitive.
 <TR>
   <TD ALIGN=RIGHT></TD>
   <TD ALIGN=LEFT>|</TD>
-  <TD ALIGN=LEFT><I>table</I></TD>
+  <TD ALIGN=LEFT><I>fonttable</I></TD>
 </TR>
 <TR>
   <TD ALIGN=RIGHT><I>text</I></TD>
@@ -558,32 +559,62 @@ Note that, as in HTML, element and attribute names are case-insensitive.
 <TR>
   <TD ALIGN=RIGHT></TD>
   <TD ALIGN=LEFT>|</TD>
-  <TD ALIGN=LEFT><B>&lt;U&gt;</B> <I>text</I> <B>&lt;/U&gt</B></TD>
+  <TD ALIGN=LEFT><B>&lt;U&gt;</B> <I>text</I> <B>&lt;/U&gt;</B></TD>
 </TR>
 <TR>
   <TD ALIGN=RIGHT></TD>
   <TD ALIGN=LEFT>|</TD>
-  <TD ALIGN=LEFT><B>&lt;O&gt;</B> <I>text</I> <B>&lt;/O&gt</B></TD>
+  <TD ALIGN=LEFT><B>&lt;O&gt;</B> <I>text</I> <B>&lt;/O&gt;</B></TD>
 </TR>
 <TR>
   <TD ALIGN=RIGHT></TD>
   <TD ALIGN=LEFT>|</TD>
-  <TD ALIGN=LEFT><B>&lt;SUB&gt;</B> <I>text</I> <B>&lt;/SUB&gt</B></TD>
+  <TD ALIGN=LEFT><B>&lt;SUB&gt;</B> <I>text</I> <B>&lt;/SUB&gt;</B></TD>
 </TR>
 <TR>
   <TD ALIGN=RIGHT></TD>
   <TD ALIGN=LEFT>|</TD>
-  <TD ALIGN=LEFT><B>&lt;SUP&gt;</B> <I>text</I> <B>&lt;/SUP&gt</B></TD>
+  <TD ALIGN=LEFT><B>&lt;SUP&gt;</B> <I>text</I> <B>&lt;/SUP&gt;</B></TD>
 </TR>
 <TR>
   <TD ALIGN=RIGHT></TD>
   <TD ALIGN=LEFT>|</TD>
-  <TD ALIGN=LEFT><B>&lt;S&gt;</B> <I>text</I> <B>&lt;/S&gt</B></TD>
+  <TD ALIGN=LEFT><B>&lt;S&gt;</B> <I>text</I> <B>&lt;/S&gt;</B></TD>
+</TR>
+<TR>
+  <TD ALIGN=RIGHT><I>fonttable</I></TD>
+  <TD ALIGN=LEFT>:</TD>
+  <TD ALIGN=LEFT><I>table</I></TD>
+</TR>
+<TR>
+  <TD ALIGN=RIGHT></TD>
+  <TD ALIGN=LEFT>|</TD>
+  <TD ALIGN=LEFT><B>&lt;FONT&gt;</B> <I>table</I> <B>&lt;/FONT&gt;</B></TD>
+</TR>
+<TR>
+  <TD ALIGN=RIGHT></TD>
+  <TD ALIGN=LEFT>|</TD>
+  <TD ALIGN=LEFT><B>&lt;I&gt;</B> <I>table</I> <B>&lt;/I&gt;</B></TD>
+</TR>
+<TR>
+  <TD ALIGN=RIGHT></TD>
+  <TD ALIGN=LEFT>|</TD>
+  <TD ALIGN=LEFT><B>&lt;B&gt;</B> <I>table</I> <B>&lt;/B&gt;</B></TD>
+</TR>
+<TR>
+  <TD ALIGN=RIGHT></TD>
+  <TD ALIGN=LEFT>|</TD>
+  <TD ALIGN=LEFT><B>&lt;U&gt;</B> <I>table</I> <B>&lt;/U&gt;</B></TD>
+</TR>
+<TR>
+  <TD ALIGN=RIGHT></TD>
+  <TD ALIGN=LEFT>|</TD>
+  <TD ALIGN=LEFT><B>&lt;O&gt;</B> <I>table</I> <B>&lt;/O&gt;</B></TD>
 </TR>
 <TR>
   <TD ALIGN=RIGHT><I>table</I></TD>
   <TD ALIGN=LEFT>:</TD>
-  <TD ALIGN=LEFT>[ <B>&lt;FONT&gt;</B> ] <B>&lt;TABLE&gt;</B> <I>rows</I> <B>&lt;/TABLE&gt;</B> [ <B>&lt;/FONT&gt;</B> ]</TD>
+  <TD ALIGN=LEFT><B>&lt;TABLE&gt;</B> <I>rows</I> <B>&lt;/TABLE&gt;</B></TD>
 </TR>
 <TR>
   <TD ALIGN=RIGHT><I>rows</I></TD>
@@ -632,10 +663,19 @@ Note that, as in HTML, element and attribute names are case-insensitive.
 </TR>
 </TABLE>
 <P>
+All non-printing characters such as tabs or newlines are ignored.
 Above, a <I>string</I> is any collection of printable characters, including
-all spaces. Note that outside of the body of a &lt;TD&gt; element, 
-whitespace characters are ignored; within a &lt;TD&gt; element, spaces
+spaces. For tables, outside of the body of a &lt;TD&gt; element, 
+whitespace characters are ignored, including spaces; within a &lt;TD&gt; element, spaces
 are preserved but all other white space characters are discarded.
+<B>N.B.</B> For technical reasons, if a table is wrapped in a font element such as  &lt;FONT&gt;
+or  &lt;B&gt;, any space immediately before or after this will cause a syntax error. For example,
+the label
+<PRE>
+&lt; &lt;U&gt;&lt;TABLE&gt;&lt;TR&gt;&lt;TD&gt;a&lt;/TD&gt;&lt;/TR&gt;&lt;/U&gt;&gt;
+</PRE>
+is not legal. Removing either the space or the &lt;U&gt;...&lt;/U&gt; will fix this.
+<P>
 HTML comments are allowed within an HTML string. They can occur anywhere
 provided that, if they contain part of an HTML element, they must contain
 the entire element.
@@ -804,16 +844,16 @@ is placed left and right of the object.
 <LI>CENTER aligns the object in the center. (Default) </LI>
 <LI>LEFT aligns the object on the left.</LI>
 <LI>RIGHT aligns the object on the right.  </LI>
-<LI>(<T>&lt;TD&gt;</T> only) TEXT aligns lines of text using the full
+<LI>(<CODE>&lt;TD&gt;</CODE> only) TEXT aligns lines of text using the full
 cell width. The alignment of a line is determined by its (possibly
-implicit) associated <T>&lt;BR&gt;</T> element.</LI> 
+implicit) associated <CODE>&lt;BR&gt;</CODE> element.</LI> 
 </ul>
 <P>
 The contents of a cell are normally aligned as a block. In particular,
 lines of text are first aligned as a text block based on the width of
-the widest line and the corresponding <T>&lt;BR&gt;</T> elements. Then,
+the widest line and the corresponding <CODE>&lt;BR&gt;</CODE> elements. Then,
 the entire text block is aligned within a cell. If, however, the
-cell's <B><I>ALIGN</I></B> value is <T>"TEXT"</T>, and the cell contains
+cell's <B><I>ALIGN</I></B> value is <CODE>"TEXT"</CODE>, and the cell contains
 lines of text, then the lines are justified using the entire available
 width of the cell. If the cell does not contain text, then the contained
 image or table is centered.
@@ -821,8 +861,8 @@ image or table is centered.
 
 <B><I><FONT SIZE=-1>BALIGN</FONT> </I></B>
 <BLOCKQUOTE>
-specifies the default alignment of <T>&lt;BR&gt;</T> elements contained
-in the cell. That is, if a <T>&lt;BR&gt;</T> element has no
+specifies the default alignment of <CODE>&lt;BR&gt;</CODE> elements contained
+in the cell. That is, if a <CODE>&lt;BR&gt;</CODE> element has no
 explicit <B><I>ALIGN</I></B> attribute, the attribute value is specified
 by the value of <B><I>BALIGN</I></B>.
 </BLOCKQUOTE>
@@ -1206,14 +1246,14 @@ format. At present, shapes can be described using PostScript, via a
 file or add-on library, for use in PostScript output, or shapes can
 be specified by a bitmap-image file for use with SVG or bitmap (jpeg,
 gif, etc.) output. More information can be found on the page 
-<A HREF="http://www.graphviz.org/wiki/how-create-custom-shapes">
+<A HREF="../../../faq/#FaqCustShape">
 How to create custom shapes</A>.
 
 <H2><A NAME=sdlshapes>SDL Shapes for PostScript</A></H2>
 One example of user-defined node shapes is provided by Mark Rison of CSR.
 These are the <A  HREF=http://www.sdl-forum.org/SDL/index.htm>SDL</A> shapes.
 These are available as PostScript functions whose use is described in
-<A HREF="http://www.graphviz.org/Documentation/html/shapehowto.html#psprocs"> External PostScript procedures</A>.
+<A HREF="../../../faq/#ext_ps_proc"> External PostScript procedures</A>.
 The necessary PostScript library file and sample use can be found in the
 <tt>contrib/sdlshapes</tt> directory in the release. Please note the
 COPYRIGHT AND PERMISSION NOTICE contained in the library file <tt>sdl.ps</tt>.
@@ -1222,7 +1262,7 @@ The table below
 gives the shape names and the corresponding node shapes.
 <P>
 <CENTER>
-<IMG SRC=sdlshapes.jpg>
+<IMG SRC=sdlshapes.png>
 </CENTER>
 </BODY>
 </HTML>

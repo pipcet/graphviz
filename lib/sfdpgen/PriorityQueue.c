@@ -18,12 +18,6 @@
 #include "assert.h"
 #include "arith.h"
 
-#define MALLOC gmalloc
-#define REALLOC grealloc
-#define FREE free
-#define MEMCPY memcpy
-
-
 PriorityQueue PriorityQueue_new(int n, int ngain){
   PriorityQueue q;
   int i;
@@ -50,15 +44,15 @@ void PriorityQueue_delete(PriorityQueue q){
   if (q){
     if (q->buckets){
       for (i = 0; i < q->ngain+1; i++) DoubleLinkedList_delete((q->buckets)[i], free);
-      FREE(q->buckets);
+      free(q->buckets);
     }
 
     if (q->where){
-      FREE(q->where);
+      free(q->where);
     }
 
-    FREE(q->gain);
-    FREE(q);
+    free(q->gain);
+    free(q);
   }
 }
 

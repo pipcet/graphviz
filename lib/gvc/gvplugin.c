@@ -14,6 +14,14 @@
 #include "config.h"
 
 #include	<string.h>
+#include        <sys/types.h>
+#include        <sys/stat.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#else
+#include <compat_unistd.h>
+#endif
+
 #ifdef ENABLE_LTDL
 #include	<ltdl.h>
 #endif
@@ -48,7 +56,7 @@ static char *api_names[] = { APIS };    /* "render", "layout", ... */
 #undef ELEM
 
 /* translate a string api name to its type, or -1 on error */
-api_t gvplugin_api(char *str)
+api_t gvplugin_api(const char *str)
 {
     int api;
 
@@ -77,7 +85,12 @@ boolean gvplugin_install(GVC_t * gvc, api_t api, const char *typestr,
 {
     gvplugin_available_t *plugin, **pnext;
 #define TYPSIZ 63
-    char *p, pins[TYPSIZ + 1], pnxt[TYPSIZ + 1];
+    char *p, *t, pins[TYPSIZ + 1], pnxt[TYPSIZ + 1];
+
+    /* duplicate typestr to later save in the plugin list */
+    t = strdup(typestr);
+    if (t == NULL)
+        return FALSE;
 
     strncpy(pins, typestr, TYPSIZ);
     if ((p = strchr(pins, ':')))
@@ -111,7 +124,7 @@ boolean gvplugin_install(GVC_t * gvc, api_t api, const char *typestr,
     plugin = GNEW(gvplugin_available_t);
     plugin->next = *pnext;
     *pnext = plugin;
-    plugin->typestr = typestr;
+    plugin->typestr = t;
     plugin->quality = quality;
     plugin->package = package;
     plugin->typeptr = typeptr;  /* null if not loaded */
@@ -158,6 +171,7 @@ gvplugin_library_t *gvplugin_library_load(GVC_t * gvc, char *path)
     static int lenp;
     char *libdir;
     char *suffix = "_LTX_library";
+    struct stat sb;
 
     if (!gvc->common.demand_loading)
         return NULL;
@@ -189,7 +203,12 @@ gvplugin_library_t *gvplugin_library_load(GVC_t * gvc, char *path)
     }
     hndl = lt_dlopen(p);
     if (!hndl) {
-        agerr(AGWARN, "Could not load \"%s\" - %s\n", p, (char *) lt_dlerror());
+        if ((stat(p, &sb)) == 0) {
+            agerr(AGWARN, "Could not load \"%s\" - %s\n", p, "It was found, so perhaps one of its dependents was not.  Try ldd.");
+        }
+        else {
+            agerr(AGWARN, "Could not load \"%s\" - %s\n", p, (char *) lt_dlerror());
+        }
         return NULL;
     }
     if (gvc->common.verbose >= 2)
@@ -311,7 +330,7 @@ gvplugin_available_t *gvplugin_load(GVC_t * gvc, api_t api, const char *str)
         }
     }
 
-    /* one last check for successfull load */
+    /* one last check for successful load */
     if (rv && rv->typeptr == NULL)
         rv = NULL;
 

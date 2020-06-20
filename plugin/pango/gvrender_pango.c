@@ -2,7 +2,7 @@
 /* vim:set shiftwidth=4 ts=8: */
 
 /*************************************************************************
- * Copyright (c) 2011 AT&T Intellectual Property 
+ * Copyright (c) 2011 AT&T Intellectual Property
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,6 @@
 
 #include "gvplugin_pango.h"
 
-#ifdef HAVE_PANGOCAIRO
 #include <pango/pangocairo.h>
 
 typedef enum {
@@ -34,6 +33,7 @@ typedef enum {
 		FORMAT_PS,
 		FORMAT_PDF,
 		FORMAT_SVG,
+		FORMAT_EPS,
     } format_type;
 
 #define ARRAY_SIZE(A) (sizeof(A)/sizeof(A[0]))
@@ -64,7 +64,7 @@ static void cairogen_set_color(cairo_t * cr, gvcolor_t * color)
                         color->u.RGBA[2], color->u.RGBA[3]);
 }
 
-static void cairogen_add_color_stop_rgba(cairo_pattern_t *pat, double stop , gvcolor_t * color) 
+static void cairogen_add_color_stop_rgba(cairo_pattern_t *pat, double stop , gvcolor_t * color)
 {
   cairo_pattern_add_color_stop_rgba (pat, stop,color->u.RGBA[0], color->u.RGBA[1],
                         color->u.RGBA[2], color->u.RGBA[3]);
@@ -88,7 +88,7 @@ static void cairogen_begin_job(GVJ_t * job)
 static void cairogen_end_job(GVJ_t * job)
 {
     cairo_t *cr = (cairo_t *) job->context;
-    
+
     if (job->external_context)
         cairo_restore(cr);
     else {
@@ -109,9 +109,12 @@ static void cairogen_begin_page(GVJ_t * job)
     if (cr == NULL) {
         switch (job->render.id) {
         case FORMAT_PS:
+        case FORMAT_EPS:
 #ifdef CAIRO_HAS_PS_SURFACE
 	    surface = cairo_ps_surface_create_for_stream (writer,
 			job, job->width, job->height);
+            if (job->render.id == FORMAT_EPS)
+                cairo_ps_surface_set_eps (surface, TRUE);
 #endif
 	    break;
         case FORMAT_PDF:
@@ -137,7 +140,7 @@ static void cairogen_begin_page(GVJ_t * job)
 		job->scale.x *= scale;
 		job->scale.y *= scale;
                 fprintf(stderr,
-                        "%s: graph is too large for cairo-renderer bitmaps. Scaling by %g to fit\n", 
+                        "%s: graph is too large for cairo-renderer bitmaps. Scaling by %g to fit\n",
                         job->common->cmdname, scale);
 	    }
 	    surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32,
@@ -209,9 +212,40 @@ static void cairogen_end_page(GVJ_t * job)
 	    fprintf(stderr, "ERROR: cairo surface has zero area, this may indicate some problem during rendering shapes.\n");
  - jce */
 	}
-	job->imagedata = (char *)(cairo_image_surface_get_data(surface));	
+	job->imagedata = (char *)(cairo_image_surface_get_data(surface));
 	break;
        	/* formatting will be done by gvdevice_format() */
+    }
+}
+
+static void cairogen_begin_anchor(GVJ_t *job, char *url, char *tooltip, char *target, char *id)
+{
+    obj_state_t *obj = job->obj;
+    cairo_t *cr = (cairo_t *) job->context;
+    double p0x, p0y, p1x, p1y;
+    char *buf;
+    size_t buf_len;
+
+    if (url && obj->url_map_p) {
+       p0x = obj->url_map_p[0].x;
+       p0y = -obj->url_map_p[0].y;
+       cairo_user_to_device (cr, &p0x, &p0y);
+       p1x = obj->url_map_p[1].x;
+       p1y = -obj->url_map_p[1].y;
+       cairo_user_to_device (cr, &p1x, &p1y);
+       buf_len = strlen(url) + 200;
+       buf = malloc(buf_len);
+       snprintf(buf, buf_len, "rect=[%f %f %f %f] uri='%s'",
+                p0x,
+                p0y,
+                p1x - p0x,
+                p1y - p0y,
+                url);
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 16, 0)
+       cairo_tag_begin (cr, CAIRO_TAG_LINK, buf);
+       cairo_tag_end (cr, CAIRO_TAG_LINK);
+#endif
+       free(buf);
     }
 }
 
@@ -291,7 +325,7 @@ static void cairo_gradient_fill (cairo_t* cr, obj_state_t* obj, int filled, poin
 	    c1.x = G[0].x +  r1 * cos(angle);
 	    c1.y = G[0].y -  r1 * sin(angle);
 	}
-	pat = cairo_pattern_create_radial(c1.x,c1.y,r1,G[0].x,G[0].y,r2); 
+	pat = cairo_pattern_create_radial(c1.x,c1.y,r1,G[0].x,G[0].y,r2);
     }
     if (obj->gradient_frac > 0) {
 	cairogen_add_color_stop_rgba(pat,obj->gradient_frac - 0.001,&(obj->fillcolor));
@@ -426,7 +460,7 @@ static gvrender_engine_t cairogen_engine = {
     0,				/* cairogen_end_node */
     0,				/* cairogen_begin_edge */
     0,				/* cairogen_end_edge */
-    0,				/* cairogen_begin_anchor */
+    cairogen_begin_anchor,	/* cairogen_begin_anchor */
     0,				/* cairogen_end_anchor */
     0,				/* cairogen_begin_label */
     0,				/* cairogen_end_label */
@@ -458,7 +492,16 @@ static gvdevice_features_t device_features_png = {
 };
 
 static gvdevice_features_t device_features_ps = {
-    GVDEVICE_DOES_TRUECOLOR,    /* flags */
+    GVRENDER_NO_WHITE_BG
+      | GVDEVICE_DOES_TRUECOLOR,    /* flags */
+    {36.,36.},			/* default margin - points */
+    {0.,0.},                    /* default page width, height - points */
+    {72.,72.},			/* postscript 72 dpi */
+};
+
+static gvdevice_features_t device_features_eps = {
+    GVRENDER_NO_WHITE_BG
+      | GVDEVICE_DOES_TRUECOLOR,    /* flags */
     {36.,36.},			/* default margin - points */
     {0.,0.},                    /* default page width, height - points */
     {72.,72.},			/* postscript 72 dpi */
@@ -466,6 +509,9 @@ static gvdevice_features_t device_features_ps = {
 
 static gvdevice_features_t device_features_pdf = {
     GVDEVICE_BINARY_FORMAT
+      | GVRENDER_NO_WHITE_BG
+      | GVRENDER_DOES_MAPS
+      | GVRENDER_DOES_MAP_RECTANGLE
       | GVDEVICE_DOES_TRUECOLOR,/* flags */
     {36.,36.},			/* default margin - points */
     {0.,0.},                    /* default page width, height - points */
@@ -473,34 +519,31 @@ static gvdevice_features_t device_features_pdf = {
 };
 
 static gvdevice_features_t device_features_svg = {
-    GVDEVICE_DOES_TRUECOLOR,    /* flags */
+    GVRENDER_NO_WHITE_BG
+      | GVDEVICE_DOES_TRUECOLOR,    /* flags */
     {0.,0.},			/* default margin - points */
     {0.,0.},                    /* default page width, height - points */
     {72.,72.},			/* svg 72 dpi */
 };
-#endif
 
 gvplugin_installed_t gvrender_pango_types[] = {
-#ifdef HAVE_PANGOCAIRO
     {FORMAT_CAIRO, "cairo", 10, &cairogen_engine, &render_features_cairo},
-#endif
     {0, NULL, 0, NULL, NULL}
 };
 
 gvplugin_installed_t gvdevice_pango_types[] = {
-#ifdef HAVE_PANGOCAIRO
 #ifdef CAIRO_HAS_PNG_FUNCTIONS
     {FORMAT_PNG, "png:cairo", 10, NULL, &device_features_png},
 #endif
 #ifdef CAIRO_HAS_PS_SURFACE
     {FORMAT_PS, "ps:cairo", -10, NULL, &device_features_ps},
+    {FORMAT_EPS, "eps:cairo", -10, NULL, &device_features_eps},
 #endif
 #ifdef CAIRO_HAS_PDF_SURFACE
     {FORMAT_PDF, "pdf:cairo", 10, NULL, &device_features_pdf},
 #endif
 #ifdef CAIRO_HAS_SVG_SURFACE
     {FORMAT_SVG, "svg:cairo", -10, NULL, &device_features_svg},
-#endif
 #endif
     {0, NULL, 0, NULL, NULL}
 };

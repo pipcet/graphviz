@@ -1200,7 +1200,7 @@ static void init_mincross(graph_t * g)
     GlobalMaxRank = GD_maxrank(g);
 }
 
-void flat_rev(Agraph_t * g, Agedge_t * e)
+static void flat_rev(Agraph_t * g, Agedge_t * e)
 {
     int j;
     Agedge_t *rev;
@@ -1213,8 +1213,6 @@ void flat_rev(Agraph_t * g, Agedge_t * e)
 		break;
     if (rev) {
 	merge_oneway(e, rev);
-	if (ED_to_virt(e) == 0)
-	    ED_to_virt(e) = rev;
 	if ((ED_edge_type(rev) == FLATORDER)
 	    && (ED_to_orig(rev) == 0))
 	    ED_to_orig(rev) = e;
@@ -1367,7 +1365,7 @@ void install_in_rank(graph_t * g, node_t * n)
     if (GD_rank(g)[r].v + ND_order(n) >
 	GD_rank(g)[r].av + GD_rank(Root)[r].an) {
 	agerr(AGERR, "install_in_rank, line %d: GD_rank(g)[%d].v + ND_order(%s) [%d] > GD_rank(g)[%d].av + GD_rank(Root)[%d].an [%d]\n",
-	      __LINE__, r, agnameof(n),GD_rank(g)[r].v + ND_order(n), r, r, GD_rank(g)[r].av+GD_rank(Root)[r].an);
+	      __LINE__, r, agnameof(n),ND_order(n), r, r, GD_rank(Root)[r].an);
 	return;
     }
 }
@@ -1847,7 +1845,7 @@ static boolean medians(graph_t * g, int r0, int r1)
 		if (lspan == rspan)
 		    ND_mval(n) = (list[lm] + list[rm]) / 2;
 		else {
-		    int w = list[lm] * rspan + list[rm] * lspan;
+		    double w = list[lm] * (double)rspan + list[rm] * (double)lspan;
 		    ND_mval(n) = w / (lspan + rspan);
 		}
 	    }

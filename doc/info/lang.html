@@ -275,14 +275,13 @@ will translate from one character set to another.
 Another way to avoid non-ascii characters in labels is to use HTML entities
 for special characters. During label evaluation, these entities are
 translated into the underlying character. This
-<a HREF="http://www.graphviz.org/doc/char.html">
+<a HREF="https://www.graphviz.org/doc/char.html">
 table</a> shows the supported entities, with their Unicode value, a typical
 glyph, and the HTML entity name. Thus, to include a lower-case Greek beta
 into a string, one can use the ascii sequence <TT>&amp;beta;</TT>. 
 In general, one should only use entities that are allowed in the output
 character set, and for which there is a glyph in the font.
 <HR>
-<FONT size="2">
 <OL TYPE="1">
 <LI> In quoted strings in DOT, the only escaped character is double-quote
 ("). That is, in quoted strings, the dyad &#92;" is converted to "; all other
@@ -293,6 +292,5 @@ of HTML strings. The new lex-based scanner makes this difficult to implement. Gi
 perceived lack of usefulness of this generality, we have restricted this feature to
 double-quoted strings, where it can actually be helpful.
 </OL>
-</FONT>
 </BODY>
 </HTML>

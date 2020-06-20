@@ -456,7 +456,7 @@ static double getSegLen (char* s)
 
 /* parseSegs:
  * Parse string of form color;float:color;float:...:color;float:color
- * where the floats are optional, nonnegative, sum to <= 1.
+ * where the semicolon-floats are optional, nonnegative, sum to <= 1.
  * Store the values in an array of colorseg_t's and return the array in psegs.
  * If nseg == 0, count the number of colors.
  * If the sum of the floats does not equal 1, the remainder is equally distributed
@@ -514,7 +514,8 @@ parseSegs (char* clrs, int nseg, colorsegs_t** psegs)
 	}
 	else {
 	    if (doWarn) {
-		agerr (AGERR, "Illegal length value in \"%s\" color attribute ", clrs);
+		agerr (AGERR, "Illegal value in \"%s\" color attribute; float expected after ';'\n",
+                    clrs);
 		doWarn = 0;
 		rval = 2;
 	    }
@@ -1416,8 +1417,10 @@ static void init_job_pagination(GVJ_t * job, graph_t *g)
     job->pageBoundingBox.UR.x = ROUND(job->canvasBox.UR.x * job->dpi.x / POINTS_PER_INCH);
     job->pageBoundingBox.UR.y = ROUND(job->canvasBox.UR.y * job->dpi.y / POINTS_PER_INCH);
     if (job->rotation) {
-	job->pageBoundingBox.LL = exch_xy(job->pageBoundingBox.LL);
-	job->pageBoundingBox.UR = exch_xy(job->pageBoundingBox.UR);
+        job->pageBoundingBox.LL = exch_xy(job->pageBoundingBox.LL);
+        job->pageBoundingBox.UR = exch_xy(job->pageBoundingBox.UR);
+        job->canvasBox.LL = exch_xyf(job->canvasBox.LL);
+        job->canvasBox.UR = exch_xyf(job->canvasBox.UR);
     }
 }
 
@@ -1697,7 +1700,7 @@ static void setup_page(GVJ_t * job, graph_t * g)
     }
 
     /* CAUTION - job->translation was difficult to get right. */
-    /* Test with and without assymetric margins, e.g: -Gmargin="1,0" */
+    /* Test with and without assymmetric margins, e.g: -Gmargin="1,0" */
     if (job->rotation) {
 	job->translation.y = - job->clip.UR.y - job->canvasBox.LL.y / job->zoom;
         if ((job->flags & GVRENDER_Y_GOES_DOWN) || (Y_invert))
@@ -3722,7 +3725,7 @@ void emit_clusters(GVJ_t * job, Agraph_t * g, int flags)
 		pencolor = color;
 	    if (((color = agget(sg, "fillcolor")) != 0) && color[0])
 		fillcolor = color;
-	    /* bgcolor is supported for backward compatability 
+	    /* bgcolor is supported for backward compatibility 
 	       if fill is set, fillcolor trumps bgcolor, so
                don't bother checking.
                if gradient is set fillcolor trumps bgcolor
@@ -4228,7 +4231,7 @@ boolean findStopColor (char* colorlist, char* clrs[2], float* frac)
     rv = parseSegs (colorlist, 0, &segs);
     if (rv || (segs->numc < 2) || (segs->segs[0].color == NULL)) {
 	clrs[0] = NULL;
-	freeSegs (segs);
+	if (segs) freeSegs (segs);
 	return FALSE;
     }
 

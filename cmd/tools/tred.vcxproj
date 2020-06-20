@@ -41,7 +41,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\Graphviz\bin\</OutDir>
     <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
-    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -62,7 +62,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <EnablePREfast>true</EnablePREfast>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)windows\getopt;$(SolutionDir);$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\ingraphs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)windows\getopt;$(SolutionDir);$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\ingraphs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -70,18 +70,17 @@
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)windows\getopt</AdditionalLibraryDirectories>
-      <AdditionalDependencies>getopt.lib;cgraph.lib;ingraphs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>getopt.lib;cgraph.lib;gvc.lib;ingraphs.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;WIN32_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
       <EnablePREfast>true</EnablePREfast>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)windows\getopt;$(SolutionDir);$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\ingraphs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)windows\getopt;$(SolutionDir);$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\ingraphs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>No</GenerateDebugInformation>
@@ -91,7 +90,7 @@
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)windows\getopt</AdditionalLibraryDirectories>
-      <AdditionalDependencies>getopt.lib;cgraph.lib;ingraphs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>getopt.lib;cgraph.lib;gvc.lib;ingraphs.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

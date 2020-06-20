@@ -11,10 +11,17 @@ syntax: glob
 #*.so.*
 #*.soT
 #COPYING
-#doxygen
+
+doxygen
+
+*.cmake
+CMakeFiles
+CMakeCache.txt
 
 # product of: make dist
-graphviz*.tar.gz*
+graphviz-*.tar.gz
+VERSION
+COLLECTION
 
 lib/rxspencer/re
 lib/rxspencer/*.oo
@@ -54,7 +61,8 @@ Makefile.in
 /config.log
 /config.status
 /libtool
-/graphviz.spec
+/redhat/graphviz.spec.fedora
+/redhat/graphviz.spec.rhel
 /stamp-h1
 .deps
 Makefile
@@ -84,6 +92,9 @@ windows/build/graphviz.wxs
 *.la
 *.lo
 *.o
+*.a
+*.so
+*.so.*
 *.pdf
 !doc/**/*.pdf
 .libs
@@ -92,8 +103,12 @@ FEATURE/
 cmd/dot/dot_builtins
 cmd/gvedit/gvedit
 cmd/gvedit/attrs.txt
+cmd/gvedit/.qmake.stash
+cmd/gvedit/moc_predefs.h
+cmd/smyrna/gui/.dirstamp
 lib/rxspencer/regex.h
 tclpkg/**/pkgIndex.tcl
+tclpkg/gv/runtime.h
 tclpkg/gv/SWIGTYPE*
 tclpkg/gv/gv.3*
 tclpkg/gv/META.gv
@@ -104,10 +119,13 @@ tclpkg/gv/gv.cmo
 tclpkg/gv/gv.cmx
 tclpkg/gv/gv.cmxa
 tclpkg/gv/gv.cs
+tclpkg/gv/gv.d
+tclpkg/gv/gv_im.d
 tclpkg/gv/gv.go
 tclpkg/gv/gv_gc.c
 tclpkg/gv/gv_go.cpp
 tclpkg/gv/gv.java
+tclpkg/gv/gv.javascript
 tclpkg/gv/gv.ml
 tclpkg/gv/gv.mli
 tclpkg/gv/gv.php
@@ -116,6 +134,8 @@ tclpkg/gv/gv.py
 tclpkg/gv/gvJNI.java
 tclpkg/gv/gvPINVOKE.cs
 tclpkg/gv/gv_R.cpp
+tclpkg/gv/gv_d.cpp
+tclpkg/gv/gv_d.in
 tclpkg/gv/gv_guile.cpp
 tclpkg/gv/gv_java.cpp
 tclpkg/gv/gv_lua.cpp
@@ -123,6 +143,8 @@ tclpkg/gv/gv_ocaml.cpp
 tclpkg/gv/gv_perl.cpp
 tclpkg/gv/gv_php.cpp
 tclpkg/gv/gv_python.cpp
+tclpkg/gv/gv_python2.cpp
+tclpkg/gv/gv_python3.cpp
 tclpkg/gv/gv_ruby.cpp
 tclpkg/gv/gv_sharp.cpp
 tclpkg/gv/gv_tcl.cpp
@@ -144,6 +166,8 @@ lib/cgraph/grammar.h
 lib/cgraph/scan.c
 lib/common/brewer_lib
 lib/common/color_lib
+lib/common/color_lib-sort
+lib/common/color_lib-temp
 lib/common/colortbl.h
 lib/common/htmlparse.c
 lib/common/htmlparse.h
@@ -156,6 +180,7 @@ lib/graph/parser.c
 lib/graph/parser.h
 lib/gvpr/gdefs.h
 lib/gvpr/mkdefs
+lib/vpsc/pairingheap/.dirstamp
 plugin/core/ps.h
 plugin/lasi/ps.h
 plugin/xlib/vimdot
@@ -173,6 +198,7 @@ cmd/lefty/lefty
 cmd/lneato/lneato
 cmd/mingle/mingle
 cmd/smyrna/smyrna
+cmd/smyrna/smyrna_static
 cmd/tools/acyclic
 cmd/tools/bcomps
 cmd/tools/ccomps
@@ -224,7 +250,7 @@ lib/color_lib
 *.VC.opendb
 *.vcxproj.user
 
-# Do not ignore Windows MSI setup.exe untill a new MSI can be generated.
+# Do not ignore Windows MSI setup.exe until a new MSI can be generated.
 !windows/graphviz-msi/setup/Release/setup.exe
 
 # Don't ignore contents of windows/include
@@ -235,3 +261,12 @@ lib/color_lib
 
 # Python byte code
 *.pyc
+
+# Apple OS files
+.DS_Store
+
+# Xcode User Files
+**/xcuserdata/**
+
+# Python typechecking cache (MyPy)
+.mypy_cache/

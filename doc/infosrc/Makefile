@@ -2,14 +2,17 @@
 # Generator for on-line documentation.
 #
 # Required tools: cc, dot, awk, ksh, yacc, gs, python.
-#  gs and awk are used in ps_to_jpg.sh
 #  dot is used in mkarrows.sh, mkshapes.sh, mkstyles.sh, mktapers.sh, mksplines.sh
-#  ps_to_png.sh and other make rules rely on netpbm tools 
-#  and ps2raster, which is part of the GMT library.
+#  ps_to_png.sh and other make rules rely on netpbm tools.
 #  
-#  python is used to run jconvert.py, which converts the json schema
-#  graphviz_json_schema.json to html. This also relies on the python
-#  package json2html.
+#  Install python modules with:
+#  $ pip install --user -r requirements.txt
+#
+#  python is used to run:
+#  - jconvert.py, which converts the json schema graphviz_json_schema.json to html.
+#    This also relies on the python package json2html.
+#  - mkoutput.py, which converts templates/output.html.j2 to output.html
+#    This requires the jinja2 python package.
 #
 # The main product are 7 web pages:
 #    arrows.html  - arrow_grammar
@@ -32,8 +35,6 @@ XGIF = forward.gif back.gif both.gif nohead.gif
 
 MGIF = constraint.gif record.gif html1.gif html2.gif fill.gif round.gif \
        mrecord.gif html3.gif html4.gif colorlist.gif record2.gif fixed.gif tee.gif
-
-MJPG = sdlshapes.jpg
 
 GRADPNG = g_lin0.png g_wlin0.png g_rad0.png g_lin45.png g_wlin45.png g_rad45.png g_lin90.png g_wlin90.png g_rad90.png \
           g_lin180.png g_wlin180.png g_rad180.png g_lin270.png g_wlin270.png g_rad270.png g_lin360.png g_wlin360.png g_rad360.png
@@ -89,7 +90,7 @@ DOTS = html2.gv html3.gv html4.gv tee.gv
 HTML = attrs.html colors.html command.html lang.html output.html shapes.html \
        arrows.html schema.html
 MISC = graphviz_json_schema.json w3data.js
-INSTALL_FILES = $(HTML) $(DOTS) $(SGIF) $(AGIF) $(A2GIF) $(MGIF) $(XGIF) $(MJPG) $(MPNG) $(MISC)
+INSTALL_FILES = $(HTML) $(DOTS) $(SGIF) $(AGIF) $(A2GIF) $(MGIF) $(XGIF) $(MPNG) $(MISC)
 
 .SUFFIXES: .gv .gif .dot .png
 
@@ -102,8 +103,10 @@ INSTALL_FILES = $(HTML) $(DOTS) $(SGIF) $(AGIF) $(A2GIF) $(MGIF) $(XGIF) $(MJPG)
 .gv.png :
 	dot -Tpng -o $@ $<
 
+.PHONY: all
 all : $(HTML) $(GIF) $(MPNG) $(MJPG)
 
+.PHONY: install
 install : all
 	$(INSTALL) $(INSTALL_FILES) $(INSTALL_DIR)
 
@@ -113,19 +116,11 @@ record2.gif : record.dot
 sdlshapes.ps : sdlshapes.dot
 	dot -Tps -lsdl.ps sdlshapes.dot > sdlshapes.ps
 
-sdlshapes.ppm: sdlshapes.ps
-	ps2raster sdlshapes.ps -Tm -A -E800
-
-sdlshapes.jpg : sdlshapes.ppm
-	cat sdlshapes.ppm | pamscale .1 | pnmtojpeg >sdlshapes.jpg
-
 sdlshapes.png : sdlshapes.ps
 	./ps_to_png.sh sdlshapes.ps sdlshapes.png
 
-attrs.html : attrs.1 attrs types mkattrs.sh mktypes.sh
-	cat attrs.1 > attrs.html
-	./mkattrs.sh < attrs >> attrs.html
-	./mktypes.sh < types >> attrs.html
+attrs.html : attrs types mkattrs.py templates/attrs.html.j2
+	./mkattrs.py attrs types > $@
 
 colors.html : colors.1 colors.n ../../lib/common/color_names ../../lib/common/svgcolor_names ../../lib/common/brewer_colors mkcolors.awk brewer.awk svg.awk
 	mkdir -p colortmp
@@ -141,11 +136,12 @@ colors.html : colors.1 colors.n ../../lib/common/color_names ../../lib/common/sv
 	cat colors.n >> colors.html
 	rm -rf colortmp
 
-output.html : output.1 output.2 outputs mkoutput.sh plugins.png jconvert.py
-	cat output.1 > output.html
+
+output.html : outputs mkoutput.py plugins.png schema.html templates/output.html.j2
+	./mkoutput.py < outputs > output.html
+
+schema.html : jconvert.py graphviz_json_schema.json
 	./jconvert.py graphviz_json_schema.json schema.html
-	./mkoutput.sh < outputs >> output.html
-	cat output.2 >> output.html
 
 html.html : html.1 html_grammar html.2 html.3 html1.gif html2.gif html3.gif html4.gif mklang
 	./mklang html_grammar gramtmp
@@ -160,12 +156,8 @@ shapes : shapelist mkshapes.sh
 	./mkshapes.sh
 	touch shapes
  
-shapes.html : shapes shapes.1 mkshhtml.sh shapes.2 html.html shapes.3 record.gif record2.gif sdlshapes.png
-	cat shapes.1 > shapes.html
-	./mkshhtml.sh >> shapes.html
-	cat shapes.2 >> shapes.html
-	cat html.html >> shapes.html
-	cat shapes.3 >> shapes.html
+shapes.html : shapes mkshhtml.py html.html record.gif record2.gif sdlshapes.png templates/shapes.html.j2 shapelist
+	./mkshhtml.py html.html < shapelist > shapes.html
 
 lang.html : grammar lang.1 lang.2 mklang
 	./mklang grammar gramtmp
@@ -208,17 +200,19 @@ $(TAPERPNG) : mktapers.sh
 $(SPLINEPNG) : mksplines.sh
 	./mksplines.sh $@
 
+.PHONY: clean
 clean :
 	rm -f mklang sdlshapes.ps sdlshapes.ppm html.html
 
+.PHONY: distclean
 distclean : clean
-	rm -f attrs.html colors.html output.html shapes.html lang.html arrows.html
-	rm -f $(A2GIF) $(AGIF) $(SGIF) $(MJPG) $(MGIF) $(MPNG) shapes
+	rm -f attrs.html colors.html output.html shapes.html lang.html arrows.html schema.html
+	rm -f $(A2GIF) $(AGIF) $(SGIF) $(MPJG) $(MGIF) $(MPNG) $(XGIF) shapes
 	(for s in $$(cat shapelist); do rm -f $$s.gif; done)
 
-EXTRA_DIST = $(XGIF) mklang.y mkarrows.sh mkattrs.sh mkshapes.sh mkstyles.sh mktapers.sh \
-             mktypes.sh mkarrowtbl.sh mkoutput.sh mkshhtml.sh \
-	         ps_to_jpg.sh ps_to_png.sh arrow_grammar grammar html_grammar \
+EXTRA_DIST = $(XGIF) mklang.y mkarrows.sh mkattrs.py mkshapes.sh mkstyles.sh mktapers.sh \
+             mkarrowtbl.sh mkoutput.py mkshhtml.py \
+	           ps_to_png.sh arrow_grammar grammar html_grammar \
              shapelist attrs.1 colors.1 colors.n \
              output.1 output.2 html.1 html.2 html1.dot html.3 \
              shapes.1 shapes.2 shapes.3 lang.1 lang.2 arrows.1 arrows.2 \
@@ -226,4 +220,3 @@ EXTRA_DIST = $(XGIF) mklang.y mkarrows.sh mkattrs.sh mkshapes.sh mkstyles.sh mkt
              colorlist.dot html1.dot html4.dot round.dot constraint.dot \
              html2.dot mrecord.dot sdlshapes.dot fill.dot html3.dot record.dot \
              attrs types X11 outputs eqn.gif plugins.gv
-

@@ -228,9 +228,9 @@ static char* resolveColor (char* str)
     char* ss;   /* second slash */
     char* c2;   /* second char */
 
-    if ((*str == 'b') || !strncmp(str+1,"lack",4)) return str;
-    if ((*str == 'w') || !strncmp(str+1,"hite",4)) return str;
-    if ((*str == 'l') || !strncmp(str+1,"ightgrey",8)) return str;
+    if (!strcmp(str, "black")) return str;
+    if (!strcmp(str, "white")) return str;
+    if (!strcmp(str, "lightgrey")) return str;
     if (*str == '/') {   /* if begins with '/' */
 	c2 = str+1;
         if ((ss = strchr(c2, '/'))) {  /* if has second '/' */

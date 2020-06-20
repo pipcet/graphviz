@@ -32,6 +32,20 @@ $(SHARP_data): gv_sharp.cpp
 gv_sharp.cpp: gv.i
 	$(SWIG) -c++ -csharp -namespace gv -o gv_sharp.cpp $(srcdir)/gv.i
 
+pkgddir = $(pkglibdir)/d
+D_data = 
+nodist_libgv_d_la_SOURCES = gv_d.cpp $(D_data)
+libgv_d_la_SOURCES = $(BASESOURCES) gv_dummy_init.c
+libgv_d_la_LIBADD = $(BASELIBS) $(D_LIBS)
+libgv_d_la_LDFLAGS = -module -avoid-version
+libgv_d_la_CPPFLAGS = $(BASECPPFLAGS) $(D_INCLUDES)
+# $(D_data): gv_d.cpp
+gv_d.cpp: gv.i
+	$(SWIG) -c++ -d -o gv_d.cpp $(srcdir)/gv.i
+	mv $@ $@.orig
+	sed '/include/s/malloc\.h/cstdlib/' $@.orig > $@
+	rm $@.orig
+
 pkggodir = $(pkglibdir)/go
 GO_data = runtime.h gv.go
 nodist_libgv_go_la_SOURCES = gv_go.cpp runtime.h gv.go
@@ -106,6 +120,20 @@ $(JAVA_data): gv_java.cpp
 gv_java.cpp: gv.i
 	$(SWIG) -package org.graphviz -java -c++ -o gv_java.cpp $(srcdir)/gv.i
 
+pkgjavascriptdir = $(pkglibdir)/javascript
+JAVASCRIPT_data = 
+nodist_libgv_javascript_la_SOURCES = gv_javascript.cpp $(JAVASCRIPT_data)
+libgv_javascript_la_SOURCES = $(BASESOURCES) gv_dummy_init.c
+libgv_javascript_la_LIBADD = $(BASELIBS) $(JAVASCRIPT_LIBS)
+libgv_javascript_la_LDFLAGS = -module -avoid-version
+libgv_javascript_la_CPPFLAGS = $(BASECPPFLAGS) $(JAVASCRIPT_INCLUDES)
+# $(D_data): gv_javascript.cpp
+gv_javascript.cpp: gv.i
+	$(SWIG) -c++ -javascript -o gv_d.cpp $(srcdir)/gv.i
+	mv $@ $@.orig
+	sed '/include/s/malloc\.h/cstdlib/' $@.orig > $@
+	rm $@.orig
+
 pkgluadir = $(pkglibdir)/lua
 LUA_data = 
 nodist_libgv_lua_la_SOURCES = gv_lua.cpp $(LUA_data)
@@ -130,7 +158,11 @@ nodist_libgv_ocaml_la_SOURCES = gv_ocaml.cpp $(OCAML_data)
 libgv_ocaml_la_SOURCES = $(BASESOURCES) gv_dummy_init.c
 libgv_ocaml_la_LIBADD = $(BASELIBS) $(OCAML_LIBS)
 libgv_ocaml_la_LDFLAGS = -module -avoid-version
-libgv_ocaml_la_CPPFLAGS = $(BASECPPFLAGS) $(OCAML_INCLUDES) -Dint64=int64_t
+libgv_ocaml_la_CPPFLAGS = \
+	$(BASECPPFLAGS) \
+	$(OCAML_INCLUDES) \
+	-Dint64=int64_t \
+	-fpermissive
 gv.ml gv.mli: gv_ocaml.cpp
 gv_ocaml.cpp: gv.i
 	$(SWIG) -c++ -ocaml -o gv_ocaml.cpp $(srcdir)/gv.i
@@ -160,7 +192,8 @@ gv.a:	gv.cmxa
 pkgperldir = $(pkglibdir)/perl
 PERL        ?= perl
 # cleanup for opencsw's perl which adds flags that g++ doesn't like
-PERL_CC      = `$(PERL) -MExtUtils::Embed -e ccopts | $(PERL) -pe 's/-x.*? //g'`
+# use sed (because I don't know perl) to cleanup flags that clang doen't like
+PERL_CC      = `$(PERL) -MExtUtils::Embed -e ccopts | $(SED) 's/-fstack-clash-protection //g' | $(PERL) -pe 's/-x.*? //g'`
 PERL_LD      = `$(PERL) -MExtUtils::Embed -e ldopts`
 VENDOR_ARCH  = `$(PERL) -MConfig -e 'print $$Config{installvendorarch};'`
 PERL_data = gv.pm
@@ -171,7 +204,7 @@ libgv_perl_la_LDFLAGS = -module -avoid-version $(PERL_LD)
 libgv_perl_la_CPPFLAGS = $(BASECPPFLAGS) $(PERL_CC)
 $(PERL_data): gv_perl.cpp
 gv_perl.cpp: gv.i
-	$(SWIG) -c++ -perl -o gv_perl.cpp $(srcdir)/gv.i
+	$(SWIG) -c++ $(SWIG_PERL_OPT) -o gv_perl.cpp $(srcdir)/gv.i
 
 pkgphpdir = $(pkglibdir)/php
 PHP_data = gv.php
@@ -196,71 +229,27 @@ $(PYTHON_data): gv_python.cpp
 gv_python.cpp: gv.i
 	$(SWIG) -c++ -python -o gv_python.cpp $(srcdir)/gv.i
 
-pkgpython23dir = $(pkglibdir)/python23
-PYTHON23_data = gv.py
-nodist_libgv_python23_la_SOURCES = gv_python23.cpp $(PYTHON23_data)
-libgv_python23_la_SOURCES = $(BASESOURCES) gv_dummy_init.c
-libgv_python23_la_LIBADD = $(BASELIBS) $(PYTHON23_LIBS)
-libgv_python23_la_LDFLAGS = -module -avoid-version
-libgv_python23_la_CPPFLAGS = $(BASECPPFLAGS) $(PYTHON23_INCLUDES)
-# $(PYTHON23_data): gv_python23.cpp
-gv_python23.cpp: gv.i
-	$(SWIG) -c++ -python -classic -o gv_python23.cpp $(srcdir)/gv.i
+pkgpython2dir = $(pkglibdir)/python2
+PYTHON2_data = gv.py
+nodist_libgv_python2_la_SOURCES = gv_python2.cpp $(PYTHON2_data)
+libgv_python2_la_SOURCES = $(BASESOURCES) gv_dummy_init.c
+libgv_python2_la_LIBADD = $(BASELIBS) $(PYTHON2_LIBS)
+libgv_python2_la_LDFLAGS = -module -avoid-version
+libgv_python2_la_CPPFLAGS = $(BASECPPFLAGS) $(PYTHON2_INCLUDES)
+$(PYTHON2_data): gv_python2.cpp
+gv_python2.cpp: gv.i
+	$(SWIG) -c++ -python -o gv_python2.cpp $(srcdir)/gv.i
 
-pkgpython24dir = $(pkglibdir)/python24
-PYTHON24_data = gv.py
-nodist_libgv_python24_la_SOURCES = gv_python24.cpp $(PYTHON24_data)
-libgv_python24_la_SOURCES = $(BASESOURCES) gv_dummy_init.c
-libgv_python24_la_LIBADD = $(BASELIBS) $(PYTHON24_LIBS)
-libgv_python24_la_LDFLAGS = -module -avoid-version
-libgv_python24_la_CPPFLAGS = $(BASECPPFLAGS) $(PYTHON24_INCLUDES)
-# $(PYTHON24_data): gv_python24.cpp
-gv_python24.cpp: gv.i
-	$(SWIG) -c++ -python -classic -o gv_python24.cpp $(srcdir)/gv.i
-
-pkgpython25dir = $(pkglibdir)/python25
-PYTHON25_data = gv.py
-nodist_libgv_python25_la_SOURCES = gv_python25.cpp $(PYTHON25_data)
-libgv_python25_la_SOURCES = $(BASESOURCES) gv_dummy_init.c
-libgv_python25_la_LIBADD = $(BASELIBS) $(PYTHON25_LIBS)
-libgv_python25_la_LDFLAGS = -module -avoid-version
-libgv_python25_la_CPPFLAGS = $(BASECPPFLAGS) $(PYTHON25_INCLUDES)
-# $(PYTHON25_data): gv_python25.cpp
-gv_python25.cpp: gv.i
-	$(SWIG) -c++ -python -classic -o gv_python25.cpp $(srcdir)/gv.i
-
-pkgpython26dir = $(pkglibdir)/python26
-PYTHON26_data = gv.py
-nodist_libgv_python26_la_SOURCES = gv_python26.cpp $(PYTHON26_data)
-libgv_python26_la_SOURCES = $(BASESOURCES) gv_dummy_init.c
-libgv_python26_la_LIBADD = $(BASELIBS) $(PYTHON26_LIBS)
-libgv_python26_la_LDFLAGS = -module -avoid-version
-libgv_python26_la_CPPFLAGS = $(BASECPPFLAGS) $(PYTHON26_INCLUDES)
-# $(PYTHON26_data): gv_python26.cpp
-gv_python26.cpp: gv.i
-	$(SWIG) -c++ -python -o gv_python26.cpp $(srcdir)/gv.i
-
-pkgpython27dir = $(pkglibdir)/python27
-PYTHON27_data = gv.py
-nodist_libgv_python27_la_SOURCES = gv_python27.cpp $(PYTHON27_data)
-libgv_python27_la_SOURCES = $(BASESOURCES) gv_dummy_init.c
-libgv_python27_la_LIBADD = $(BASELIBS) $(PYTHON27_LIBS)
-libgv_python27_la_LDFLAGS = -module -avoid-version
-libgv_python27_la_CPPFLAGS = $(BASECPPFLAGS) $(PYTHON27_INCLUDES)
-# $(PYTHON27_data): gv_python27.cpp
-gv_python27.cpp: gv.i
-	$(SWIG) -c++ -python -o gv_python27.cpp $(srcdir)/gv.i
-
-pkgpython34dir = $(pkglibdir)/python34
-PYTHON34_data = gv.py
-nodist_libgv_python34_la_SOURCES = gv_python34.cpp $(PYTHON34_data)
-libgv_python34_la_SOURCES = $(BASESOURCES) gv_dummy_init.c
-libgv_python34_la_LIBADD = $(BASELIBS) $(PYTHON34_LIBS)
-libgv_python34_la_LDFLAGS = -module -avoid-version
-libgv_python34_la_CPPFLAGS = $(BASECPPFLAGS) $(PYTHON34_INCLUDES)
-# $(PYTHON34_data): gv_python34.cpp
-gv_python34.cpp: gv.i
-	$(SWIG) -c++ -python -o gv_python34.cpp $(srcdir)/gv.i
+pkgpython3dir = $(pkglibdir)/python3
+PYTHON3_data = gv.py
+nodist_libgv_python3_la_SOURCES = gv_python3.cpp $(PYTHON3_data)
+libgv_python3_la_SOURCES = $(BASESOURCES) gv_dummy_init.c
+libgv_python3_la_LIBADD = $(BASELIBS) $(PYTHON3_LIBS)
+libgv_python3_la_LDFLAGS = -module -avoid-version
+libgv_python3_la_CPPFLAGS = $(BASECPPFLAGS) $(PYTHON3_INCLUDES)
+$(PYTHON3_data): gv_python3.cpp
+gv_python3.cpp: gv.i
+	$(SWIG) -c++ -python -o gv_python3.cpp $(srcdir)/gv.i
 
 pkgRdir = $(pkglibdir)/R
 R_data = 
@@ -308,6 +297,13 @@ pdf_DATA += gv.3sharp.pdf
 pkgsharp_LTLIBRARIES = libgv_sharp.la
 DEVTSTS += test_sharp
 endif
+if WITH_D
+pkgd_DATA = $(D_data)
+#man_MANS += gv.3d
+#pdf_DATA += gv.3d.pdf
+pkgd_LTLIBRARIES = libgv_d.la
+#DEVTSTS += test_d
+endif
 if WITH_GO
 pkggo_DATA = $(GO_data)
 man_MANS += gv.3go
@@ -335,6 +331,13 @@ man_MANS += gv.3java
 pdf_DATA += gv.3java.pdf
 pkgjava_LTLIBRARIES = libgv_java.la
 DEVTSTS += test_java
+endif
+if WITH_JAVASCRIPT
+pkgd_DATA = $(JAVASCRIPT_data)
+#man_MANS += gv.3javascript
+#pdf_DATA += gv.3javascript.pdf
+pkgjavascript_LTLIBRARIES = libgv_javascript.la
+#DEVTSTS += test_javascript
 endif
 if WITH_LUA
 pkglua_DATA = $(LUA_data)
@@ -366,55 +369,21 @@ DEVTSTS += test_php
 endif
 if WITH_PYTHON
 pkgpython_DATA = $(PYTHON_data)
-py_mans = gv.3python
-py_data = gv.3python.pdf
 pkgpython_LTLIBRARIES = libgv_python.la
 DEVTSTS += test_python
 endif
-if WITH_PYTHON23
-pkgpython23_DATA = $(PYTHON23_data)
-py_mans = gv.3python
-py_data = gv.3python.pdf
-pkgpython23_LTLIBRARIES = libgv_python23.la
-#DEVTSTS += test_python23
+if WITH_PYTHON2
+pkgpython2_DATA = $(PYTHON2_data)
+pkgpython2_LTLIBRARIES = libgv_python2.la
+DEVTSTS += test_python2
 endif
-if WITH_PYTHON24
-pkgpython24_DATA = $(PYTHON24_data)
-py_mans = gv.3python
-py_data = gv.3python.pdf
-pkgpython24_LTLIBRARIES = libgv_python24.la
-#DEVTSTS += test_python24
+if WITH_PYTHON3
+pkgpython3_DATA = $(PYTHON3_data)
+pkgpython3_LTLIBRARIES = libgv_python3.la
+DEVTSTS += test_python3
 endif
-if WITH_PYTHON25
-pkgpython25_DATA = $(PYTHON25_data)
-py_mans = gv.3python
-py_data = gv.3python.pdf
-pkgpython25_LTLIBRARIES = libgv_python25.la
-#DEVTSTS += test_python25
-endif
-if WITH_PYTHON26
-pkgpython26_DATA = $(PYTHON26_data)
-py_mans = gv.3python
-py_data = gv.3python.pdf
-pkgpython26_LTLIBRARIES = libgv_python26.la
-#DEVTSTS += test_python26
-endif
-if WITH_PYTHON27
-pkgpython27_DATA = $(PYTHON27_data)
-py_mans = gv.3python
-py_data = gv.3python.pdf
-pkgpython27_LTLIBRARIES = libgv_python27.la
-#DEVTSTS += test_python27
-endif
-if WITH_PYTHON34
-pkgpython34_DATA = $(PYTHON34_data)
-py_mans = gv.3python
-py_data = gv.3python.pdf
-pkgpython34_LTLIBRARIES = libgv_python34.la
-#DEVTSTS += test_python34
-endif
-man_MANS += $(py_mans)
-pdf_DATA += $(py_data)
+man_MANS += gv.3python
+pdf_DATA += gv.3python.pdf
 if WITH_R
 pkgR_DATA = $(R_data)
 man_MANS += gv.3r
@@ -447,51 +416,88 @@ man = gv.3sharp gv.3go gv.3guile gv.3io gv.3java gv.3lua gv.3ocaml \
 	gv.3perl gv.3php gv.3python gv.3r gv.3ruby gv.3tcl
 
 pdf = gv.3sharp.pdf gv.3go.pdf gv.3guile.pdf gv.3io.pdf gv.3java.pdf gv.3lua.pdf \
-      gv.3ocaml.pdf gv.3perl.pdf gv.3php.pdf gv.3python.pdf gv.3r.pdf \
-      gv.3ruby.pdf gv.3tcl.pdf
-
+      gv.3ocaml.pdf gv.3perl.pdf gv.3php.pdf gv.3python.pdf gv.3r.pdf gv.3ruby.pdf gv.3tcl.pdf
 
 $(man): gv.i gv_doc_writer.tcl gv_doc_template.tcl gv_doc_langs.tcl
 	$(TCLSH) $(srcdir)/gv_doc_writer.tcl "$(srcdir)"
 
-gv.3sharp.pdf: gv.3sharp
-	- $(GROFF) -Tps -man gv.3sharp | $(PS2PDF) - - >gv.3sharp.pdf
+gv.3sharp.pdf: gv.3sharp.ps
+	@PS2PDF@ $< $@
 
-gv.3go.pdf: gv.3go
-	- $(GROFF) -Tps -man gv.3go | $(PS2PDF) - - >gv.3go.pdf
+gv.3sharp.ps: gv.3sharp
+	@GROFF@ -Tps -man $< >$@
 
-gv.3guile.pdf: gv.3guile
-	- $(GROFF) -Tps -man gv.3guile | $(PS2PDF) - - >gv.3guile.pdf
+gv.3go.pdf: gv.3go.ps
+	@PS2PDF@ $< $@
 
-gv.3io.pdf: gv.3io
-	- $(GROFF) -Tps -man gv.3io | $(PS2PDF) - - >gv.3io.pdf
+gv.3go.ps: gv.3go
+	@GROFF@ -Tps -man $< >$@
 
-gv.3java.pdf: gv.3java
-	- $(GROFF) -Tps -man gv.3java | $(PS2PDF) - - >gv.3java.pdf
+gv.3guile.pdf: gv.3guile.ps
+	@PS2PDF@ $< $@
 
-gv.3lua.pdf: gv.3lua
-	- $(GROFF) -Tps -man gv.3lua | $(PS2PDF) - - >gv.3lua.pdf
+gv.3guile.ps: gv.3guile
+	@GROFF@ -Tps -man $< >$@
 
-gv.3ocaml.pdf: gv.3ocaml
-	- $(GROFF) -Tps -man gv.3ocaml | $(PS2PDF) - - >gv.3ocaml.pdf
+gv.3io.pdf: gv.3io.ps
+	@PS2PDF@ $< $@
 
-gv.3perl.pdf: gv.3perl
-	- $(GROFF) -Tps -man gv.3perl | $(PS2PDF) - - >gv.3perl.pdf
+gv.3io.ps: gv.3io
+	@GROFF@ -Tps -man $< >$@
 
-gv.3php.pdf: gv.3php
-	- $(GROFF) -Tps -man gv.3php | $(PS2PDF) - - >gv.3php.pdf
+gv.3java.pdf: gv.3java.ps
+	@PS2PDF@ $< $@
 
-gv.3python.pdf: gv.3python
-	- $(GROFF) -Tps -man gv.3python | $(PS2PDF) - - >gv.3python.pdf
+gv.3java.ps: gv.3java
+	@GROFF@ -Tps -man $< >$@
 
-gv.3r.pdf: gv.3r
-	- $(GROFF) -Tps -man gv.3r | $(PS2PDF) - - >gv.3r.pdf
+gv.3lua.pdf: gv.3lua.ps
+	@PS2PDF@ $< $@
 
-gv.3ruby.pdf: gv.3ruby
-	- $(GROFF) -Tps -man gv.3ruby | $(PS2PDF) - - >gv.3ruby.pdf
+gv.3lua.ps: gv.3lua
+	@GROFF@ -Tps -man $< >$@
 
-gv.3tcl.pdf: gv.3tcl
-	- $(GROFF) -Tps -man gv.3tcl | $(PS2PDF) - - >gv.3tcl.pdf
+gv.3ocaml.pdf: gv.3ocaml.ps
+	@PS2PDF@ $< $@
+
+gv.3ocaml.ps: gv.3ocaml
+	@GROFF@ -Tps -man $< >$@
+
+gv.3perl.pdf: gv.3perl.ps
+	@PS2PDF@ $< $@
+
+gv.3perl.ps: gv.3perl
+	@GROFF@ -Tps -man $< >$@
+
+gv.3php.pdf: gv.3php.ps
+	@PS2PDF@ $< $@
+
+gv.3php.ps: gv.3php
+	@GROFF@ -Tps -man $< >$@
+
+gv.3python.pdf: gv.3python.ps
+	@PS2PDF@ $< $@
+
+gv.3python.ps: gv.3python
+	@GROFF@ -Tps -man $< >$@
+
+gv.3r.pdf: gv.3r.ps
+	@PS2PDF@ $< $@
+
+gv.3r.ps: gv.3r
+	@GROFF@ -Tps -man $< >$@
+
+gv.3ruby.pdf: gv.3ruby.ps
+	@PS2PDF@ $< $@
+
+gv.3ruby.ps: gv.3ruby
+	@GROFF@ -Tps -man $< >$@
+
+gv.3tcl.pdf: gv.3tcl.ps
+	@PS2PDF@ $< $@
+
+gv.3tcl.ps: gv.3tcl
+	@GROFF@ -Tps -man $< >$@
 
 install-data-hook:
 if WITH_JAVA
@@ -509,23 +515,11 @@ endif
 if WITH_PYTHON
 	(cd $(DESTDIR)$(pkgpythondir); rm -f _gv.so; $(LN_S) libgv_python.so _gv.so;)
 endif
-if WITH_PYTHON23
-	(cd $(DESTDIR)$(pkgpython23dir); rm -f _gv.so; $(LN_S) libgv_python23.so _gv.so;)
+if WITH_PYTHON2
+	(cd $(DESTDIR)$(pkgpython2dir); rm -f _gv.so; $(LN_S) libgv_python2.so _gv.so;)
 endif
-if WITH_PYTHON24
-	(cd $(DESTDIR)$(pkgpython24dir); rm -f _gv.so; $(LN_S) libgv_python24.so _gv.so;)
-endif
-if WITH_PYTHON25
-	(cd $(DESTDIR)$(pkgpython25dir); rm -f _gv.so; $(LN_S) libgv_python25.so _gv.so;)
-endif
-if WITH_PYTHON26
-	(cd $(DESTDIR)$(pkgpython26dir); rm -f _gv.so; $(LN_S) libgv_python26.so _gv.so;)
-endif
-if WITH_PYTHON27
-	(cd $(DESTDIR)$(pkgpython27dir); rm -f _gv.so; $(LN_S) libgv_python27.so _gv.so;)
-endif
-if WITH_PYTHON34
-	(cd $(DESTDIR)$(pkgpython34dir); rm -f _gv.so; $(LN_S) libgv_python34.so _gv.so;)
+if WITH_PYTHON3
+	(cd $(DESTDIR)$(pkgpython3dir); rm -f _gv.so; $(LN_S) libgv_python3.so _gv.so;)
 endif
 if WITH_R
 	(cd $(DESTDIR)$(pkgRdir);   rm -f gv.so;  $(LN_S) libgv_R.so gv.so;)
@@ -614,6 +608,20 @@ test_python: libgv_python.la
 		ln -fs ../$(srcdir)/*.gv ../$(srcdir)/*.py .; \
 		PYTHONPATH=. $(PYTHON) test.py)
 
+.PHONY: test_python2
+test_python2: libgv_python2.la
+	-(mkdir -p test_python2; cd test_python2; \
+		ln -fs ../.libs/libgv_python2.so _gv.so; \
+		ln -fs ../$(srcdir)/*.gv ../$(srcdir)/*.py .; \
+		PYTHONPATH=. $(PYTHON2) test.py)
+
+.PHONY: test_python3
+test_python3: libgv_python3.la
+	-(mkdir -p test_python3; cd test_python3; \
+		ln -fs ../.libs/libgv_python3.so _gv.so; \
+		ln -fs ../$(srcdir)/*.gv ../$(srcdir)/*.py .; \
+		PYTHONPATH=. $(PYTHON3) test.py)
+
 .PHONY: test_R
 test_R: libgv_R.la
 	-(mkdir -p test_R; cd test_R; \
@@ -648,15 +656,12 @@ CLEANFILES = test_*/* pkgIndex.tcl \
 	gv_perl.cpp $(PERL_data) \
 	gv_php.cpp $(PHP_data) \
 	gv_python.cpp $(PYTHON_data) gv.pyc \
-	gv_python23.cpp $(PYTHON23_data) gv.pyc \
-	gv_python24.cpp $(PYTHON24_data) gv.pyc \
-	gv_python25.cpp $(PYTHON25_data) gv.pyc \
-	gv_python26.cpp $(PYTHON26_data) gv.pyc \
-	gv_python27.cpp $(PYTHON27_data) gv.pyc \
-	gv_python34.cpp $(PYTHON34_data) gv.pyc \
+	gv_python2.cpp $(PYTHON2_data) gv.pyc \
+	gv_python3.cpp $(PYTHON3_data) gv.pyc \
 	gv_R.cpp $(R_data) \
 	gv_ruby.cpp $(RUBY_data) \
 	gv_tcl.cpp $(TCL_data) pkgIndex.tcl
 
-DISTCLEANFILES = gv_*.n gv_*.pdf
-
+DISTCLEANFILES = gv_*.n gv_*.pdf gv.3sharp.ps gv.3go.ps gv.3guile.ps \
+	gv.3io.ps gv.3java.ps gv.3lua.ps gv.3ocaml.ps gv.3perl.ps gv.3php.ps \
+	gv.3python.ps gv.3r.ps gv.3ruby.ps gv.3tcl.ps

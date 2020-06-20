@@ -1,5 +1,3 @@
-# $Id$ $Revision$
-
 # Process this file with autoconf to produce a configure script
 # Try to use version available on FC8
 AC_PREREQ(2.61)
@@ -13,6 +11,9 @@ dnl Set Graphviz version information
 #	graphviz_version_micro
 #	graphviz_collection
 #	graphviz_version_date
+#	graphviz_change_date
+#	graphviz_author_name
+#	graphviz_author_email
 #	graphviz_version_commit
 m4_include(./version.m4)
 
@@ -28,6 +29,11 @@ GRAPHVIZ_COLLECTION=graphviz_collection()
 # NB: date/time of last commit - or "0"
 GRAPHVIZ_VERSION_DATE=graphviz_version_date()
 
+GRAPHVIZ_GIT_DATE=graphviz_git_date()
+GRAPHVIZ_AUTHOR_NAME=graphviz_author_name()
+GRAPHVIZ_AUTHOR_EMAIL=graphviz_author_email()
+GRAPHVIZ_CHANGE_DATE=graphviz_change_date()
+
 # NB: git commit hash of last commit
 GRAPHVIZ_VERSION_COMMIT=graphviz_version_commit()
 
@@ -37,6 +43,10 @@ AC_SUBST([GRAPHVIZ_VERSION_MAJOR])
 AC_SUBST([GRAPHVIZ_VERSION_MINOR])
 AC_SUBST([GRAPHVIZ_VERSION_MICRO])
 AC_SUBST([GRAPHVIZ_VERSION_DATE])
+AC_SUBST([GRAPHVIZ_GIT_DATE])
+AC_SUBST([GRAPHVIZ_AUTHOR_NAME])
+AC_SUBST([GRAPHVIZ_AUTHOR_EMAIL])
+AC_SUBST([GRAPHVIZ_CHANGE_DATE])
 AC_SUBST([GRAPHVIZ_VERSION_COMMIT])
 AC_SUBST([GRAPHVIZ_COLLECTION])
 AC_SUBST([GRAPHVIZ_SOURCES])
@@ -106,13 +116,14 @@ AC_SUBST([GRAPHVIZ_VERSION_REVISION])
 
 AC_ARG_VAR(LIBPOSTFIX, [subscript to lib, e.g. "/64" for "/usr/lib/64" on Solaris])
 AC_ARG_VAR(INTGOSIZE, [integer size for go, 32 or 64])
+AC_ARG_VAR(RUBY_VER, [version number of the ruby package])
 
 INTGOSIZE=32
 if test -z "$LIBPOSTFIX"; then
   case "${host_os}" in
     *linux* )
       case "${host_cpu}" in
-        aarch64 | powerpc64 | powerpc64le | s390x | x86_64 | sparc64 )
+        aarch64 | powerpc64 | powerpc64le | s390x | x86_64 | sparc64 | mips64* | riscv64 )
           LIBPOSTFIX="64"
           INTGOSIZE=64
           ;;
@@ -137,10 +148,7 @@ case "${host_os}" in
   *uwin* )
 	UWIN=yes
 	DEFAULT_FONTPATH="C:/WINDOWS/FONTS;C:/WINNT/Fonts;C:/winnt/fonts"
-	CFLAGS="${CFLAGS} -DMSWIN32"
-	CXXFLAGS="${CXXFLAGS} -DMSWIN32"
 	PATHSEPARATOR=";"
-        NO_POSTSCRIPT_ALIAS=1
 	BROWSER="xdg-open"
 	JSHEXT=so
 	;;
@@ -148,8 +156,6 @@ case "${host_os}" in
 	CYGWIN=yes
 	DEFAULT_FONTPATH="C:/WINDOWS/FONTS;C:/WINNT/Fonts;C:/winnt/fonts"
 	PATHSEPARATOR=";"
-        NO_POSTSCRIPT_ALIAS=1
-	AC_DEFINE(NO_POSTSCRIPT_ALIAS,1,[Alias PostScript font names to URW type 1 fonts])
 	BROWSER="xdg-open"
 	JSHEXT=so
 	;;
@@ -157,7 +163,6 @@ case "${host_os}" in
 	MINGW32=yes
 	DEFAULT_FONTPATH="C:/WINDOWS/FONTS;C:/WINNT/Fonts;C:/winnt/fonts"
 	PATHSEPARATOR=":"
-        NO_POSTSCRIPT_ALIAS=1
 	BROWSER="xdg-open"
 	JSHEXT=so
 	;;
@@ -166,7 +171,6 @@ case "${host_os}" in
 	AC_DEFINE_UNQUOTED(DARWIN,1,[Define for any Darwin-based OS.])
 	DEFAULT_FONTPATH="~/Library/Fonts:/Library/Fonts:/Network/Library/Fonts:/System/Library/Fonts"
 	PATHSEPARATOR=":"
-        NO_POSTSCRIPT_ALIAS=1
 	BROWSER="open"
 	JSHEXT=jnilib
 	AC_DEFINE_UNQUOTED(DARWIN_DYLIB,"$DARWIN_DYLIB",[Define for Darwin-style shared library names.])
@@ -184,7 +188,6 @@ case "${host_os}" in
   * ) # This sucks!  Whatever happened to standards for file system layout?   (Good job its no longer used unless fontconfig is unavailable.)
 	DEFAULT_FONTPATH="/usr/share/fonts/sun/TrueType:/usr/share/fonts/TrueType:/usr/X11/lib/X11/fonts/TrueType:/usr/share/fonts/sun/Type1:/usr/openwin/lib/X11/fonts/Type1:/usr/share/fonts/X11/Type1:/usr/share/fonts/default/Type1:/usr/X11R6/lib/X11/fonts/TrueType:/usr/X11R6/lib/X11/fonts/truetype:/usr/X11R6/lib/X11/fonts/TTF:/usr/share/fonts/truetype:/usr/openwin/lib/X11/fonts/TrueType:/usr/X11R6/lib/X11/fonts/Type1:/usr/common/share/fonts/ttf";
 	PATHSEPARATOR=":"
-        NO_POSTSCRIPT_ALIAS=0
 	BROWSER="xdg-open"
 	JSHEXT=so
 	;;
@@ -199,7 +202,6 @@ AC_SUBST([JNI_EXTRA_LDFLAGS])
 AC_SUBST([JSHEXT])
 AC_DEFINE_UNQUOTED(DEFAULT_FONTPATH,"$DEFAULT_FONTPATH",[Path to TrueType fonts.])
 AC_DEFINE_UNQUOTED(PATHSEPARATOR,"$PATHSEPARATOR",[Path separator character.])
-AC_DEFINE_UNQUOTED(NO_POSTSCRIPT_ALIAS,$NO_POSTSCRIPT_ALIAS,[Postscript fontnames.])
 AM_CONDITIONAL(WITH_WIN32, [test "x$UWIN" = "xyes" -o "x$CYGWIN" = "xyes" -o "x$MINGW32" = "xyes"])
 AM_CONDITIONAL(WITH_DARWIN9, [test "x$DARWIN9" = "xyes"])
 
@@ -207,7 +209,7 @@ DEFAULT_DPI=96
 AC_DEFINE_UNQUOTED(DEFAULT_DPI,$DEFAULT_DPI,Default DPI.)
 AC_DEFINE_UNQUOTED(BROWSER,"$BROWSER",[Command to open a browser on a URL])
 
-AM_INIT_AUTOMAKE([no-define])
+AM_INIT_AUTOMAKE([no-define subdir-objects])
 
 # Suppress verbose compile lines
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -235,7 +237,7 @@ fi
 # ALL_LINGUAS=""
 
 dnl -----------------------------------
-# Static/Shared binaries 
+# Static/Shared binaries
 
 AC_ARG_ENABLE(static,
         [AS_HELP_STRING([--enable-static],[build static executable])])
@@ -292,7 +294,7 @@ AC_ARG_WITH(tclsh,
   TCLSH=$withval,)
 
 if test "x$TCLSH" = "x"; then
-  AC_PATH_PROGS(TCLSH,[tclsh8.6 tclsh8.5 tclsh8.4 tclsh8.3 tclsh])
+  AC_PATH_PROGS(TCLSH,[tclsh8.6 tclsh8.5 tclsh8.4 tclsh8.3 tclsh],[],[/usr/bin])
 #  if test "x$TCLSH" = "x"; then
 #    AC_MSG_ERROR([Unable to find a tclsh. Tclsh is a required program for building graphviz, independent of wether tcl-based graphviz products are built])
 #    use_tcl="No (tclsh unavailable)"
@@ -317,10 +319,10 @@ if [test "${GCC}" == "yes"]
 then
   # Enable common warnings flags
   CFLAGS="${CFLAGS} -Wall"
-  
+
   # Enable common extra flags
   CFLAGS="${CFLAGS} -Wextra"
-  
+
   # Enable specific warning flags not included by -Wall or -Wextra
   CFLAGS="${CFLAGS} -Wmissing-include-dirs -Wswitch-default -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wconversion -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs"
 
@@ -406,12 +408,37 @@ fi
 AM_CONDITIONAL(RC_IS_RC, [test "x$RC" = "xrc"])
 AM_CONDITIONAL(RC_IS_WINDRES, [test "x$RC" = "xwindres"])
 
+# debug
+AC_ARG_ENABLE([debug],
+	AS_HELP_STRING([--enable-debug],[Compile the debug version (default: disabled)]),
+	[enable_debug=$enableval],
+	[enable_debug=no])
+AM_CONDITIONAL([DEBUG], [test $enable_debug = "yes"])
+if test "x$enable_debug" = "xyes"; then
+  changequote({,})
+  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O[0-9s]*//g'`
+  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O[0-9s]*//g'`
+  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-g//g'`
+  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-g//g'`
+  changequote([,])
+  dnl add -O0 only if GCC or ICC is used
+  if test "$GCC" = "yes" || test "$ICC" = "yes"; then
+    CFLAGS="$CFLAGS -g -O0 -Wall"
+    CXXFLAGS="$CXXFLAGS -g -O0 -Wall"
+  fi
+fi
+
 dnl -----------------------------------
 dnl Check for various typedefs and provide substitutes if they do not exist.
 
 AC_TYPE_PID_T
 AC_TYPE_SSIZE_T
 AC_TYPE_UID_T
+
+AC_CHECK_TYPES([
+	off64_t,
+	struct stat64,
+])
 
 dnl -----------------------------------
 dnl Checks for header files
@@ -423,9 +450,6 @@ AC_CHECK_HEADERS(malloc.h \
 	sys/time.h sys/types.h sys/select.h \
 	sys/stat.h sys/mman.h sys/vfork.h \
 	sys/ioctl.h sys/inotify.h crt_externs.h)
-AC_HEADER_TIME
-AC_HEADER_DIRENT
-AC_HEADER_STDBOOL
 
 # Internationalization macros
 # AM_GNU_GETTEXT
@@ -439,7 +463,7 @@ AC_SUBST([MATH_LIBS])
 
 # Check for functions that might need -lm
 LIBS="$LIBS $MATH_LIBS"
-AC_CHECK_FUNCS([log2 sincos])
+AC_CHECK_FUNCS([sincos])
 
 LIBS=$save_LIBS
 
@@ -447,7 +471,8 @@ LIBS=$save_LIBS
 
 # Checks for library functions
 AC_CHECK_FUNCS([lrand48 drand48 srand48 setmode setenv getenv \
-	cbrt vsnprintf _NSGetEnviron mallopt mallinfo mstats getpagesize])
+	cbrt vsnprintf _NSGetEnviron mallopt mallinfo mstats getpagesize \
+  ftruncate lseek64 stat64 vfork unlink waitpid select])
 
 AC_REPLACE_FUNCS([strcasecmp strncasecmp strcasestr])
 
@@ -547,21 +572,22 @@ else
     use_swig="No (swig not available)"
   else
     SWIG_VERSION=`$SWIG -version 2>&1 | $EGREP Version | cut -d ' ' -f 3`
+    AC_SUBST([SWIG_VERSION])
     SWIG_VERSION_MAJOR=`echo $SWIG_VERSION | cut -d '.' -f 1`
     SWIG_VERSION_MINOR=`echo $SWIG_VERSION | cut -d '.' -f 2`
     SWIG_VERSION_MICRO=`echo $SWIG_VERSION | cut -d '.' -f 3`
     if test $SWIG_VERSION_MAJOR -lt 2; then
       if test $SWIG_VERSION_MAJOR -lt 1; then
-	SWIG=
+        SWIG=
       else
         if test $SWIG_VERSION_MINOR -lt 3; then
-	  SWIG=
-	else
+          SWIG=
+        else
           # EL5 has swig-1.3.29 which does not define SWIGJAVA
-	  if test $SWIG_VERSION_MICRO -lt 40; then
+          if test $SWIG_VERSION_MICRO -lt 40; then
             SWIGJAVA_CPPFLAGS=-DSWIGJAVA
             AC_SUBST([SWIGJAVA_CPPFLAGS])
-	  fi
+          fi
         fi
       fi
     fi
@@ -571,7 +597,7 @@ else
     else
       use_swig="Yes"
     fi
-fi
+  fi
 fi
 AM_CONDITIONAL(WITH_SWIG, [test "x$SWIG" != "x"])
 
@@ -607,14 +633,59 @@ fi
 AM_CONDITIONAL(WITH_SHARP, [test "x$use_sharp" = "xYes"])
 
 dnl -----------------------------------
+dnl INCLUDES and LIBS for D (disabled by default - incomplete)
+
+AC_ARG_ENABLE(d,
+  [AS_HELP_STRING([--enable-d=no],[d language bindings])],
+  [], [enable_d=no])
+
+if test "x$enable_d" != "xyes"; then
+  use_d="No (disabled by default - incomplete"
+else
+  if test "x$use_swig" != "xYes"; then
+    use_d="No (swig not available)"
+  else
+    if test `$SWIG -help 2>&1 | $EGREP -c '\-d* *- Generate'` = 0 ; then
+      use_d="No (swig does not support -d option)"
+    else
+      AC_CHECK_PROG(D,gdc,ldc)
+      if test "x$D" = "x"; then
+        use_d="No (D compiler not available)"
+      else
+        D_INCLUDES=
+#        D_INSTALL_DIR="/usr/lib${LIBPOSTFIX}/d/modules"
+#        D_INSTALL_DATADIR="/usr/share/d"
+        D_LIBS=
+#        save_CPPFLAGS=$CPPFLAGS
+#        CPPFLAGS="$CPPFLAGS $D_INCLUDES"
+#        AC_CHECK_HEADER(d.h,,[
+#          use_d="No (missing header)"
+#          D=
+#        ])
+#        CPPFLAGS=$save_CPPFLAGS
+	if test "x$D" != "x"; then
+	  use_d="Yes"
+#          AC_SUBST([D_INSTALL_DATADIR])
+#          AC_SUBST([D_INSTALL_DIR])
+          AC_SUBST([D_INCLUDES])
+          AC_SUBST([D_LIBS])
+          AC_SUBST([INTDSIZE])
+        fi
+      fi
+    fi
+  fi
+fi
+AM_CONDITIONAL(WITH_D, [test "x$use_d" = "xYes"])
+
+dnl -----------------------------------
 dnl INCLUDES and LIBS for GO
 
 AC_ARG_ENABLE(go,
-  [AS_HELP_STRING([--enable-go=no],[go language bindings])],
-  [], [enable_go=no])
+  [AS_HELP_STRING([--enable-go=yes],[go language bindings])],
+  [], [enable_go=yes])
 
 if test "x$enable_go" != "xyes"; then
-  use_go="No (disabled by default - experimental)"
+  use_go="No (disabled)"
 else
   if test "x$use_swig" != "xYes"; then
     use_go="No (swig not available)"
@@ -721,7 +792,7 @@ fi
 AM_CONDITIONAL(WITH_GUILE, [test "x$use_guile" = "xYes"])
 
 dnl -----------------------------------
-dnl INCLUDES and LIBS for IO   (disbled until supported by swig)
+dnl INCLUDES and LIBS for IO   (disabled until supported by swig)
 
 AC_ARG_ENABLE(io,
   [AS_HELP_STRING([--enable-io=no],[io language bindings])],
@@ -815,6 +886,51 @@ fi
 AM_CONDITIONAL(WITH_JAVA, [test "x$use_java" = "xYes"])
 
 dnl -----------------------------------
+dnl INCLUDES and LIBS for JAVASCRIPT (disabled by default - incomplete)
+
+AC_ARG_ENABLE(javascript,
+  [AS_HELP_STRING([--enable-javascript=no],[d language bindings])],
+  [], [enable_javascript=no])
+
+if test "x$enable_javascript" != "xyes"; then
+  use_javascript="No (disabled by default - incomplete"
+else
+  if test "x$use_swig" != "xYes"; then
+    use_javascript="No (swig not available)"
+  else
+    if test `$SWIG -help 2>&1 | $EGREP -c '\-javascript* *- Generate'` = 0 ; then
+      use_javascript="No (swig does not support -javascript option)"
+    else
+      AC_CHECK_PROG(JAVASCRIPT,js,js)
+      if test "x$JAVASCRIPT" = "x"; then
+        use_javascript="No (JAVASCRIPT compiler not available)"
+      else
+        JAVASCRIPT_INCLUDES=
+#        JAVASCRIPT_INSTALL_DIR="/usr/lib${LIBPOSTFIX}/javascript/modules"
+#        JAVASCRIPT_INSTALL_DATADIR="/usr/share/javascript"
+        JAVASCRIPT_LIBS=
+#        save_CPPFLAGS=$CPPFLAGS
+#        CPPFLAGS="$CPPFLAGS $JAVASCRIPT_INCLUDES"
+#        AC_CHECK_HEADER(javascript.h,,[
+#          use_javascript="No (missing header)"
+#          JAVASCRIPT=
+#        ])
+#        CPPFLAGS=$save_CPPFLAGS
+	if test "x$D" != "x"; then
+	  use_javascript="Yes"
+#          AC_SUBST([JAVASCRIPT_INSTALL_DATADIR])
+#          AC_SUBST([JAVASCRIPT_INSTALL_DIR])
+          AC_SUBST([JAVASCRIPT_INCLUDES])
+          AC_SUBST([JAVASCRIPT_LIBS])
+          AC_SUBST([INTJAVASCRIPTSIZE])
+        fi
+      fi
+    fi
+  fi
+fi
+AM_CONDITIONAL(WITH_JAVASCRIPT, [test "x$use_javascript" = "xYes"])
+
+dnl -----------------------------------
 dnl INCLUDES and LIBS for LUA
 
 AC_ARG_ENABLE(lua,
@@ -837,13 +953,13 @@ else
         ac_save_CPPFLAGS="$CPPFLAGS"
         ac_save_CFLAGS="$CFLAGS"
         ac_save_LDFLAGS="$LDFLAGS"
-    
+
         AC_CHECK_PROG(LUA,lua,lua)
-    
+
         LUA_INCLUDES=""
         LUA_LIBS=""
         LUA_INSTALL_DIR=""
-    
+
         if test -n "$lua_inc"; then
            CFLAGS="$CFLAGS -I$lua_inc"
            CPPFLAGS="$CPPFLAGS -I$lua_inc"
@@ -851,32 +967,30 @@ else
         if test -n "$lua_lib"; then
            LDFLAGS="$LDFLAGS -L$lua_lib"
         fi
-    
+
         if test "x$LUA_INCLUDES" = "x" -a "x$LUA_LIBS" = "x" ; then
-            PKGCONFIG=""
-            AC_CHECK_PROGS(PKGCONFIG, pkg-config)
-            if test "x$PKGCONFIG" != "x"; then
+            if test "x$PKG_CONFIG" != "x"; then
 	        AC_MSG_CHECKING(for Lua headers and libraries with pkg-config)
 	        echo
-	        for l in "$lua_suffix" "" "52" "5.2" "51" "5.1" "50" "5.0" ; do
-	            pkgconfig_lua_found=`$PKGCONFIG --exists lua$l 2>/dev/null`
+	        for l in "$lua_suffix" "" "53" "5.3" "52" "5.2" "51" "5.1" "50" "5.0" ; do
+	            pkgconfig_lua_found=`$PKG_CONFIG --exists lua$l 2>/dev/null`
 	            if test "x$?" = "x0" ; then
-		        LUA_VERSION=`$PKGCONFIG --modversion lua$l`
-                        LUA_INCLUDES="$LUA_CFLAGS "`$PKGCONFIG --cflags lua$l`
-                        LUA_LIBS="$LUA_LFLAGS "`$PKGCONFIG --libs lua$l`
-		        LUA_INSTALL_DIR="/usr/lib$LIBPOSTFIX/lua/`$PKGCONFIG --variable=V lua`"
-    
-		        pkgconfig_lualib_found=`$PKGCONFIG --exists lualib$l 2>/dev/null`
+		        LUA_VERSION=`$PKG_CONFIG --modversion lua$l`
+                        LUA_INCLUDES="$LUA_CFLAGS "`$PKG_CONFIG --cflags lua$l`
+                        LUA_LIBS="$LUA_LFLAGS "`$PKG_CONFIG --libs lua$l`
+		        LUA_INSTALL_DIR="/usr/lib$LIBPOSTFIX/lua/`$PKG_CONFIG --variable=V lua`"
+
+		        pkgconfig_lualib_found=`$PKG_CONFIG --exists lualib$l 2>/dev/null`
 		        if test  "x$?" = "x0"; then
-		           LUA_INCLUDES="$LUA_CFLAGS "`$PKGCONFIG --cflags lualib$l`
-		           LUA_LIBS="$LUA_LFLAGS "`$PKGCONFIG --libs lualib$l`
+		           LUA_INCLUDES="$LUA_CFLAGS "`$PKG_CONFIG --cflags lualib$l`
+		           LUA_LIBS="$LUA_LFLAGS "`$PKG_CONFIG --libs lualib$l`
 		        fi
                         break
                     fi
                 done
             fi
         fi
-    
+
         if test "x$LUA_INCLUDES" = "x" -o "x$LUA_LIBS" = "x" ; then
             LUACONFIG=""
             AC_CHECK_PROGS(LUACONFIG, lua-config lua-config52 lua-config5.2 lua-config51 lua-config5.1 lua-config50 lua-config5.0)
@@ -889,7 +1003,7 @@ else
 	        LUA_INSTALL_DIR="/usr/lib$LIBPOSTFIX/lua/5.0"
             fi
         fi
-    
+
         if test "x$LUA_INCLUDES" = "x" -o "x$LUA_LIBS" = "x" ; then
             AC_MSG_CHECKING(for Lua headers and libraries)
 	    echo
@@ -902,33 +1016,33 @@ else
                 AC_CHECK_LIB(lua$l,lua_call,ac_found_lua_lib="yes",ac_found_lua_lib="no")
                 if test "x$ac_found_lua_lib" = "xyes" ; then
 	            LUA_VERSION=">=5.1.0"
-    
+
 	            LUA_LIBS="$LDFLAGS -llua$l -lm"
-    
+
 		    ac2_save_LDFLAGS="$LDFLAGS"
 		    LDFLAGS="$LDFLAGS -llua$l -lm"
-    
+
 		    if echo "$host_os" | grep "^linux" 1>/dev/null 2>&1 ; then
 		       LDFLAGS="$LDFLAGS -ldl"
 		    fi
-    
+
 		    AC_CHECK_LIB(lualib$l,luaL_openlib,ac_found_liblua_lib="yes",ac_found_liblua_lib="no")
 		    if test "x$ac_found_liblua_lib" = "xyes" ; then
 		       LUA_VERSION="5.0.x"
-    
+
 		       LUA_LIBS="$LUA_LFLAGS -llualib$l"
-    
+
 		       if echo "$host_os" | grep "^linux" 1>/dev/null 2>&1 ; then
 		          LUA_LIBS="$LUA_LFLAGS -ldl"
 		       fi
 		    fi
-    
+
 		    LDFLAGS="$ac2_save_LDFLAGS"
 		    break
 	        fi
             done
         fi
-    
+
         AC_MSG_CHECKING(for Lua compiling and linking)
         LUA_TEST=`LT=luatest.c ; echo "#include <lua.h>" > $LT;  echo "#include <lualib.h>" >> $LT; echo "int main() { return 0; }" >> $LT ; $CC -Wall $LT -o $LT.out $LUA_INCLUDES $LUA_LIBS $CFLAGS $LDFLAGS 1>/dev/null 2>&1 ; echo $?; rm -f $LT $LT.out 1>/dev/null 2>&1`
         if test "x$LUA_TEST" != "x0" ; then
@@ -1009,8 +1123,13 @@ else
   if test "x$use_swig" != "xYes"; then
     use_perl="No (swig not available)"
   else
-    if test `$SWIG -help 2>&1 | $EGREP -c '\-perl *- Generate'` = 0; then
-      use_perl="No (swig does not support -perl option)"
+    if test `$SWIG -perl5 2>&1 | $EGREP -c '(Unable|No target)'` -eq 1; then
+      SWIG_PERL_OPT='-perl'
+    else
+      SWIG_PERL_OPT='-perl5'
+    fi
+    if test `$SWIG -help 2>&1 | $EGREP -c "(-perl|-perl5) *- Generate"` = 0; then
+      use_perl="No (swig does not support -perl or -perl5 option)"
     else
       AC_CHECK_PROG(PERL,perl,perl)
       if test "x$PERL" = "x"; then
@@ -1043,6 +1162,7 @@ else
 	  AC_SUBST([PERL_INCLUDES])
           AC_SUBST([PERL_LIBS])
 	  AC_SUBST([PERL_INSTALL_DIR])
+	  AC_SUBST([SWIG_PERL_OPT])
         fi
       fi
     fi
@@ -1063,8 +1183,8 @@ else
   if test "x$use_swig" != "xYes"; then
     use_php="No (swig not available)"
   else
-    if test `$SWIG -php7 2>&1 | $EGREP -c 'Unable'` -eq 1; then
-      if test `$SWIG -php5 2>&1 | $EGREP -c 'Unable'` -eq 1; then
+    if test `$SWIG -php7 2>&1 | $EGREP -c '(Unable|No target)'` -eq 1; then
+      if test `$SWIG -php5 2>&1 | $EGREP -c '(Unable|No target)'` -eq 1; then
         SWIG_PHP_OPT='-php'
       else
         SWIG_PHP_OPT='-php5'
@@ -1072,40 +1192,37 @@ else
     else
       SWIG_PHP_OPT='-php7'
     fi
-    if test `$SWIG -help 2>&1 | $EGREP -c '\-php5* *- Generate'` = 0 ; then
-      use_php="No (swig does not support -php or -php5 option)"
+    if test `$SWIG -help 2>&1 | $EGREP -c "(-php|-php5|-php7) *- Generate"` = 0 ; then
+      use_php="No (swig does not support -php or -php5 or -php7 option)"
     else
-      AC_CHECK_PROGS(PHP,php7,php,php5)
+      AC_CHECK_PROGS(PHP,php7.2,php7,php,php5)
       if test "x$PHP" = "x"; then
         use_php="No (php not available)"
       else
-        if test -d /usr/include/php7; then
-          PHP_INCLUDES="-I/usr/include/php7 -I/usr/include/php7/main -I/usr/include/php7/Zend -I/usr/include/php7/TSRM"
+        AC_CHECK_PROGS(PHPCONFIG,${PHP}-config,php-config)
+        if test "x$PHPCONFIG" = "x"; then
+          use_php="No (php-config not available)"
         else
-          if test -d /usr/include/php5; then
-            PHP_INCLUDES="-I/usr/include/php5 -I/usr/include/php5/main -I/usr/include/php5/Zend -I/usr/include/php5/TSRM"
-          else
-            PHP_INCLUDES="-I/usr/include/php -I/usr/include/php/main -I/usr/include/php/TSRM -I/usr/include/php/Zend -I/usr/include/php/ext -I/usr/include/php/ext/date/lib"
-          fi
+          PHP_INCLUDES="`$PHPCONFIG --includes`"
+          PHP_INSTALL_DIR="`$PHPCONFIG --extension-dir`"
+          PHP_INSTALL_DATADIR="/usr/share/php"
+          PHP_LIBS="`$PHPCONFIG --ldflags` `$PHPCONFIG --libs`"
+          save_CPPFLAGS=$CPPFLAGS
+          CPPFLAGS="$CPPFLAGS $PHP_INCLUDES"
+          AC_CHECK_HEADER(php.h,,[
+            use_php="No (missing header)"
+            PHP=
+          ])
+          CPPFLAGS=$save_CPPFLAGS
         fi
-        PHP_INSTALL_DIR="/usr/lib${LIBPOSTFIX}/php/modules"
-        PHP_INSTALL_DATADIR="/usr/share/php"
-        PHP_LIBS=
-        save_CPPFLAGS=$CPPFLAGS
-        CPPFLAGS="$CPPFLAGS $PHP_INCLUDES"
-        AC_CHECK_HEADER(php.h,,[
-          use_php="No (missing header)"
-          PHP=
-        ])
-        CPPFLAGS=$save_CPPFLAGS
-	if test "x$PHP" != "x"; then
-	  use_php="Yes"
-          AC_SUBST([PHP_INSTALL_DATADIR])
-          AC_SUBST([PHP_INSTALL_DIR])
-          AC_SUBST([PHP_INCLUDES])
-          AC_SUBST([PHP_LIBS])
-          AC_SUBST([SWIG_PHP_OPT])
-        fi
+      fi
+      if test "x$PHP" != "x"; then
+	    use_php="Yes"
+        AC_SUBST([PHP_INCLUDES])
+        AC_SUBST([PHP_INSTALL_DIR])
+        AC_SUBST([PHP_INSTALL_DATADIR])
+        AC_SUBST([PHP_LIBS])
+        AC_SUBST([SWIG_PHP_OPT])
       fi
     fi
   fi
@@ -1153,7 +1270,7 @@ else
       if test "x$PYTHON" = "x"; then
 	use_python="No (python is too old)"
       else
-        PYTHON_PREFIX=`$PYTHON -c "import sys; print sys.prefix"`
+        PYTHON_PREFIX=`$PYTHON -c "import sys; print(sys.prefix)"`
         PYTHON_INCLUDES=-I$PYTHON_PREFIX/include/python$PYTHON_VERSION_SHORT
 #        PYTHON_LIBS="-lpython$PYTHON_VERSION_SHORT"
 	PYTHON_LIBS="-undefined dynamic_lookup"
@@ -1178,386 +1295,147 @@ fi
 AM_CONDITIONAL(WITH_PYTHON, [test "x$use_python" = "xYes"])
 
 dnl -----------------------------------
-dnl INCLUDES and LIBS for PYTHON23
+dnl INCLUDES and LIBS for PYTHON2
 
-AC_ARG_ENABLE(python23,
-  [AS_HELP_STRING([--enable-python23=no],[python23 language bindings])],
-  [], [enable_python23=no])
+AC_ARG_ENABLE(python2,
+  [AS_HELP_STRING([--enable-python2=yes],[python2 language bindings])],
+  [], [enable_python2=yes])
 
-if test "x$enable_python23" != "xyes"; then
-  use_python23="No (disabled by default - for multiversion installs)"
+if test "x$enable_python2" != "xyes"; then
+  use_python2="No (disabled)"
 else
   if test "x$use_swig" != "xYes"; then
-    use_python23="No (swig not available)"
+    use_python2="No (swig not available)"
   else
     if test `$SWIG -help 2>&1 | $EGREP -c '\-python *- Generate'` = 0; then
-      use_python23="No (swig does not support -python option)"
+      use_python="No (swig does not support -python option)"
     else
-      AC_CHECK_PROG(PYTHON23,python2.3,python2.3)
-      if test "x$PYTHON23" = "x"; then
-        use_python23="No (python23 not available)"
+      AC_CHECK_PROG(PYTHON2,python2,python2)
+      if test "x$PYTHON2" = "x"; then
+        use_python2="No (python2 not available)"
       else
-        PYTHON23_VERSION=`$PYTHON23 -V 2>&1 | $EGREP Python | cut -d ' ' -f 2`
-        if test "x$PYTHON23_VERSION" = "x"; then
-          PYTHON23=
+        PYTHON2_VERSION=`$PYTHON2 -c "import sys; print('%d.%d' % sys.version_info[[0:2]])"`
+        if test "x$PYTHON2_VERSION" = "x"; then
+          PYTHON2=
         else
-          PYTHON23_VERSION_MAJOR=`echo $PYTHON23_VERSION | cut -d '.' -f 1`
-          PYTHON23_VERSION_MINOR=`echo $PYTHON23_VERSION | cut -d '.' -f 2`
-          PYTHON23_VERSION_SHORT=$PYTHON23_VERSION_MAJOR.$PYTHON23_VERSION_MINOR
-          if test $PYTHON23_VERSION_MAJOR -lt 3; then
-            if test $PYTHON23_VERSION_MAJOR -lt 2; then
-	      PYTHON23=
+          PYTHON2_VERSION_MAJOR=`echo $PYTHON2_VERSION | cut -d '.' -f 1`
+          PYTHON2_VERSION_MINOR=`echo $PYTHON2_VERSION | cut -d '.' -f 2`
+          PYTHON2_VERSION_SHORT=$PYTHON2_VERSION_MAJOR.$PYTHON2_VERSION_MINOR
+          if test $PYTHON2_VERSION_MAJOR -lt 3; then
+            if test $PYTHON2_VERSION_MAJOR -lt 2; then
+	      PYTHON2=
             else
-              if test $PYTHON23_VERSION_MINOR -lt 3; then
-	        PYTHON23=
+              if test $PYTHON2_VERSION_MINOR -lt 3; then
+	        PYTHON2=
               fi
             fi
           fi
         fi
       fi
-      if test "x$PYTHON23" = "x"; then
-	use_python23="No (python2.3 is too old)"
+      if test "x$PYTHON2" = "x"; then
+	    use_python2="No (python2 is too old)"
       else
-        PYTHON23_PREFIX=`$PYTHON23 -c "import sys; print sys.prefix"`
-        PYTHON23_INCLUDES=-I$PYTHON23_PREFIX/include/python$PYTHON23_VERSION_SHORT
-        PYTHON23_LIBS="-lpython$PYTHON_VERSION_SHORT"
-        PYTHON23_INSTALL_DIR="`$PYTHON23 $srcdir/config/config_python.py archsitelib`"
+        if test "x$PKG_CONFIG" != "x"; then
+          AC_MSG_CHECKING(for Python2 headers and libraries with pkg-config)
+          echo
+          pkgconfig_python2_found=`$PKG_CONFIG --exists python-$PYTHON2_VERSION 2>/dev/null`
+          if test "x$?" = "x0" ; then
+               PYTHON2_INCLUDES="$PYTHON2_CFLAGS "`$PKG_CONFIG --cflags python-$PYTHON2_VERSION`
+               PYTHON2_LIBS="$PYTHON2_LFLAGS "`$PKG_CONFIG --libs python-$PYTHON2_VERSION`
+          else
+	           use_python2="No (python-$PYTHON2_VERSION.pc not found)"
+	           PYTHON2=
+          fi
+        fi
+        PYTHON2_PREFIX=`$PYTHON2 -c "import sys; print(sys.prefix)"`
+        PYTHON2_INSTALL_DIR="`$PYTHON2 $srcdir/config/config_python.py archsitelib`"
         save_CPPFLAGS=$CPPFLAGS
-        CPPFLAGS="$CPPFLAGS $PYTHON23_INCLUDES"
-        AC_CHECK_HEADER(Python.h,,[
-          use_python23="No (missing header)"
-          PYTHON23=
-        ])
         CPPFLAGS=$save_CPPFLAGS
-	if test "x$PYTHON23" != "x"; then
-	  use_python23="Yes"
-          AC_SUBST([PYTHON23_INSTALL_DIR])
-          AC_SUBST([PYTHON23_INCLUDES])
-          AC_SUBST([PYTHON23_LIBS])
+	if test "x$PYTHON2" != "x"; then
+	  use_python2="Yes"
+          AC_SUBST([PYTHON2_INSTALL_DIR])
+          AC_SUBST([PYTHON2_INCLUDES])
+          AC_SUBST([PYTHON2_LIBS])
         fi
       fi
     fi
   fi
 fi
-AM_CONDITIONAL(WITH_PYTHON23, [test "x$use_python23" = "xYes"])
+AM_CONDITIONAL(WITH_PYTHON2, [test "x$use_python2" = "xYes"])
 
 dnl -----------------------------------
-dnl INCLUDES and LIBS for PYTHON24
+dnl INCLUDES and LIBS for PYTHON3
 
-AC_ARG_ENABLE(python24,
-  [AS_HELP_STRING([--enable-python24=no],[python24 language bindings])],
-  [], [enable_python24=no])
+AC_ARG_ENABLE(python3,
+  [AS_HELP_STRING([--enable-python3=yes],[python3 language bindings])],
+  [], [enable_python3=yes])
 
-if test "x$enable_python24" != "xyes"; then
-  use_python24="No (disabled by default - for multiversion installs)"
+if test "x$enable_python3" != "xyes"; then
+  use_python3="No (disabled)"
 else
   if test "x$use_swig" != "xYes"; then
-    use_python24="No (swig not available)"
+    use_python3="No (swig not available)"
   else
     if test `$SWIG -help 2>&1 | $EGREP -c '\-python *- Generate'` = 0; then
-      use_python24="No (swig does not support -python option)"
+      use_python="No (swig does not support -python option)"
     else
-      AC_CHECK_PROG(PYTHON24,python2.4,python2.4)
-      if test "x$PYTHON24" = "x"; then
-        use_python24="No (python24 not available)"
+      AC_CHECK_PROG(PYTHON3,python3,python3)
+      if test "x$PYTHON3" = "x"; then
+        use_python3="No (python3 not available)"
       else
-        PYTHON24_VERSION=`$PYTHON24 -V 2>&1 | $EGREP Python | cut -d ' ' -f 2`
-        if test "x$PYTHON24_VERSION" = "x"; then
-          PYTHON24=
+        PYTHON3_VERSION=`$PYTHON3 -c "import sys; print('%d.%d' % sys.version_info[[0:2]])"`
+        if test "x$PYTHON3_VERSION" = "x"; then
+          PYTHON3=
         else
-          PYTHON24_VERSION_MAJOR=`echo $PYTHON24_VERSION | cut -d '.' -f 1`
-          PYTHON24_VERSION_MINOR=`echo $PYTHON24_VERSION | cut -d '.' -f 2`
-          PYTHON24_VERSION_SHORT=$PYTHON24_VERSION_MAJOR.$PYTHON24_VERSION_MINOR
-          if test $PYTHON24_VERSION_MAJOR -lt 3; then
-            if test $PYTHON24_VERSION_MAJOR -lt 2; then
-	      PYTHON24=
+          PYTHON3_VERSION_MAJOR=`echo $PYTHON3_VERSION | cut -d '.' -f 1`
+          PYTHON3_VERSION_MINOR=`echo $PYTHON3_VERSION | cut -d '.' -f 2`
+          PYTHON3_VERSION_SHORT=$PYTHON3_VERSION_MAJOR.$PYTHON3_VERSION_MINOR
+          if test $PYTHON3_VERSION_MAJOR -lt 3; then
+            if test $PYTHON3_VERSION_MAJOR -lt 2; then
+	      PYTHON3=
             else
-              if test $PYTHON24_VERSION_MINOR -lt 4; then
-	        PYTHON24=
+              if test $PYTHON3_VERSION_MINOR -lt 3; then
+	        PYTHON3=
               fi
             fi
           fi
         fi
       fi
-      if test "x$PYTHON24" = "x"; then
-	use_python24="No (python2.4 is too old)"
+      if test "x$PYTHON3" = "x"; then
+	use_python3="No (python3 is too old)"
+	PYTHON3=
       else
-        PYTHON24_PREFIX=`$PYTHON24 -c "import sys; print sys.prefix"`
-        PYTHON24_INCLUDES=-I$PYTHON24_PREFIX/include/python$PYTHON24_VERSION_SHORT
-        PYTHON24_LIBS="-lpython$PYTHON_VERSION_SHORT"
-        PYTHON24_INSTALL_DIR="`$PYTHON24 $srcdir/config/config_python.py archsitelib`"
-        save_CPPFLAGS=$CPPFLAGS
-        CPPFLAGS="$CPPFLAGS $PYTHON24_INCLUDES"
-        AC_CHECK_HEADER(Python.h,,[
-          use_python24="No (missing header)"
-          PYTHON24=
-        ])
-        CPPFLAGS=$save_CPPFLAGS
-	if test "x$PYTHON24" != "x"; then
-	  use_python24="Yes"
-          AC_SUBST([PYTHON24_INSTALL_DIR])
-          AC_SUBST([PYTHON24_INCLUDES])
-          AC_SUBST([PYTHON24_LIBS])
-        fi
-      fi
-    fi
-  fi
-fi
-AM_CONDITIONAL(WITH_PYTHON24, [test "x$use_python24" = "xYes"])
-
-dnl -----------------------------------
-dnl INCLUDES and LIBS for PYTHON25
-
-AC_ARG_ENABLE(python25,
-  [AS_HELP_STRING([--enable-python25=no],[python25 language bindings])],
-  [], [enable_python25=no])
-
-if test "x$enable_python25" != "xyes"; then
-  use_python25="No (disabled by default - for multiversion installs)"
-else
-  if test "x$use_swig" != "xYes"; then
-    use_python25="No (swig not available)"
-  else
-    if test `$SWIG -help 2>&1 | $EGREP -c '\-python *- Generate'` = 0; then
-      use_python25="No (swig does not support -python option)"
-    else
-      AC_CHECK_PROG(PYTHON25,python2.5,python2.5)
-      if test "x$PYTHON25" = "x"; then
-        use_python25="No (python25 not available)"
-      else
-        PYTHON25_VERSION=`$PYTHON25 -V 2>&1 | $EGREP Python | cut -d ' ' -f 2`
-        if test "x$PYTHON25_VERSION" = "x"; then
-          PYTHON25=
-        else
-          PYTHON25_VERSION_MAJOR=`echo $PYTHON25_VERSION | cut -d '.' -f 1`
-          PYTHON25_VERSION_MINOR=`echo $PYTHON25_VERSION | cut -d '.' -f 2`
-          PYTHON25_VERSION_SHORT=$PYTHON25_VERSION_MAJOR.$PYTHON25_VERSION_MINOR
-          if test $PYTHON25_VERSION_MAJOR -lt 3; then
-            if test $PYTHON25_VERSION_MAJOR -lt 2; then
-	      PYTHON25=
-            else
-              if test $PYTHON25_VERSION_MINOR -lt 5; then
-	        PYTHON25=
-              fi
-            fi
+        if test "x$PKG_CONFIG" != "x"; then
+          AC_MSG_CHECKING(for Python3 headers and libraries with pkg-config)
+          echo
+          pkgconfig_python3_found=`$PKG_CONFIG --exists python-$PYTHON3_VERSION 2>/dev/null`
+          if test "x$?" = "x0" ; then
+               PYTHON3_INCLUDES="$PYTHON3_CFLAGS "`$PKG_CONFIG --cflags python-$PYTHON3_VERSION`
+               PYTHON3_LIBS="$PYTHON3_LFLAGS "`$PKG_CONFIG --libs python-$PYTHON3_VERSION`
+          else
+	           use_python3="No (python-$PYTHON3_VERSION.pc not found)"
           fi
         fi
-      fi
-      if test "x$PYTHON25" = "x"; then
-	use_python25="No (python2.5 is too old)"
-      else
-        PYTHON25_PREFIX=`$PYTHON25 -c "import sys; print sys.prefix"`
-        PYTHON25_INCLUDES=-I$PYTHON25_PREFIX/include/python$PYTHON25_VERSION_SHORT
-        PYTHON24_LIBS="-lpython$PYTHON_VERSION_SHORT"
-        PYTHON25_INSTALL_DIR="`$PYTHON25 $srcdir/config/config_python.py archsitelib`"
+        PYTHON3_PREFIX=`$PYTHON3 -c "import sys; print(sys.prefix)"`
+        PYTHON3_INSTALL_DIR="`$PYTHON3 $srcdir/config/config_python.py archsitelib`"
         save_CPPFLAGS=$CPPFLAGS
-        CPPFLAGS="$CPPFLAGS $PYTHON25_INCLUDES"
+        CPPFLAGS="$CPPFLAGS $PYTHON3_INCLUDES"
         AC_CHECK_HEADER(Python.h,,[
-          use_python25="No (missing header)"
-          PYTHON25=
+          use_python3="No (missing header)"
+          PYTHON3=
         ])
         CPPFLAGS=$save_CPPFLAGS
-	if test "x$PYTHON25" != "x"; then
-	  use_python25="Yes"
-          AC_SUBST([PYTHON25_INSTALL_DIR])
-          AC_SUBST([PYTHON25_INCLUDES])
-          AC_SUBST([PYTHON25_LIBS])
+	if test "x$PYTHON3" != "x"; then
+	  use_python3="Yes"
+          AC_SUBST([PYTHON3_INSTALL_DIR])
+          AC_SUBST([PYTHON3_INCLUDES])
+          AC_SUBST([PYTHON3_LIBS])
         fi
       fi
     fi
   fi
 fi
-AM_CONDITIONAL(WITH_PYTHON25, [test "x$use_python25" = "xYes"])
-
-dnl -----------------------------------
-dnl INCLUDES and LIBS for PYTHON26
-
-AC_ARG_ENABLE(python26,
-  [AS_HELP_STRING([--enable-python26=no],[python26 language bindings])],
-  [], [enable_python26=no])
-
-if test "x$enable_python26" != "xyes"; then
-  use_python26="No (disabled by default - for multiversion installs)"
-else
-  if test "x$use_swig" != "xYes"; then
-    use_python26="No (swig not available)"
-  else
-    if test `$SWIG -help 2>&1 | $EGREP -c '\-python *- Generate'` = 0; then
-      use_python26="No (swig does not support -python option)"
-    else
-      AC_CHECK_PROG(PYTHON26,python2.6,python2.6)
-      if test "x$PYTHON26" = "x"; then
-        use_python26="No (python26 not available)"
-      else
-        PYTHON26_VERSION=`$PYTHON26 -V 2>&1 | $EGREP Python | cut -d ' ' -f 2`
-        if test "x$PYTHON26_VERSION" = "x"; then
-          PYTHON26=
-        else
-          PYTHON26_VERSION_MAJOR=`echo $PYTHON26_VERSION | cut -d '.' -f 1`
-          PYTHON26_VERSION_MINOR=`echo $PYTHON26_VERSION | cut -d '.' -f 2`
-          PYTHON26_VERSION_SHORT=$PYTHON26_VERSION_MAJOR.$PYTHON26_VERSION_MINOR
-          if test $PYTHON26_VERSION_MAJOR -lt 3; then
-            if test $PYTHON26_VERSION_MAJOR -lt 2; then
-	      PYTHON26=
-            else
-              if test $PYTHON26_VERSION_MINOR -lt 5; then
-	        PYTHON26=
-              fi
-            fi
-          fi
-        fi
-      fi
-      if test "x$PYTHON26" = "x"; then
-	use_python26="No (python2.6 is too old)"
-      else
-        PYTHON26_PREFIX=`$PYTHON26 -c "import sys; print sys.prefix"`
-        PYTHON26_INCLUDES=-I$PYTHON26_PREFIX/include/python$PYTHON26_VERSION_SHORT
-        PYTHON24_LIBS="-lpython$PYTHON_VERSION_SHORT"
-        PYTHON26_INSTALL_DIR="`$PYTHON26 $srcdir/config/config_python.py archsitelib`"
-        save_CPPFLAGS=$CPPFLAGS
-        CPPFLAGS="$CPPFLAGS $PYTHON26_INCLUDES"
-        AC_CHECK_HEADER(Python.h,,[
-          use_python26="No (missing header)"
-          PYTHON26=
-        ])
-        CPPFLAGS=$save_CPPFLAGS
-	if test "x$PYTHON26" != "x"; then
-	  use_python26="Yes"
-          AC_SUBST([PYTHON26_INSTALL_DIR])
-          AC_SUBST([PYTHON26_INCLUDES])
-          AC_SUBST([PYTHON26_LIBS])
-        fi
-      fi
-    fi
-  fi
-fi
-AM_CONDITIONAL(WITH_PYTHON26, [test "x$use_python26" = "xYes"])
-
-dnl -----------------------------------
-dnl INCLUDES and LIBS for PYTHON27
-
-AC_ARG_ENABLE(python27,
-  [AS_HELP_STRING([--enable-python27=no],[python27 language bindings])],
-  [], [enable_python27=no])
-
-if test "x$enable_python27" != "xyes"; then
-  use_python27="No (disabled by default - for multiversion installs)"
-else
-  if test "x$use_swig" != "xYes"; then
-    use_python27="No (swig not available)"
-  else
-    if test `$SWIG -help 2>&1 | $EGREP -c '\-python *- Generate'` = 0; then
-      use_python27="No (swig does not support -python option)"
-    else
-      AC_CHECK_PROG(PYTHON27,python2.7,python2.7)
-      if test "x$PYTHON27" = "x"; then
-        use_python27="No (python27 not available)"
-      else
-        PYTHON27_VERSION=`$PYTHON27 -V 2>&1 | $EGREP Python | cut -d ' ' -f 2`
-        if test "x$PYTHON27_VERSION" = "x"; then
-          PYTHON27=
-        else
-          PYTHON27_VERSION_MAJOR=`echo $PYTHON27_VERSION | cut -d '.' -f 1`
-          PYTHON27_VERSION_MINOR=`echo $PYTHON27_VERSION | cut -d '.' -f 2`
-          PYTHON27_VERSION_SHORT=$PYTHON27_VERSION_MAJOR.$PYTHON27_VERSION_MINOR
-          if test $PYTHON27_VERSION_MAJOR -lt 3; then
-            if test $PYTHON27_VERSION_MAJOR -lt 2; then
-	      PYTHON27=
-            else
-              if test $PYTHON27_VERSION_MINOR -lt 5; then
-	        PYTHON27=
-              fi
-            fi
-          fi
-        fi
-      fi
-      if test "x$PYTHON27" = "x"; then
-	use_python27="No (python2.7 is too old)"
-      else
-        PYTHON27_PREFIX=`$PYTHON27 -c "import sys; print sys.prefix"`
-        PYTHON27_INCLUDES=-I$PYTHON27_PREFIX/include/python$PYTHON27_VERSION_SHORT
-        PYTHON24_LIBS="-lpython$PYTHON_VERSION_SHORT"
-        PYTHON27_INSTALL_DIR="`$PYTHON27 $srcdir/config/config_python.py archsitelib`"
-        save_CPPFLAGS=$CPPFLAGS
-        CPPFLAGS="$CPPFLAGS $PYTHON27_INCLUDES"
-        AC_CHECK_HEADER(Python.h,,[
-          use_python27="No (missing header)"
-          PYTHON27=
-        ])
-        CPPFLAGS=$save_CPPFLAGS
-	if test "x$PYTHON27" != "x"; then
-	  use_python27="Yes"
-          AC_SUBST([PYTHON27_INSTALL_DIR])
-          AC_SUBST([PYTHON27_INCLUDES])
-          AC_SUBST([PYTHON27_LIBS])
-        fi
-      fi
-    fi
-  fi
-fi
-AM_CONDITIONAL(WITH_PYTHON27, [test "x$use_python27" = "xYes"])
-
-dnl -----------------------------------
-dnl INCLUDES and LIBS for PYTHON34
-
-AC_ARG_ENABLE(python34,
-  [AS_HELP_STRING([--enable-python34=no],[python34 language bindings])],
-  [], [enable_python34=no])
-
-if test "x$enable_python34" != "xyes"; then
-  use_python34="No (disabled by default - for multiversion installs)"
-else
-  if test "x$use_swig" != "xYes"; then
-    use_python34="No (swig not available)"
-  else
-    if test `$SWIG -help 2>&1 | $EGREP -c '\-python *- Generate'` = 0; then
-      use_python34="No (swig does not support -python option)"
-    else
-      AC_CHECK_PROG(PYTHON34,python3.4,python3.4)
-      if test "x$PYTHON34" = "x"; then
-        use_python34="No (python34 not available)"
-      else
-        PYTHON34_VERSION=`$PYTHON34 -V 2>&1 | $EGREP Python | cut -d ' ' -f 2`
-        if test "x$PYTHON34_VERSION" = "x"; then
-          PYTHON34=
-        else
-          PYTHON34_VERSION_MAJOR=`echo $PYTHON34_VERSION | cut -d '.' -f 1`
-          PYTHON34_VERSION_MINOR=`echo $PYTHON34_VERSION | cut -d '.' -f 2`
-          PYTHON34_VERSION_SHORT=$PYTHON34_VERSION_MAJOR.$PYTHON34_VERSION_MINOR
-          if test $PYTHON34_VERSION_MAJOR -lt 3; then
-            if test $PYTHON34_VERSION_MINOR -lt 4; then
-	          PYTHON34=
-            fi
-          fi
-        fi
-      fi
-      if test "x$PYTHON34" = "x"; then
-	    use_python34="No (python34 is too old)"
-      else
-        PYTHON34_PREFIX=`$PYTHON3 -c "import sys; print sys.prefix"`
-#        PYTHON34_INCLUDES=-I$PYTHON34_PREFIX/include/python$PYTHON34_VERSION_SHORT
-# FIXME - whats the stupid "m" for?
-        PYTHON34_INCLUDES=-I/usr/include/python3.4m
-        PYTHON34_LIBS="-lpython$PYTHON_VERSION_SHORT"
-        PYTHON34_INSTALL_DIR="`$PYTHON34 $srcdir/config/config_python.py archsitelib`"
-        save_CPPFLAGS=$CPPFLAGS
-        CPPFLAGS="$CPPFLAGS $PYTHON34_INCLUDES"
-        AC_CHECK_HEADER(Python.h,,[
-          use_python34="No (missing header)"
-          PYTHON34=
-        ])
-        CPPFLAGS=$save_CPPFLAGS
-	if test "x$PYTHON34" != "x"; then
-	  use_python34="Yes"
-          AC_SUBST([PYTHON34_INSTALL_DIR])
-          AC_SUBST([PYTHON34_INCLUDES])
-          AC_SUBST([PYTHON34_LIBS])
-        fi
-      fi
-    fi
-  fi
-fi
-AM_CONDITIONAL(WITH_PYTHON34, [test "x$use_python34" = "xYes"])
+AM_CONDITIONAL(WITH_PYTHON3, [test "x$use_python3" = "xYes"])
 
 dnl -----------------------------------
 dnl INCLUDES and LIBS for R
@@ -1611,7 +1489,7 @@ else
           RUBY_INSTALL_DIR="`$RUBY $srcdir/config/config_ruby.rb vendorarchdir`"
 	fi
       ],[
-        PKG_CHECK_MODULES([RUBY], [ruby-1.9],[
+        PKG_CHECK_MODULES([RUBY], [ruby-${RUBY_VER}],[
 	  AC_CHECK_PROG(RUBY,ruby,ruby)
           if test "x$RUBY" = "x"; then
             use_ruby="No (ruby not available)"
@@ -1692,6 +1570,7 @@ if test "x$use_tcl" = "x"; then
   ])
   CPPFLAGS=$save_CPPFLAGS
 fi
+AC_SUBST([TCLSH_EXEC_PREFIX])
 
 if test "x$use_tcl" = "x"; then
   # Some systems don't have Tcl.  Don't build
@@ -1715,7 +1594,7 @@ if test "x$use_tcl" = "x"; then
     AC_MSG_WARN([Unable to find tclConfig.sh. The Tcl packages will not be built])
     use_tcl="No (missing tclConfig.sh)"
   fi
-  TCL_INSTALL_DIR="${TCLSH_EXEC_PREFIX}/lib${LIBPOSTFIX}/tcl${TCL_VERSION_FOUND}"
+  TCL_INSTALL_DIR=${TCLSH_EXEC_PREFIX}/lib${LIBPOSTFIX}/tcl${TCL_VERSION_FOUND}
 fi
 
 if test "x$use_tcl" = "x"; then
@@ -1731,6 +1610,7 @@ if test "x$use_tcl" = "x"; then
   fi
 fi
 
+AC_SUBST([TCLCONFIG])
 AC_SUBST([TCL_INSTALL_DIR])
 
 AM_CONDITIONAL(WITH_TCL, [test "x$use_tcl" = "xYes"])
@@ -1760,7 +1640,7 @@ TCL_LIBS=
 AC_SUBST([TCL_LIBS])
 
 #AC_SUBST([TCL_PREFIX])
-AC_SUBST([TCL_EXEC_PREFIX])
+#AC_SUBST([TCL_EXEC_PREFIX])
 #AC_SUBST([TCL_SHLIB_CFLAGS])
 #AC_SUBST([TCL_SHLIB_CXXFLAGS])
 #AC_SUBST([TCL_EXTRA_CFLAGS])
@@ -1813,7 +1693,7 @@ if test "$tk_checkBoth" = 1; then
   tk_oldLibs=$LIBS
   LIBS="$LIBS -lsocket -lnsl"
   AC_CHECK_FUNC(accept, tk_checkNsl=0, [LIBS=$tk_oldLibs])
-fi  
+fi
 AC_CHECK_FUNC(gethostbyname, , [AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"])])
 SOCKET_LIBS=$LIBS
 AC_SUBST([SOCKET_LIBS])
@@ -1839,7 +1719,7 @@ else
 	if test "${EXPAT_PREFIX}/lib" != "/usr/lib" ; then
 		EXPAT_LIBS="-L${EXPAT_PREFIX}/lib"
 	fi
-  else         
+  else
 	EXPAT_INCLUDES=""
 	EXPAT_LIBS=""
   fi
@@ -1875,7 +1755,7 @@ if test "x$use_expat" = "x"; then
   AC_SUBST([EXPAT_INCLUDES])
   AC_SUBST([EXPAT_LIBS])
 fi
-  
+
 dnl -----------------------------------
 dnl INCLUDES and LIBS for DEVIL
 
@@ -2020,13 +1900,13 @@ AC_SUBST([Z_LIBS])
 
 dnl -----------------------------------
 dnl INCLUDES and LIBS for WEBP
-                                                                                
+
 AC_ARG_WITH(webp,
-  [AS_HELP_STRING([--with-webp=no],[webp library])],
-  [], [with_webp=no])
+  [AS_HELP_STRING([--with-webp=yes],[webp library])],
+  [], [with_webp=yes])
 
 if test "x$with_webp" != "xyes"; then
-  use_webp="No (disabled by default - experimental)"
+  use_webp="No (disabled)"
 else
   PKG_CHECK_MODULES(WEBP, [libwebp],[
     use_webp="Yes"
@@ -2042,7 +1922,7 @@ AM_CONDITIONAL(WITH_WEBP, [test "x$use_webp" = "xYes"])
 
 dnl -----------------------------------
 dnl INCLUDES and LIBS for POPPLER
-                                                                                
+
 AC_ARG_WITH(poppler,
   [AS_HELP_STRING([--with-poppler=yes],[poppler library])],
   [], [with_poppler=yes])
@@ -2064,7 +1944,7 @@ AM_CONDITIONAL(WITH_POPPLER, [test "x$use_poppler" = "xYes"])
 
 dnl -----------------------------------
 dnl INCLUDES and LIBS for RSVG
-                                                                                
+
 AC_ARG_WITH(rsvg,
   [AS_HELP_STRING([--with-rsvg=yes],[rsvg library])],
   [], [with_rsvg=yes])
@@ -2093,7 +1973,7 @@ AM_CONDITIONAL(WITH_RSVG, [test "x$use_rsvg" = "xYes"])
 
 dnl -----------------------------------
 dnl INCLUDES and LIBS for GHOSTSCRIPT
-                                                                                
+
 AC_ARG_WITH(ghostscript,
   [AS_HELP_STRING([--with-ghostscript=yes],[ghostscript library])],
   [], [with_ghostscript=yes])
@@ -2121,13 +2001,13 @@ AM_CONDITIONAL(WITH_GS, [test "x$use_ghostscript" = "xYes"])
 
 dnl -----------------------------------
 dnl INCLUDES and LIBS for VISIO
-                                                                                
+
 AC_ARG_WITH(visio,
-  [AS_HELP_STRING([--with-visio=no],[visio library])],
-  [], [with_visio=no])
+  [AS_HELP_STRING([--with-visio=yes],[visio library])],
+  [], [with_visio=yes])
 
 if test "x$with_visio" != "xyes"; then
-  use_visio="No (disabled by default - experimental)"
+  use_visio="No (disabled)"
 else
 #  AC_CHECK_HEADER(visio/visio.h, VISIO_CFLAGS="",use_visio="No (missing headers)")
 #  if test "x$use_visio" = "x"; then
@@ -2145,7 +2025,7 @@ AM_CONDITIONAL(WITH_VISIO, [test "x$use_visio" = "xYes"])
 
 dnl -----------------------------------
 dnl INCLUDES and LIBS for PANGOCAIRO
-                                                                                
+
 AC_ARG_WITH(pangocairo,
   [AS_HELP_STRING([--with-pangocairo=yes],[pangocairo library])],
   [], [with_pangocairo=yes])
@@ -2171,13 +2051,13 @@ if test "x$use_pangocairo" = "xYes"; then
     save_LIBS=$LIBS
     PKG_CHECK_MODULES(PANGOFT2, [pangoft2])
     LIBS="$LIBS $PANGOCAIRO_LIBS $PANGOFT2_LIBS"
-    AC_CHECK_FUNCS([pango_fc_font_lock_face pango_fc_font_unlock_face pango_font_map_create_context])
+    AC_CHECK_FUNCS([pango_fc_font_lock_face pango_fc_font_unlock_face pango_font_map_create_context cairo_surface_set_mime_data])
     LIBS=$save_LIBS
 fi
 
 dnl -----------------------------------
 dnl INCLUDES and LIBS for LASI
-                                                                                
+
 AC_ARG_WITH(lasi,
   [AS_HELP_STRING([--with-lasi=yes],[lasi library])],
   [], [with_lasi=yes])
@@ -2203,7 +2083,7 @@ AM_CONDITIONAL(WITH_LASI, [test "x$use_lasi" = "xYes"])
 
 dnl -----------------------------------
 dnl INCLUDES and LIBS for GLITZ
-                                                                                
+
 AC_ARG_WITH(glitz,
   [AS_HELP_STRING([--with-glitz=no],[glitz library])],
   [], [with_glitz=no])
@@ -2225,7 +2105,7 @@ AM_CONDITIONAL(WITH_GLITZ, [test "x$use_glitz" = "xYes"])
 
 dnl -----------------------------------
 dnl INCLUDES and LIBS for FREETYPE2
-                                                                                
+
 AC_ARG_WITH(freetype2,
   [AS_HELP_STRING([--with-freetype2=yes],[freetype2 library])],
   [], [with_freetype2=yes])
@@ -2271,7 +2151,7 @@ AM_CONDITIONAL(WITH_FREETYPE2, [test "x$ue_freetype" = "xYes"])
 
 dnl -----------------------------------
 dnl INCLUDES and LIBS for FONTCONFIG
-                                                                                
+
 AC_ARG_WITH(fontconfig,
   [AS_HELP_STRING([--with-fontconfig=yes],[use fontconfig library])],
   [], [with_fontconfig=yes])
@@ -2470,25 +2350,41 @@ else
   ],[
     use_ann="No (no ann.pc found)"
   ])
-  if test "$use_ann" != "Yes"; then
-    if test -f /usr/lib$LIBPOSTFIX/libANN.so; then
-      AC_DEFINE_UNQUOTED(HAVE_ANN,1,
-        [Define if you have the ann library])
-      ANN_LIBS=-lANN
-      AC_SUBST([ANN_LIBS])
-      use_ann="Yes (but no ann.pc found)"
-    else
-      if test -f /usr/lib$LIBPOSTFIX/libann.so; then
-        AC_DEFINE_UNQUOTED(HAVE_ANN,1,
-          [Define if you have the ann library])
-        ANN_LIBS=-lann
-        AC_SUBST([ANN_LIBS])
-        use_ann="Yes (but no ann.pc found)"
-      else
-        use_ann="No (ANN library not available)"
-      fi
-    fi
-  fi
+#  if test "$use_ann" != "Yes"; then
+#    if test -f /usr/lib$LIBPOSTFIX/libANN.so; then
+#      AC_DEFINE_UNQUOTED(HAVE_ANN,1,
+#        [Define if you have the ann library])
+#      ANN_LIBS=-lANN
+#      AC_SUBST([ANN_LIBS])
+#      use_ann="Yes (but no ann.pc found)"
+#    else
+#      if test -f /usr/lib$LIBPOSTFIX/libann.so; then
+#        AC_DEFINE_UNQUOTED(HAVE_ANN,1,
+#          [Define if you have the ann library])
+#        ANN_LIBS=-lann
+#        AC_SUBST([ANN_LIBS])
+#        use_ann="Yes (but no ann.pc found)"
+#      else
+#        if test -f /usr/lib/x86_64-linux-gnu/libann.so; then
+#          AC_DEFINE_UNQUOTED(HAVE_ANN,1,
+#            [Define if you have the ann library])
+#          ANN_LIBS=-L/usr/lib/x86_64-linux-gnu -lann
+#          AC_SUBST([ANN_LIBS])
+#          use_ann="Yes (but no ann.pc found so taking a wild guess its ubuntu-18.10)"
+#        else
+#          if test -f /usr/lib/libann.so; then
+#            AC_DEFINE_UNQUOTED(HAVE_ANN,1,
+#              [Define if you have the ann library])
+#            ANN_LIBS=-L/usr/lib -lann
+#            AC_SUBST([ANN_LIBS])
+#            use_ann="Yes (but no ann.pc found so taking a wild guess its ubuntu-18.04)"
+#          else
+#            use_ann="No (ANN library not available)"
+#          fi
+#        fi
+#      fi
+#    fi
+#  fi
 fi
 AM_CONDITIONAL(WITH_ANN, [test x"${use_ann%% *}" = "xYes"])
 
@@ -2547,10 +2443,16 @@ if test "x$with_qt" != "xyes"; then
   use_qt="No (disabled)"
 else
 
-  AC_CHECK_PROGS(QMAKE,qmake-qt4 qmake-qt3 qmake,false)
+  # required for linking with QT5
+  AX_CHECK_COMPILE_FLAG([-std=c++11], [
+	CXXFLAGS="${CXXFLAGS} -fPIE -fPIC -std=c++11"
+     ],[
+	CXXFLAGS="${CXXFLAGS} -fPIE -fPIC"
+     ])
+  AC_CHECK_PROGS(QMAKE,qmake-qt5 qmake-qt4 qmake,false)
   if test "$QMAKE" != "false"; then
-    PKG_CHECK_MODULES(QTCORE, [QtCore],[
-      PKG_CHECK_MODULES(QTGUI, [QtGui],[
+    PKG_CHECK_MODULES(QTCORE, [Qt5Core],[
+      PKG_CHECK_MODULES(QTGUI, [Qt5Widgets Qt5PrintSupport],[
 	use_qt="Yes"
       ],[
         use_qt="No (QtGui not available)"
@@ -2565,7 +2467,7 @@ fi
 AM_CONDITIONAL(WITH_QT, [test "x$use_qt" = "xYes"])
 
 dnl -----------------------------------
-dnl INCLUDES and LIBS for QUARTZ 
+dnl INCLUDES and LIBS for QUARTZ
 
 AC_ARG_WITH(quartz,
   [AS_HELP_STRING([--with-quartz=no],[Quartz framework (Mac OS X)])],
@@ -2600,10 +2502,10 @@ AC_ARG_WITH(platformsdklibdir,
 
 AC_SUBST([PLATFORMSDKINCLUDE])
 AC_SUBST([PLATFORMSDKINCLUDE_ESCAPED])
-AC_SUBST([PLATFORMSDKLIB]) 
+AC_SUBST([PLATFORMSDKLIB])
 
 dnl -----------------------------------
-dnl INCLUDES and LIBS for GDI+ 
+dnl INCLUDES and LIBS for GDI+
 
 AC_ARG_WITH(gdiplus,
   [AS_HELP_STRING([--with-gdiplus=no],[GDI+ framework (Windows)])],
@@ -2630,7 +2532,7 @@ AM_CONDITIONAL(WITH_GDIPLUS, [test "x$use_gdiplus" = "xYes"])
 
 dnl -----------------------------------
 dnl INCLUDES and LIBS for GD
-                                                                                
+
 AC_ARG_WITH(libgd,
   [AS_HELP_STRING([--with-libgd=yes],[use gd library])],
   [], [with_libgd=yes])
@@ -2792,7 +2694,7 @@ else
     [AS_HELP_STRING([--with-glutlibdir=DIR],[use GLUT libraries from DIR])],
     [GLUT_LIBS="-L$withval"])
   LDFLAGS="$LDFLAGS $GLUT_LIBS"
-  
+
   AC_CHECK_HEADER(GL/glut.h,
     AC_CHECK_LIB(glut,main,
       [GLUT_LIBS="$GLUT_LIBS -lglut"
@@ -2858,7 +2760,7 @@ AC_SUBST([TCL_PKGINDEX_SWIG])
 
 dnl -----------------------------------
 dnl SFDP
- 
+
 AC_ARG_WITH(sfdp,
   [AS_HELP_STRING([--with-sfdp=yes],[sfdp layout engine])],
   [], [with_sfdp=yes])
@@ -2872,14 +2774,14 @@ fi
 AM_CONDITIONAL(WITH_SFDP, [test "x$use_sfdp" = "xYes"])
 
 dnl -----------------------------------
-dnl SMYRNA 
+dnl SMYRNA
 
 AC_ARG_WITH(smyrna,
-  [AS_HELP_STRING([--with-smyrna=no],[SMYRNA large graph viewer])],
-  [], [with_smyrna=no])
+  [AS_HELP_STRING([--with-smyrna=yes],[SMYRNA large graph viewer])],
+  [], [with_smyrna=yes])
 
 if test "x$with_smyrna" != "xyes"; then
-  use_smyrna="No (disabled by default - experimental)"
+  use_smyrna="No (disabled)"
 else
   if test "x$use_gtk" != "xYes"; then
      AC_MSG_WARN(SMYRNA requires GTK)
@@ -2911,7 +2813,7 @@ fi
 AM_CONDITIONAL(WITH_SMYRNA, [test "x$use_smyrna" = "xYes"])
 
 dnl -----------------------------------
-dnl ORTHO 
+dnl ORTHO
 
 AC_ARG_WITH(ortho,
   [AS_HELP_STRING([--with-ortho=yes],[ORTHO features in neato layout engine])],
@@ -2926,7 +2828,7 @@ fi
 AM_CONDITIONAL(WITH_ORTHO, [test "x$use_ortho" = "xYes"])
 
 dnl -----------------------------------
-dnl DIGCOLA 
+dnl DIGCOLA
 
 AC_ARG_WITH(digcola,
   [AS_HELP_STRING([--with-digcola=yes],[DIGCOLA features in neato layout engine])],
@@ -2940,13 +2842,13 @@ else
 fi
 
 dnl -----------------------------------
-dnl IPSEPCOLA   /* disabled by default due to C++ issues on some platforms */
+dnl IPSEPCOLA   /* enabled by default. C++ issues on some platforms should be resolved by now */
 AC_ARG_WITH(ipsepcola,
-  [AS_HELP_STRING([--with-ipsepcola=no],[IPSEPCOLA features in neato layout engine])],
-  [], [with_ipsepcola=no])
+  [AS_HELP_STRING([--with-ipsepcola=yes],[IPSEPCOLA features in neato layout engine])],
+  [], [with_ipsepcola=yes])
 
 if test "x$with_ipsepcola" != "xyes"; then
-  use_ipsepcola="No (disabled by default - C++ portability issues)"
+  use_ipsepcola="No (disabled)"
 else
   if test "x$use_digcola" != "xYes"; then
     use_ipsepcola="No (requires: digcola)"
@@ -3043,11 +2945,6 @@ fi
 rm -f conftest*
 
 # -----------------------------------------------------------------------
-AC_CHECK_SIZEOF([long long])
-AC_CHECK_SIZEOF([int])
-SIZEOF_INT_BITS=$(( $ac_cv_sizeof_int * 8 ))
-AC_SUBST([SIZEOF_INT_BITS])
-# -----------------------------------------------------------------------
 
 # This is a historical artifact ... there are no other choices these days
 # This #define is never used in our sources,
@@ -3077,6 +2974,7 @@ AM_CONDITIONAL(HAVE_CRITERION, test "$use_criterion" = "Yes")
 # -----------------------------------------------------------------------
 
 # Generate Makefiles
+#	tests/regression_tests/vuln/Makefile was removed
 AC_CONFIG_FILES(Makefile
 	debian/changelog
 	doc/Makefile
@@ -3194,16 +3092,24 @@ AC_CONFIG_FILES(Makefile
 	tclpkg/gv/demo/Makefile
 	tclpkg/gv/META.gv
 	rtest/Makefile
-  tests/Makefile
-  tests/unit_tests/Makefile
-  tests/unit_tests/lib/Makefile
-  tests/unit_tests/lib/common/Makefile
-  tests/regression_tests/Makefile
-  tests/regression_tests/shapes/Makefile
+	rtest/graphs/Makefile
+	rtest/linux.x86/Makefile
+	tests/Makefile
+	tests/unit_tests/Makefile
+	tests/unit_tests/lib/Makefile
+	tests/unit_tests/lib/common/Makefile
+	tests/regression_tests/Makefile
+	tests/regression_tests/installation/Makefile
+	tests/regression_tests/shapes/Makefile
+	tests/regression_tests/shapes/reference/Makefile
+	tests/regression_tests/vuln/Makefile
+	tests/regression_tests/vuln/input/Makefile
+	tests/regression_tests/vuln/reference/Makefile
 	share/Makefile
 	share/examples/Makefile
 	share/gui/Makefile
-	graphviz.spec
+	redhat/graphviz.spec.fedora
+	redhat/graphviz.spec.rhel
 	Doxyfile
 	)
 
@@ -3253,6 +3159,7 @@ echo "  ipsepcola:     $use_ipsepcola"
 echo "  ltdl:          $use_ltdl"
 echo "  ortho:         $use_ortho"
 echo "  sfdp:          $use_sfdp"
+echo "  swig:          $use_swig ( $SWIG_VERSION )"
 echo "  shared:        $use_shared"
 echo "  static:        $use_static"
 echo "  qt:            $use_qt"
@@ -3294,21 +3201,19 @@ echo "  xlib:          $use_xlib"
 echo ""
 echo "language extensions:"
 echo "  gv_sharp:      $use_sharp"
+echo "  gv_d:          $use_d"
 echo "  gv_go:         $use_go"
 echo "  gv_guile:      $use_guile"
 echo "  gv_io:         $use_io"
 echo "  gv_java:       $use_java"
+echo "  gv_javascript: $use_javascript"
 echo "  gv_lua:        $use_lua"
 echo "  gv_ocaml:      $use_ocaml"
 echo "  gv_perl:       $use_perl"
 echo "  gv_php:        $use_php"
 echo "  gv_python:     $use_python"
-echo "  gv_python23:   $use_python23"
-echo "  gv_python24:   $use_python24"
-echo "  gv_python25:   $use_python25"
-echo "  gv_python26:   $use_python26"
-echo "  gv_python27:   $use_python27"
-echo "  gv_python34:   $use_python34"
+echo "  gv_python2:    $use_python2"
+echo "  gv_python3:    $use_python3"
 echo "  gv_R:          $use_r"
 echo "  gv_ruby:       $use_ruby"
 echo "  gv_tcl:        $use_gv_tcl"

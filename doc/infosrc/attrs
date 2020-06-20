@@ -91,7 +91,7 @@ Style of arrowhead on the head node of an edge.
 This will only appear if the <A HREF=#d:dir>dir</A> attribute
 is "forward" or "both".
 See the <A HREF=#h:undir_note>limitation</A>.
-:arrowsize (E_arrowsz):E:double:1.0:0.0;
+:arrowsize:E:double:1.0:0.0;
 Multiplicative scale factor for arrowheads.
 :arrowtail:E:arrowType:normal;
 Style of arrowhead on the tail node of an edge.
@@ -155,6 +155,25 @@ equivalently,
 <TT>"Latin1"</TT>. The <B>charset</B> attribute is case-insensitive.
 Note that if the character encoding used in the input does not
 match the <B>charset</B> value, the resulting output may be very strange.
+:class:ENCG:string:"":;svg
+Classnames to attach to the node, edge, graph, or cluster's SVG element.
+Combine with <a href="#d:stylesheet">stylesheet</a> for styling SVG output
+using CSS classnames.
+<p>
+Multiple space-separated classes are supported.
+<p>
+<pre>
+digraph G {
+  graph [class="cats"];
+
+  subgraph cluster_big {
+    graph [class="big_cats"];
+
+    "Lion" [class="yellow social"];
+    "Snow Leopard" [class="white solitary"];
+  };
+}
+</pre>
 :clusterrank:G:clusterMode:local;  dot
 Mode used for handling clusters. If <B>clusterrank</B> is "local", a
 subgraph whose name begins with "cluster" is given special treatment.
@@ -208,7 +227,7 @@ If true, use edge concentrators.
 This merges multiedges into a single edge and causes partially parallel
 edges to share part of their paths. The latter feature is not yet available
 outside of dot.
-:constraint (E_constr):E:bool:true;  dot
+:constraint:E:bool:true;  dot
 If false, the edge is not used in ranking the nodes. For example,
 in the graph
 <PRE>
@@ -291,9 +310,9 @@ If undefined, the value of the <A HREF=#d:target>target</A> is used.
 Tooltip annotation attached to the non-label part of an edge.
 This is used only if the edge has a <A HREF=#d:URL>URL</A>
 or <A HREF=#d:edgeURL>edgeURL</A> attribute.
-:epsilon:G:double:.0001 * # nodes(mode == KK)/.0001(mode == major);  neato
+:epsilon:G:double:.0001 * # nodes(mode == KK)/.0001(mode == major)/.01(mode == sgd);  neato
 Terminating condition. If the length squared of all energy gradients are
-< <B>epsilon</B>, the algorithm stops.
+&lt; <B>epsilon</B>, the algorithm stops.
 :esep:G:addDouble/addPoint:+3; notdot
 Margin used around polygons for purposes of spline edge routing.
 The interpretation is the same as given for <A HREF=#d:sep>sep</A>.
@@ -319,7 +338,7 @@ for setting the gradient angle.
 Note that a cluster inherits the root graph's attributes if defined.
 Thus, if the root graph has defined a <B>fillcolor</B>, this will override a
 <B>color</B> or <B>bgcolor</B> attribute set for the cluster.
-:fixedsize  (N_fixed):N:bool/string:false;
+:fixedsize:N:bool/string:false;
 If <tt>false</tt>, the size of a node is determined by smallest width and height
 needed to contain its label and image, if any, with a margin specified by
 the <A HREF=#d:margin><TT>margin</TT></A> attribute. The width
@@ -467,7 +486,7 @@ Synonym for <A HREF=#d:URL>URL</A>.
 :id:GCNE:escString:"";  map,ps,svg
 Allows the graph author to provide an id for graph objects which is to be included in the output.
 Normal "&#92;N", "&#92;E", "&#92;G" substitutions are applied.
-If provided, it is the responsiblity of the provider to keep
+If provided, it is the responsibility of the provider to keep
 its values sufficiently unique for its intended downstream use.
 Note, in particular, that "&#92;E" does not provide a unique id for multi-edges.
 If no id attribute is provided, then a unique internal id is used. However, 
@@ -511,6 +530,21 @@ a semicolon (for Windows) or a colon (all other OS).
 The first directory in which a file of the given name is found will be used to
 load the image. If <tt>imagepath</tt> is not set, relative pathnames for the image
 file will be interpreted with respect to the current working directory.
+:imagepos:N:string:"mc":;
+Attribute controlling how an image is positioned within its containing node.  This
+only has an effect when the image is smaller than the containing node.  The
+default is to be centered both horizontally and vertically.  Valid values:
+<TABLE>
+<TR><TD>tl</TD><TD>Top Left</TD></TR>
+<TR><TD>tc</TD><TD>Top Centered</TD></TR>
+<TR><TD>tr</TD><TD>Top Right</TD></TR>
+<TR><TD>ml</TD><TD>Middle Left</TD></TR>
+<TR><TD>mc</TD><TD>Middle Centered <I>(the default)</I></TD></TR>
+<TR><TD>mr</TD><TD>Middle Right</TD></TR>
+<TR><TD>bl</TD><TD>Bottom Left</TD></TR>
+<TR><TD>bc</TD><TD>Bottom Centered</TD></TR>
+<TR><TD>br</TD><TD>Bottom Right</TD></TR>
+</TABLE>
 :imagescale:N:bool/string:false:;
 Attribute controlling how an image fills its
 containing node. In general, the image is given its natural size,
@@ -562,7 +596,7 @@ If a node's <A HREF=#d:shape>shape</A> is record, then the label can
 have a <A HREF=shapes.html#record>special format</A>
 which describes the record layout.
 <P>
-Note that a node's default label is "\&#92;N", so the node's name or ID becomes
+Note that a node's default label is "&#92;N", so the node's name or ID becomes
 its label. Technically, a node's name can be an HTML string but this will not
 mean that the node's label will be interpreted as an <a href="shapes.html#html">HTML-like label</a>. This is
 because the node's actual label is an ordinary string, which will be replaced 
@@ -589,7 +623,7 @@ Multiplicative scaling factor adjusting the distance that
 the headlabel(taillabel) is from the head(tail) node.
 The default distance is 10 points. See <A HREF=#d:labelangle>labelangle</A>
 for more details.
-:labelfloat (E_label_float):E:bool:false;
+:labelfloat:E:bool:false;
 If true, allows edge labels to be less constrained in position.
 In particular, it may appear on top of other edges.
 :labelfontcolor:E:color:black;
@@ -656,7 +690,7 @@ Specifies layers in which the node, edge or cluster is present.
 Specifies a linearly ordered list of layer names attached to the graph
 The graph is then output in separate layers. Only those components
 belonging to the current output layer appear. For more information,
-see the page <A HREF="http://www.graphviz.org/wiki/how-use-drawing-layers-overlays">How to use drawing layers (overlays)</A>.
+see the page <A HREF="../../../faq/#FaqOverlays">How to use drawing layers (overlays)</A>.
 :layerlistsep:G:string:",";
 Specifies the separator characters used to split
 an attribute of type <A HREF=#k:layerRange>layerRange</A> into a list of ranges.
@@ -720,7 +754,7 @@ the cluster bounding box. By default, this is 8 points.
 <P>
 For nodes, this attribute specifies space left around the node's label.
 By default, the value is <TT>0.11,0.055</TT>.
-:maxiter:G:int:100 &#42; # nodes(mode == KK)/200(mode == major)/600(fdp);  neato,fdp
+:maxiter:G:int:100 * # nodes(mode == KK)/200(mode == major)/30(mode == sgd)/600(fdp);  neato,fdp
 Sets the number of iterations used.
 :mclimit:G:double:1.0;  dot
 Multiplicative scale factor used to alter the MinQuit (default = 8)
@@ -737,8 +771,12 @@ Technique for optimizing the layout. For neato, if <B>mode</B> is <TT>"major"</T
 neato uses stress majorization. If <B>mode</B> is <TT>"KK"</TT>,
 neato uses a version of the gradient descent method. The only advantage
 to the latter technique is that it is sometimes appreciably faster for
-small (number of nodes < 100) graphs. A significant disadvantage is that
-it may cycle.
+small (number of nodes &lt; 100) graphs. A significant disadvantage is that
+it may cycle. If <B>mode</B> is <TT>"sgd"</TT>, neato uses a version of the
+stochastic gradient descent method. The advantage of sgd is faster and more
+reliable convergence than both the previous methods, while the disadvantage
+is that it runs in a fixed number of iterations and may require larger
+values of <TT>"maxiter"</TT> in some graphs.
 <P>
 There are two experimental modes in neato, "hier", which adds a top-down
 directionality similar to the layout used in dot, and "ipsep", which
@@ -1204,7 +1242,7 @@ rectangular. The image formats supported as well as the precise semantics of
 how the file is used depends on the
 <A HREF="output.html">output format</A>.  For further details, see
 <A HREF=output.html#d:image_fmts>Image Formats</A> and
-<A HREF=http://www.graphviz.org/wiki/how-create-custom-shapes#ext_image>External PostScript files</A>.
+<A HREF="../../../faq/#ext_image">External PostScript files</A>.
 <P>
 There is one exception to this usage.
 If <B>shape</B> is set to "epsf", shapefile gives
@@ -1212,11 +1250,11 @@ a filename containing a definition of the node in PostScript.
 The graphics defined must be contain all of the
 node content, including any desired boundaries.
 For further details, see
-<A HREF=http://www.graphviz.org/wiki/how-create-custom-shapes#ext_ps>
+<A HREF="../../../faq/#ext_ps_file">
 External PostScript files</A>.
 :showboxes:ENG:int:0:0; dot
 Print guide boxes in PostScript at the beginning of
-routesplines if 1, or at the end if 2. (Debugging)
+routesplines if 1, or at the end if 2. (Debugging, TB mode only!)
 :sides:N:int:4:0;
 Number of sides if <A HREF=#d:shape><B>shape</B></A>=polygon.
 :size:G:double/point;
@@ -1318,7 +1356,8 @@ making all edges invisible, a specific edge can overrride this via:
 <P>
 Of course, the component can also explicitly set its <TT>style</TT> attribute to the desired value.
 :stylesheet:G:string:"";  svg
-A URL or pathname specifying an XML style sheet, used in SVG output.
+A URL or pathname specifying an XML style sheet, used in SVG output. Combine
+with <a href="#d:class">class</a> to style elements using CSS selectors.
 :tailURL:E:escString:""; map,svg
 If <B>tailURL</B> is defined, it is
 output as part of the tail label of the edge.

@@ -35,7 +35,6 @@ pdf_DATA = gvc.3.pdf
 libgvc_C_la_SOURCES = gvrender.c gvlayout.c gvdevice.c gvloadimage.c \
 	gvcontext.c gvjobs.c gvevent.c gvplugin.c gvconfig.c \
 	gvtool_tred.c gvtextlayout.c gvusershape.c gvc.c
-#	gvbuffstderr.c
 
 libgvc_C_la_LIBADD = \
 	$(top_builddir)/lib/pack/libpack_C.la \
@@ -69,9 +68,12 @@ if WITH_WIN32
 libgvc_la_LDFLAGS += -export-symbols $(top_srcdir)/lib/gvc.def
 endif
 
-gvc.3.pdf: $(srcdir)/gvc.3
-	- @GROFF@ -Tps -man $(srcdir)/gvc.3 | @PS2PDF@ - - > gvc.3.pdf
+gvc.3.pdf: gvc.3.ps
+	@PS2PDF@ $< $@
+
+gvc.3.ps: $(srcdir)/gvc.3
+	@GROFF@ -Tps -man $< >$@
 
 EXTRA_DIST = $(man_MANS) $(pdf_DATA)
 
-DISTCLEANFILES = $(pdf_DATA)
+DISTCLEANFILES = $(pdf_DATA) gvc.3.ps

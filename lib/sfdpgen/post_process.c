@@ -248,7 +248,7 @@ real get_full_stress(SparseMatrix A, int dim, real *x, int weighting_scheme){
 #endif
 
 
-SparseMatrix ideal_distance_matrix(SparseMatrix A, int dim, real *x){
+static SparseMatrix ideal_distance_matrix(SparseMatrix A, int dim, real *x){
   /* find the ideal distance between edges, either 1, or |N[i] \Union N[j]| - |N[i] \Intersection N[j]|
    */
   SparseMatrix D;
@@ -822,7 +822,7 @@ real StressMajorizationSmoother_smooth(StressMajorizationSmoother sm, int dim, r
   x0 = N_GNEW(dim*m,real);
   if (!x0) goto RETURN;
 
-  x0 = MEMCPY(x0, x, sizeof(real)*dim*m);
+  memcpy(x0, x, sizeof(real)*dim*m);
   y = N_GNEW(dim*m,real);
   if (!y) goto RETURN;
 
@@ -989,7 +989,7 @@ real StressMajorizationSmoother_smooth(StressMajorizationSmoother sm, int dim, r
 #endif
 
 
-    MEMCPY(x, y, sizeof(real)*m*dim);
+    memcpy(x, y, sizeof(real)*m*dim);
   }
 
 #ifdef DEBUG

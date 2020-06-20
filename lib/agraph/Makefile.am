@@ -11,7 +11,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/lib/cdt
 
 pkginclude_HEADERS = agraph.h
-noinst_HEADERS = aghdr.h malloc.h vmstub.h grammar.h
+noinst_HEADERS = aghdr.h malloc.h grammar.h
 noinst_LTLIBRARIES = libagraph_C.la
 lib_LTLIBRARIES = libagraph.la
 pkgconfig_DATA = libagraph.pc
@@ -45,11 +45,14 @@ y.tab.c y.tab.h: y.output
 y.output: $(top_srcdir)/lib/agraph/grammar.y
 	@YACC@ -dv $(top_srcdir)/lib/agraph/grammar.y
 
-agraph.3.pdf: $(srcdir)/agraph.3
-	- @GROFF@ -Tps -man $(srcdir)/agraph.3 | @PS2PDF@ - - >agraph.3.pdf
+agraph.3.pdf: agraph.3.ps
+	@PS2PDF@ $< $@
+
+agraph.3.ps: $(srcdir)/agraph.3
+	@GROFF@ -Tps -man $< >$@
 
 EXTRA_DIST = $(man_MANS) $(pdf_DATA) cmpnd.c dotdge.c \
 	main.c tester.c README grammar.c grammar.h scan.c \
 	y.tab.c y.tab.h y.output
 
-DISTCLEANFILES = $(pdf_DATA) grammar.[ch] scan.c y.output y.tab.[ch]
+DISTCLEANFILES = $(pdf_DATA) grammar.[ch] scan.c y.output y.tab.[ch] agraph.3.ps

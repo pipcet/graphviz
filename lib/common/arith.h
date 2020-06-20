@@ -12,7 +12,7 @@
  *************************************************************************/
 
 /* geometric functions (e.g. on points and boxes) with application to, but
- * no specific dependance on graphs */
+ * no specific dependence on graphs */
 
 #ifndef GV_ARITH_H
 #define GV_ARITH_H
@@ -65,7 +65,7 @@ extern "C" {
 #endif
 
 #ifndef MAXFLOAT
-#define MAXFLOAT	((float)3.40282347e+38)
+#define MAXFLOAT	((float)3.40282347e+38)  // exact value: 0x1.fffffep+127f
 #endif
 
 #ifdef BETWEEN

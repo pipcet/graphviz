@@ -2,7 +2,7 @@
 /* vim:set shiftwidth=4 ts=8: */
 
 /*************************************************************************
- * Copyright (c) 2011 AT&T Intellectual Property 
+ * Copyright (c) 2011 AT&T Intellectual Property
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,10 +19,13 @@
 #include "gvc.h"
 
 #ifdef _WIN32
-#include "libltdl/lt_system.h"
+#define R_OK 4
 #endif
 
-#include <unistd.h>
+#ifdef HAVE_UNISTD_H
+#   include <unistd.h>
+#endif // HAVE_UNISTD_H
+
 #include <ctype.h>
 
 /*
@@ -102,17 +105,17 @@ double late_double(void *obj, attrsym_t * attr, double def, double low)
  * Return value for PSinputscale. If this is > 0, it has been set on the
  * command line and this value is used.
  * Otherwise, we check the graph's inputscale attribute. If this is not set
- * or has a bad value, we return -1. 
+ * or has a bad value, we return -1.
  * If the value is 0, we return the default. Otherwise, we return the value.
  * Set but negative values are treated like 0.
- */ 
+ */
 double get_inputscale (graph_t* g)
 {
     double d;
 
     if (PSinputscale > 0) return PSinputscale;  /* command line flag prevails */
     d = late_double(g, agfindgraphattr(g, "inputscale"), -1, 0);
-    if (d == 0) return POINTS_PER_INCH; 
+    if (d == 0) return POINTS_PER_INCH;
     else return d;
 }
 
@@ -164,6 +167,9 @@ node_t *UF_union(node_t * u, node_t * v)
 	ND_UF_size(v) = 1;
     } else
 	v = UF_find(v);
+	/* if we have two copies of the same node, their union is just that node */
+    if (u == v)
+	return u;
     if (ND_id(u) > ND_id(v)) {
 	ND_UF_parent(u) = v;
 	ND_UF_size(v) += ND_UF_size(u);
@@ -209,11 +215,11 @@ pointf coord(node_t * n)
 #define W_DEGREE 5
 
 /*
- *  Bezier : 
+ *  Bezier :
  *	Evaluate a Bezier curve at a particular parameter value
  *      Fill in control points for resulting sub-curves if "Left" and
  *	"Right" are non-null.
- * 
+ *
  */
 pointf Bezier(pointf * V, int degree, double t, pointf * Left, pointf * Right)
 {
@@ -260,7 +266,7 @@ Agraphinfo_t* GD_info(graph_t * g) { return ((Agraphinfo_t*)AGDATA(g));}
 Agnodeinfo_t* ND_info(node_t * n) { return ((Agnodeinfo_t*)AGDATA(n));}
 #endif
 
-#if !defined(MSWIN32) && !defined(_WIN32)
+#if !defined(_WIN32)
 #include	<pwd.h>
 
 #if 0
@@ -273,7 +279,7 @@ static void cleanup(void)
 
 /* Fgets:
  * Read a complete line.
- * Return pointer to line, 
+ * Return pointer to line,
  * or 0 on EOF
  */
 char *Fgets(FILE * fp)
@@ -305,23 +311,23 @@ char *Fgets(FILE * fp)
  * Check to make sure it is okay to read in files.
  * It returns NULL if the filename is trivial.
  *
- * If the application has set the SERVER_NAME environment variable, 
+ * If the application has set the SERVER_NAME environment variable,
  * this indicates it is web-active. In this case, it requires that the GV_FILE_PATH
  * environment variable be set. This gives the legal directories
  * from which files may be read. safefile then derives the rightmost component
- * of filename, where components are separated by a slash, backslash or colon, 
- * It then checks for the existence of a file consisting of a directory from 
+ * of filename, where components are separated by a slash, backslash or colon,
+ * It then checks for the existence of a file consisting of a directory from
  * GV_FILE_PATH followed by the rightmost component of filename. It returns the
  * first such found, or NULL otherwise.
  * The filename returned is thus
  * Gvfilepath concatenated with the last component of filename,
  * where a component is determined by a slash, backslash or colon
- * character.  
+ * character.
  *
  * If filename contains multiple components, the user is
  * warned, once, that everything to the left is ignored.
  *
- * For non-server applications, we use the path list in Gvimagepath to 
+ * For non-server applications, we use the path list in Gvimagepath to
  * resolve relative pathnames.
  *
  * N.B. safefile uses a fixed buffer, so functions using it should use the
@@ -382,7 +388,7 @@ const char *safefile(const char *filename)
 	return NULL;
 
     if (HTTPServerEnVar) {   /* If used as a server */
-	/* 
+	/*
 	 * If we are running in an http server we allow
 	 * files only from the directory specified in
 	 * the GV_FILE_PATH environment variable.
@@ -607,7 +613,7 @@ static int Tflag;
 void gvToggle(int s)
 {
     Tflag = !Tflag;
-#if !defined(MSWIN32) && !defined(_WIN32)
+#if !defined(_WIN32)
     signal(SIGUSR1, gvToggle);
 #endif
 }
@@ -671,7 +677,7 @@ initFontLabelEdgeAttr(edge_t * e, struct fontinfo *fi,
  * Return true if head/tail end of edge should not be clipped
  * to node.
  */
-static boolean 
+static boolean
 noClip(edge_t *e, attrsym_t* sym)
 {
     char		*str;
@@ -689,7 +695,7 @@ noClip(edge_t *e, attrsym_t* sym)
  */
 static port
 chkPort (port (*pf)(node_t*, char*, char*), node_t* n, char* s)
-{ 
+{
     port pt;
 	char* cp=NULL;
 	if(s)
@@ -753,8 +759,8 @@ int common_init_edge(edge_t * e)
     }
     /* end vladimir */
 
-    /* We still accept ports beginning with colons but this is deprecated 
-     * That is, we allow tailport = ":abc" as well as the preferred 
+    /* We still accept ports beginning with colons but this is deprecated
+     * That is, we allow tailport = ":abc" as well as the preferred
      * tailport = "abc".
      */
     str = agget(e, TAIL_ID);
@@ -911,7 +917,7 @@ void compute_bb(graph_t * g)
 
 int is_a_cluster (Agraph_t* g)
 {
-    return ((g == g->root) || (!strncasecmp(agnameof(g), "cluster", 7)));
+    return ((g == g->root) || (!strncasecmp(agnameof(g), "cluster", 7)) || mapBool(agget(g,"cluster"),FALSE));
 }
 
 /* setAttr:
@@ -1042,6 +1048,7 @@ static edge_t *cloneEdge(edge_t * e, node_t * ct, node_t * ch)
     edge_t *ce = agedge(g, ct, ch,NULL,1);
     agbindrec(ce, "Agedgeinfo_t", sizeof(Agedgeinfo_t), TRUE);
     agcopyattr(e, ce);
+    ED_compound(ce) = TRUE;
 
     return ce;
 }
@@ -1079,7 +1086,7 @@ static item *mapEdge(Dt_t * map, edge_t * e)
 }
 
 /* checkCompound:
- * If endpoint names a cluster, mark for temporary deletion and create 
+ * If endpoint names a cluster, mark for temporary deletion and create
  * special node and insert into cluster. Then clone the edge. Real edge
  * will be deleted when we delete the original node.
  * Invariant: new edge has same sense as old. That is, given t->h with
@@ -1091,11 +1098,12 @@ static item *mapEdge(Dt_t * map, edge_t * e)
  * routing to avoid edge crossings. At present, this is not implemented,
  * so we could use a simpler model in which we create a single cluster
  * node for each cluster used in a cluster edge.
+ *
+ * Return 1 if cluster edge is created.
  */
 #define MAPC(n) (strncmp(agnameof(n),"cluster",7)?NULL:findCluster(cmap,agnameof(n)))
 
-
-static void
+static int
 checkCompound(edge_t * e, graph_t * clg, agxbuf * xb, Dt_t * map, Dt_t* cmap)
 {
     graph_t *tg;
@@ -1107,20 +1115,20 @@ checkCompound(edge_t * e, graph_t * clg, agxbuf * xb, Dt_t * map, Dt_t* cmap)
     edge_t *ce;
     item *ip;
 
-    if (IS_CLUST_NODE(h)) return;
+    if (IS_CLUST_NODE(h)) return 0;
     tg = MAPC(t);
     hg = MAPC(h);
     if (!tg && !hg)
-	return;
+	return 0;
     if (tg == hg) {
 	agerr(AGWARN, "cluster cycle %s -- %s not supported\n", agnameof(t),
 	      agnameof(t));
-	return;
+	return 0;
     }
     ip = mapEdge(map, e);
     if (ip) {
 	cloneEdge(e, ip->t, ip->h);
-	return;
+	return 1;
     }
 
     if (hg) {
@@ -1128,12 +1136,12 @@ checkCompound(edge_t * e, graph_t * clg, agxbuf * xb, Dt_t * map, Dt_t* cmap)
 	    if (agcontains(hg, tg)) {
 		agerr(AGWARN, "tail cluster %s inside head cluster %s\n",
 		      agnameof(tg), agnameof(hg));
-		return;
+		return 0;
 	    }
 	    if (agcontains(tg, hg)) {
 		agerr(AGWARN, "head cluster %s inside tail cluster %s\n",
 		      agnameof(hg),agnameof(tg));
-		return;
+		return 0;
 	    }
 	    cn = clustNode(t, tg, xb, clg);
 	    cn1 = clustNode(h, hg, xb, clg);
@@ -1143,7 +1151,7 @@ checkCompound(edge_t * e, graph_t * clg, agxbuf * xb, Dt_t * map, Dt_t* cmap)
 	    if (agcontains(hg, t)) {
 		agerr(AGWARN, "tail node %s inside head cluster %s\n",
 		      agnameof(t), agnameof(hg));
-		return;
+		return 0;
 	    }
 	    cn = clustNode(h, hg, xb, clg);
 	    ce = cloneEdge(e, t, cn);
@@ -1153,23 +1161,40 @@ checkCompound(edge_t * e, graph_t * clg, agxbuf * xb, Dt_t * map, Dt_t* cmap)
 	if (agcontains(tg, h)) {
 	    agerr(AGWARN, "head node %s inside tail cluster %s\n", agnameof(h),
 		  agnameof(tg));
-	    return;
+	    return 0;
 	}
 	cn = clustNode(t, tg, xb, clg);
 	ce = cloneEdge(e, cn, h);
 	insertEdge(map, t, h, ce);
     }
+    return 1;
+}
+
+typedef struct {
+    Agrec_t hdr;
+    int n_cluster_edges;
+} cl_edge_t;
+
+static int
+num_clust_edges(graph_t * g)
+{
+    cl_edge_t* cl_info = (cl_edge_t*)HAS_CLUST_EDGE(g);
+    if (cl_info)
+	return cl_info->n_cluster_edges;
+    else
+	return 0;
 }
 
 /* processClusterEdges:
  * Look for cluster edges. Replace cluster edge endpoints
  * corresponding to a cluster with special cluster nodes.
  * Delete original nodes.
- * Return 0 if no cluster edges; 1 otherwise.
+ * If cluster edges are found, a cl_edge_t record will be
+ * attached to the graph, containing the count of such edges.
  */
-int processClusterEdges(graph_t * g)
+void processClusterEdges(graph_t * g)
 {
-    int rv;
+    int num_cl_edges = 0;
     node_t *n;
     node_t *nxt;
     edge_t *e;
@@ -1186,21 +1211,22 @@ int processClusterEdges(graph_t * g)
     for (n = agfstnode(g); n; n = agnxtnode(g, n)) {
 	if (IS_CLUST_NODE(n)) continue;
 	for (e = agfstout(g, n); e; e = agnxtout(g, e)) {
-	    checkCompound(e, clg, &xb, map, cmap);
+	    num_cl_edges += checkCompound(e, clg, &xb, map, cmap);
 	}
     }
     agxbfree(&xb);
     dtclose(map);
-    rv = agnnodes(clg);
     for (n = agfstnode(clg); n; n = nxt) {
 	nxt = agnxtnode(clg, n);
 	agdelete(g, n);
     }
     agclose(clg);
-    if (rv)
-	SET_CLUST_EDGE(g);
+    if (num_cl_edges) {
+	cl_edge_t* cl_info;
+	cl_info = agbindrec(g, CL_EDGE_TAG, sizeof(cl_edge_t), FALSE);
+	cl_info->n_cluster_edges = num_cl_edges;
+    }
     dtclose(cmap);
-    return rv;
 }
 
 /* mapN:
@@ -1228,6 +1254,7 @@ static node_t *mapN(node_t * n, graph_t * clg)
 	return nn;
     nn = agnode(g, name, 1);
     agbindrec(nn, "Agnodeinfo_t", sizeof(Agnodeinfo_t), TRUE);
+    SET_CLUST_NODE(nn);
 
     /* Set all attributes to default */
     for (sym = agnxtattr(g, AGNODE, NULL); sym;  (sym = agnxtattr(g, AGNODE, sym))) {
@@ -1245,8 +1272,6 @@ static void undoCompound(edge_t * e, graph_t * clg)
     node_t *nhead;
     edge_t* ce;
 
-    if (!(IS_CLUST_NODE(t) || IS_CLUST_NODE(h)))
-	return;
     ntail = mapN(t, clg);
     nhead = mapN(h, clg);
     ce = cloneEdge(e, ntail, nhead);
@@ -1276,15 +1301,25 @@ void undoClusterEdges(graph_t * g)
     node_t *nextn;
     edge_t *e;
     graph_t *clg;
+    edge_t **elist;
+    int ecnt = num_clust_edges(g);
+    int i = 0;
 
+    if (!ecnt) return;
     clg = agsubg(g, "__clusternodes",1);
     agbindrec(clg, "Agraphinfo_t", sizeof(Agraphinfo_t), TRUE);
+    elist = N_NEW(ecnt, edge_t*);
     for (n = agfstnode(g); n; n = agnxtnode(g, n)) {
 	for (e = agfstout(g, n); e; e = agnxtout(g, e)) {
-	    undoCompound(e, clg);
+	    if (ED_compound(e))
+		elist[i++] = e;
 	}
     }
-    for (n = agfstnode(clg); n; n = nextn) { 
+    assert(i == ecnt);
+    for (i = 0; i < ecnt; i++)
+	undoCompound(elist[i], clg);
+    free (elist);
+    for (n = agfstnode(clg); n; n = nextn) {
 	nextn = agnxtnode(clg, n);
 	gv_cleanup_node(n);
 	agdelete(g, n);
@@ -1296,12 +1331,12 @@ void undoClusterEdges(graph_t * g)
  * Find the attribute belonging to graph g for objects like obj
  * with given name. If one does not exist, create it with the
  * default value def.
- */ 
+ */
 attrsym_t*
 safe_dcl(graph_t * g, int obj_kind, char *name, char *def)
 {
     attrsym_t *a = agattr(g,obj_kind,name, NULL);
-    if (!a)	/* attribute does not exist */		
+    if (!a)	/* attribute does not exist */
 	a = agattr(g,obj_kind,name,def);
     return a;
 }
@@ -1343,7 +1378,7 @@ char* scanEntity (char* t, agxbuf* xb)
 
 /* htmlEntity:
  * Check for an HTML entity for a special character.
- * Assume *s points to first byte after '&'. 
+ * Assume *s points to first byte after '&'.
  * If successful, return the corresponding value and update s to
  * point after the terminating ';'.
  * On failure, return 0 and leave s unchanged.
@@ -1506,7 +1541,7 @@ char* htmlEntityUTF8 (char* s, graph_t* g)
                     agxbputc(&xb, c);
                     c = *(unsigned char*)s++;
                 }
-                else { 
+                else {
 		            if (!warned) {
 		                agerr(AGWARN, "Invalid %d-byte UTF8 found in input of graph %s - treated as Latin-1. Perhaps \"-Gcharset=latin1\" is needed?\n", uc + 1, agnameof(g));
 		                warned = 1;
@@ -1787,7 +1822,7 @@ void setEdgeType (graph_t* g, int dflt)
  * Evaluates the extreme points of an ellipse or polygon
  * Determines the point at the center of the extreme points
  * If isRadial is true,sets the inner radius to half the distance to the min point;
- * else uses the angle parameter to identify two points on a line that defines the 
+ * else uses the angle parameter to identify two points on a line that defines the
  * gradient direction
  * By default, this assumes a left-hand coordinate system (for svg); if RHS = 2 flag
  * is set, use standard coordinate system.
@@ -1799,7 +1834,7 @@ void get_gradient_points(pointf * A, pointf * G, int n, float angle, int flags)
     pointf min,max,center;
     int isRadial = flags & 1;
     int isRHS = flags & 2;
-    
+
     if (n == 2) {
       rx = A[1].x - A[0].x;
       ry = A[1].y - A[0].y;
@@ -1807,7 +1842,7 @@ void get_gradient_points(pointf * A, pointf * G, int n, float angle, int flags)
       max.x = A[0].x + rx;
       min.y = A[0].y - ry;
       max.y = A[0].y + ry;
-    }    
+    }
     else {
       min.x = max.x = A[0].x;
       min.y = max.y = A[0].y;
@@ -1921,7 +1956,7 @@ void gv_cleanup_edge(edge_t * e)
     free_label(ED_head_label(e));
     free_label(ED_tail_label(e));
 	/*FIX HERE , shallow cleaning may not be enough here */
-	agdelrec(e, "Agedgeinfo_t");	
+	agdelrec(e, "Agedgeinfo_t");
 }
 
 void gv_cleanup_node(node_t * n)
@@ -1932,7 +1967,7 @@ void gv_cleanup_node(node_t * n)
     free_label(ND_label(n));
     free_label(ND_xlabel(n));
 	/*FIX HERE , shallow cleaning may not be enough here */
-	agdelrec(n, "Agnodeinfo_t");	
+	agdelrec(n, "Agnodeinfo_t");
 }
 
 void gv_nodesize(node_t * n, boolean flip)
@@ -1943,7 +1978,7 @@ void gv_nodesize(node_t * n, boolean flip)
         w = INCH2PS(ND_height(n));
         ND_lw(n) = ND_rw(n) = w / 2;
         ND_ht(n) = INCH2PS(ND_width(n));
-    } 
+    }
     else {
         w = INCH2PS(ND_width(n));
         ND_lw(n) = ND_rw(n) = w / 2;
@@ -1951,7 +1986,7 @@ void gv_nodesize(node_t * n, boolean flip)
     }
 }
 
-#ifdef _WIN32	
+#ifdef _WIN32
 void fix_fc(void)
 {
     char buf[28192];
@@ -1970,6 +2005,7 @@ void fix_fc(void)
 #endif
 
 #ifndef HAVE_DRAND48
+#pragma weak drand48
 double drand48(void)
 {
     double d;
@@ -2034,7 +2070,7 @@ Dt_t* mkClustMap (Agraph_t* g)
     Dt_t* map = dtopen (&strDisc, Dtoset);
 
     fillMap (g, map);
-    
+
     return map;
 }
 

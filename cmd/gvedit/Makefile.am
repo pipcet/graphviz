@@ -17,11 +17,11 @@ pdf_DATA = $(pdfs)
 endif
 
 AM_CPPFLAGS = \
-        -I$(top_srcdir)/lib/common \
-        -I$(top_srcdir)/lib/gvc \
-        -I$(top_srcdir)/lib/pathplan \
-        -I$(top_srcdir)/lib/cgraph \
-        -I$(top_srcdir)/lib/cdt
+	-I$(top_srcdir)/lib/common \
+	-I$(top_srcdir)/lib/gvc \
+	-I$(top_srcdir)/lib/pathplan \
+	-I$(top_srcdir)/lib/cgraph \
+	-I$(top_srcdir)/lib/cdt
 
 gvedit_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
@@ -42,9 +42,11 @@ noinst_HEADERS = csettings.h imageviewer.h mainwindow.h mdichild.h ui_settings.h
 
 MOCABLES = moc_csettings.cpp moc_imageviewer.cpp moc_mainwindow.cpp moc_mdichild.cpp qrc_mdi.cpp
 
-gvedit_SOURCES = main.cpp csettings.cpp mainwindow.cpp imageviewer.cpp mdichild.cpp $(MOCABLES)
+gvedit_SOURCES = main.cpp csettings.cpp imageviewer.cpp mainwindow.cpp mdichild.cpp $(MOCABLES)
 
 $(MOCABLES): mocables
+
+gvedit gvedit$(EXEEXT): $(MOCABLES)
 
 .PHONY: mocables
 mocables: qMakefile
@@ -57,14 +59,17 @@ qMakefile: gvedit.pro
 attrs.txt: $(top_srcdir)/doc/infosrc/attrs
 	cp $(top_srcdir)/doc/infosrc/attrs attrs.txt
 
-gvedit.1.pdf: $(srcdir)/gvedit.1
-	- $(GROFF) -Tps -man $(srcdir)/gvedit.1 | @PS2PDF@ - - >gvedit.1.pdf
+gvedit.1.pdf: gvedit.1.ps
+	@PS2PDF@ $< $@
+
+gvedit.1.ps: $(srcdir)/gvedit.1
+	@GROFF@ -Tps -man $< >$@
 
 EXTRA_DIST = gvedit.vcxproj* gvedit.pro.in mdi.qrc $(mans) $(pdfs)
 
 CLEANFILES = moc_csettings.cpp moc_imageviewer.cpp moc_mainwindow.cpp moc_mdichild.cpp qrc_mdi.cpp
 	
-DISTCLEANFILES = attrs.txt $(pdf_DATA) qMakefile
+DISTCLEANFILES = attrs.txt $(pdf_DATA) qMakefile gvedit.1.ps
 
 clean-local:
 	-$(MAKE) -f qMakefile clean

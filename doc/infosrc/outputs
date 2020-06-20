@@ -1,8 +1,8 @@
 # List of Graphviz output formats
-# Each item consists of line of the form :<name>:<long description>
+# Each item consists of line of the form :<param1>[/<param2>...]:<format>
 # followed by a description of the format in HTML
-# The name may consist of multiple, related names, separated by '/'.
-# The long description is just text.
+# The command-line params may consist of multiple, related params, separated by '/'.
+# The format is just text.
 # The items are alphabetized when the page is created.
 #
 :eps:Encapsulated PostScript
@@ -158,7 +158,7 @@ and uses the HTML
 Note that the name given in the USEMAP attribute must be the same
 as the ID attribute of the MAP element. The Graphviz renderer
 uses the name of the graph as the ID. Thus, in the example above,
-where the graph's name is <T>mainmap</T>, we have <T>USEMAP="#mainmap"</T>
+where the graph's name is <CODE>mainmap</CODE>, we have <CODE>USEMAP="#mainmap"</CODE>
 in the IMG attribute, and x.map will look like
 <XMP>
 <map id="mainmap" name="mainmap">
@@ -257,7 +257,6 @@ respectively.
 <P>
 Additional drawing attributes can appear on nodes, edges, clusters and 
 on the graph itself. There are six new attributes: 
-<SPACER TYPE=VERTICAL size=10>
 <TABLE  border bgcolor=beige>
 <TR><TD>_draw_<TD colspan=2>General drawing without labels
 <TR><TD>_ldraw_<TD colspan=2>Label drawing
@@ -276,7 +275,6 @@ The value of these attributes consists of the concatenation of some
 (The number is parentheses gives the xdot version when the operation
 was added to the format. If no version number is given, the operation
 was in the original specification.)
-<SPACER TYPE=VERTICAL size=10>
 <TABLE border bgcolor=beige>
 <TR><TD>E x<sub>0</sub> y<sub>0</sub> w h
 <TD>Filled ellipse ((x-x<sub>0</sub>)/w)<sup>2</sup> + ((y-y<sub>0</sub>)/h)<sup>2</sup> = 1
@@ -377,11 +375,11 @@ Version info:
 <TR><TD>1.0</TD> <TD>1.9</TD><TD> </TD></TR>
 <TR><TD>1.1</TD> <TD>2.8</TD><TD>First plug-in version</TD></TR>
 <TR><TD>1.2</TD><TD>2.13</TD><TD>Support image operator <b>I</b></TD></TR>
-<TR><TD>1.3</TD><TD>2.31</TD><TD>Add numerical precision</TD</TR>
-<TR><TD>1.4</TD><TD>2.32</TD><TD>Add gradient colors</TD</TR>
-<TR><TD>1.5</TD><TD>2.34</TD><TD>Fix text layout problem; fix inverted vector in gradient; support version-specific output; new <B>t</B> op for text characteristics</TD</TR>
-<TR><TD>1.6</TD><TD>2.35</TD><TD>Add STRIKE-THROUGH bit for <tt>t</tt></TD</TR>
-<TR><TD>1.7</TD><TD>2.37</TD><TD>Add OVERLINE for <tt>t</tt></TD</TR>
+<TR><TD>1.3</TD><TD>2.31</TD><TD>Add numerical precision</TD></TR>
+<TR><TD>1.4</TD><TD>2.32</TD><TD>Add gradient colors</TD></TR>
+<TR><TD>1.5</TD><TD>2.34</TD><TD>Fix text layout problem; fix inverted vector in gradient; support version-specific output; new <B>t</B> op for text characteristics</TD></TR>
+<TR><TD>1.6</TD><TD>2.35</TD><TD>Add STRIKE-THROUGH bit for <tt>t</tt></TD></TR>
+<TR><TD>1.7</TD><TD>2.37</TD><TD>Add OVERLINE for <tt>t</tt></TD></TR>
 </TABLE>
 :plain/plain-ext:Simple text format
 The plain and plain-ext formats produce output using
@@ -469,31 +467,28 @@ The only real advantages to these formats is their terseness and their
 ease of parsing. In general, the <A HREF=#d:dot>dot</A> and
 <A HREF=#d:xdot>xdot</A> are preferable in terms of the quantity of
 information provided.
-:bmp: Windows Bitmap Format
+:bmp:Windows Bitmap Format
 Outputs images in the Windows <A HREF="http://en.wikipedia.org/wiki/Bitmap">BMP</A> format.
-:ico: Icon Image File Format
+:ico:Icon Image File Format
 Outputs images in the Windows <A HREF="http://en.wikipedia.org/wiki/ICO_(icon_image_file_format)">ICO format</A>.
-:pdf: Portable Document Format (PDF)
+:pdf:Portable Document Format (PDF)
 Produces <A HREF="http://www.adobe.com/devnet/pdf/">PDF</A> output.
 (This option assumes Graphviz includes the Cairo renderer.)
 Alternatively, one can use the <A HREF="#d:ps2">ps2</A> option to
 produce PDF-compatible PostScript, and then use a ps-to-pdf converter.
-<P>
-Note: At present, this option does not support anchors, etc. To get these
-included in your PDF output, use <A HREF="#d:ps2">ps2</A>.
-:tif/tiff: TIFF (Tag Image File Format)
+:tif/tiff:TIFF (Tag Image File Format)
 Produces <A HREF="http://www.libtiff.org/">TIFF</A> output.
-:vml/vmlz: Vector Markup Language (VML)
+:vml/vmlz:Vector Markup Language (VML)
 Produces <A HREF="http://www.w3.org/TR/NOTE-VML">VML</A> output,
 the latter in compressed format.
 <P>
 See <A HREF=#ID>Note</A>.
-:gtk: GTK canvas
+:gtk:GTK canvas
 Creates a <A HREF="http://www.gtk.org/">GTK</A> window and displays the output there.
-:webp: Image format for the Web
+:webp:Image format for the Web
 Produces output in the image format for the Web (WEBP) format, optimized for
 web devices such as tablets.
 See Wikipedia's <a href="http://en.wikipedia.org/wiki/Webp">WebP</a>
 or Google's <a href="http://code.google.com/speed/webp/">webp</a> pages.
-:xlib/x11: Xlib canvas
+:xlib/x11:Xlib canvas
 Creates an <A HREF="http://en.wikipedia.org/wiki/Xlib">Xlib</A> window and displays the output there.

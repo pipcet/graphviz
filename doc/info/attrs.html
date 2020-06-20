@@ -90,11 +90,11 @@ of the layout programs.
 </TD><TD>GC</TD><TD>double</TD><TD ALIGN="CENTER">0.3</TD><TD>0</TD><TD>sfdp, fdp only</TD> </TR>
  <TR><TD><A NAME=a:URL HREF=#d:URL>URL</A>
 </TD><TD>ENGC</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">&#60;none&#62;</TD><TD></TD><TD>svg, postscript, map only</TD> </TR>
+</TD><TD ALIGN="CENTER">&lt;none&gt;</TD><TD></TD><TD>svg, postscript, map only</TD> </TR>
  <TR><TD><A NAME=a:_background HREF=#d:_background>_background</A>
-</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">&#60;none&#62;</TD><TD></TD><TD></TD> </TR>
+</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">&lt;none&gt;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:area HREF=#d:area>area</A>
-</TD><TD>NC</TD><TD>double</TD><TD ALIGN="CENTER">1.0</TD><TD>&#62;0</TD><TD>patchwork only</TD> </TR>
+</TD><TD>NC</TD><TD>double</TD><TD ALIGN="CENTER">1.0</TD><TD>&gt;0</TD><TD>patchwork only</TD> </TR>
  <TR><TD><A NAME=a:arrowhead HREF=#d:arrowhead>arrowhead</A>
 </TD><TD>E</TD><TD><A HREF=#k:arrowType>arrowType</A>
 </TD><TD ALIGN="CENTER">normal</TD><TD></TD><TD></TD> </TR>
@@ -109,12 +109,14 @@ of the layout programs.
  <TR><TD><A NAME=a:bgcolor HREF=#d:bgcolor>bgcolor</A>
 </TD><TD>GC</TD><TD><A HREF=#k:color>color</A>
 <BR><A HREF=#k:colorList>colorList</A>
-</TD><TD ALIGN="CENTER">&#60;none&#62;</TD><TD></TD><TD></TD> </TR>
+</TD><TD ALIGN="CENTER">&lt;none&gt;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:center HREF=#d:center>center</A>
 </TD><TD>G</TD><TD><A HREF=#k:bool>bool</A>
 </TD><TD ALIGN="CENTER">false</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:charset HREF=#d:charset>charset</A>
-</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">"UTF-8"</TD><TD></TD><TD></TD> </TR>
+</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">&#34;UTF-8&#34;</TD><TD></TD><TD></TD> </TR>
+ <TR><TD><A NAME=a:class HREF=#d:class>class</A>
+</TD><TD>ENCG</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg only</TD> </TR>
  <TR><TD><A NAME=a:clusterrank HREF=#d:clusterrank>clusterrank</A>
 </TD><TD>G</TD><TD><A HREF=#k:clusterMode>clusterMode</A>
 </TD><TD ALIGN="CENTER">local</TD><TD></TD><TD>dot only</TD> </TR>
@@ -123,9 +125,9 @@ of the layout programs.
 <BR><A HREF=#k:colorList>colorList</A>
 </TD><TD ALIGN="CENTER">black</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:colorscheme HREF=#d:colorscheme>colorscheme</A>
-</TD><TD>ENCG</TD><TD>string</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD>ENCG</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:comment HREF=#d:comment>comment</A>
-</TD><TD>ENG</TD><TD>string</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD>ENG</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:compound HREF=#d:compound>compound</A>
 </TD><TD>G</TD><TD><A HREF=#k:bool>bool</A>
 </TD><TD ALIGN="CENTER">false</TD><TD></TD><TD>dot only</TD> </TR>
@@ -156,18 +158,18 @@ of the layout programs.
 </TD><TD>G</TD><TD>double</TD><TD ALIGN="CENTER">96.0<BR>0.0</TD><TD></TD><TD>svg, bitmap output only</TD> </TR>
  <TR><TD><A NAME=a:edgeURL HREF=#d:edgeURL>edgeURL</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg, map only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg, map only</TD> </TR>
  <TR><TD><A NAME=a:edgehref HREF=#d:edgehref>edgehref</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg, map only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg, map only</TD> </TR>
  <TR><TD><A NAME=a:edgetarget HREF=#d:edgetarget>edgetarget</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">&#60;none&#62;</TD><TD></TD><TD>svg, map only</TD> </TR>
+</TD><TD ALIGN="CENTER">&lt;none&gt;</TD><TD></TD><TD>svg, map only</TD> </TR>
  <TR><TD><A NAME=a:edgetooltip HREF=#d:edgetooltip>edgetooltip</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg, cmap only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg, cmap only</TD> </TR>
  <TR><TD><A NAME=a:epsilon HREF=#d:epsilon>epsilon</A>
-</TD><TD>G</TD><TD>double</TD><TD ALIGN="CENTER">.0001 * # nodes(mode == KK)<BR>.0001(mode == major)</TD><TD></TD><TD>neato only</TD> </TR>
+</TD><TD>G</TD><TD>double</TD><TD ALIGN="CENTER">.0001 * # nodes(mode == KK)<BR>.0001(mode == major)<BR>.01(mode == sgd)</TD><TD></TD><TD>neato only</TD> </TR>
  <TR><TD><A NAME=a:esep HREF=#d:esep>esep</A>
 </TD><TD>G</TD><TD><A HREF=#k:addDouble>addDouble</A>
 <BR><A HREF=#k:addPoint>addPoint</A>
@@ -183,9 +185,9 @@ of the layout programs.
 </TD><TD>ENGC</TD><TD><A HREF=#k:color>color</A>
 </TD><TD ALIGN="CENTER">black</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:fontname HREF=#d:fontname>fontname</A>
-</TD><TD>ENGC</TD><TD>string</TD><TD ALIGN="CENTER">"Times-Roman"</TD><TD></TD><TD></TD> </TR>
+</TD><TD>ENGC</TD><TD>string</TD><TD ALIGN="CENTER">&#34;Times-Roman&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:fontnames HREF=#d:fontnames>fontnames</A>
-</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg only</TD> </TR>
+</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg only</TD> </TR>
  <TR><TD><A NAME=a:fontpath HREF=#d:fontpath>fontpath</A>
 </TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">system-dependent</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:fontsize HREF=#d:fontsize>fontsize</A>
@@ -194,12 +196,12 @@ of the layout programs.
 </TD><TD>G</TD><TD><A HREF=#k:bool>bool</A>
 </TD><TD ALIGN="CENTER">true</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:gradientangle HREF=#d:gradientangle>gradientangle</A>
-</TD><TD>NCG</TD><TD>int</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD>NCG</TD><TD>int</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:group HREF=#d:group>group</A>
-</TD><TD>N</TD><TD>string</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>dot only</TD> </TR>
+</TD><TD>N</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>dot only</TD> </TR>
  <TR><TD><A NAME=a:headURL HREF=#d:headURL>headURL</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg, map only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg, map only</TD> </TR>
  <TR><TD><A NAME=a:head_lp HREF=#d:head_lp>head_lp</A>
 </TD><TD>E</TD><TD><A HREF=#k:point>point</A>
 </TD><TD ALIGN="CENTER"></TD><TD></TD><TD>write only</TD> </TR>
@@ -208,42 +210,44 @@ of the layout programs.
 </TD><TD ALIGN="CENTER">true</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:headhref HREF=#d:headhref>headhref</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg, map only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg, map only</TD> </TR>
  <TR><TD><A NAME=a:headlabel HREF=#d:headlabel>headlabel</A>
 </TD><TD>E</TD><TD><A HREF=#k:lblString>lblString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:headport HREF=#d:headport>headport</A>
 </TD><TD>E</TD><TD><A HREF=#k:portPos>portPos</A>
 </TD><TD ALIGN="CENTER">center</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:headtarget HREF=#d:headtarget>headtarget</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">&#60;none&#62;</TD><TD></TD><TD>svg, map only</TD> </TR>
+</TD><TD ALIGN="CENTER">&lt;none&gt;</TD><TD></TD><TD>svg, map only</TD> </TR>
  <TR><TD><A NAME=a:headtooltip HREF=#d:headtooltip>headtooltip</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg, cmap only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg, cmap only</TD> </TR>
  <TR><TD><A NAME=a:height HREF=#d:height>height</A>
 </TD><TD>N</TD><TD>double</TD><TD ALIGN="CENTER">0.5</TD><TD>0.02</TD><TD></TD> </TR>
  <TR><TD><A NAME=a:href HREF=#d:href>href</A>
 </TD><TD>GCNE</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg, postscript, map only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg, postscript, map only</TD> </TR>
  <TR><TD><A NAME=a:id HREF=#d:id>id</A>
 </TD><TD>GCNE</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg, postscript, map only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg, postscript, map only</TD> </TR>
  <TR><TD><A NAME=a:image HREF=#d:image>image</A>
-</TD><TD>N</TD><TD>string</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD>N</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:imagepath HREF=#d:imagepath>imagepath</A>
-</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
+ <TR><TD><A NAME=a:imagepos HREF=#d:imagepos>imagepos</A>
+</TD><TD>N</TD><TD>string</TD><TD ALIGN="CENTER">&#34;mc&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:imagescale HREF=#d:imagescale>imagescale</A>
 </TD><TD>N</TD><TD><A HREF=#k:bool>bool</A>
 <BR>string</TD><TD ALIGN="CENTER">false</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:inputscale HREF=#d:inputscale>inputscale</A>
-</TD><TD>G</TD><TD>double</TD><TD ALIGN="CENTER">&#60;none&#62;</TD><TD></TD><TD>fdp, neato only</TD> </TR>
+</TD><TD>G</TD><TD>double</TD><TD ALIGN="CENTER">&lt;none&gt;</TD><TD></TD><TD>fdp, neato only</TD> </TR>
  <TR><TD><A NAME=a:label HREF=#d:label>label</A>
 </TD><TD>ENGC</TD><TD><A HREF=#k:lblString>lblString</A>
-</TD><TD ALIGN="CENTER">"&#92;N" (nodes)<BR>"" (otherwise)</TD><TD></TD><TD></TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;\&amp;#92;N&#34; (nodes)<BR>&#34;&#34; (otherwise)</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:labelURL HREF=#d:labelURL>labelURL</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg, map only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg, map only</TD> </TR>
  <TR><TD><A NAME=a:label_scheme HREF=#d:label_scheme>label_scheme</A>
 </TD><TD>G</TD><TD>int</TD><TD ALIGN="CENTER">0</TD><TD>0</TD><TD>sfdp only</TD> </TR>
  <TR><TD><A NAME=a:labelangle HREF=#d:labelangle>labelangle</A>
@@ -257,40 +261,40 @@ of the layout programs.
 </TD><TD>E</TD><TD><A HREF=#k:color>color</A>
 </TD><TD ALIGN="CENTER">black</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:labelfontname HREF=#d:labelfontname>labelfontname</A>
-</TD><TD>E</TD><TD>string</TD><TD ALIGN="CENTER">"Times-Roman"</TD><TD></TD><TD></TD> </TR>
+</TD><TD>E</TD><TD>string</TD><TD ALIGN="CENTER">&#34;Times-Roman&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:labelfontsize HREF=#d:labelfontsize>labelfontsize</A>
 </TD><TD>E</TD><TD>double</TD><TD ALIGN="CENTER">14.0</TD><TD>1.0</TD><TD></TD> </TR>
  <TR><TD><A NAME=a:labelhref HREF=#d:labelhref>labelhref</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg, map only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg, map only</TD> </TR>
  <TR><TD><A NAME=a:labeljust HREF=#d:labeljust>labeljust</A>
-</TD><TD>GC</TD><TD>string</TD><TD ALIGN="CENTER">"c"</TD><TD></TD><TD></TD> </TR>
+</TD><TD>GC</TD><TD>string</TD><TD ALIGN="CENTER">&#34;c&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:labelloc HREF=#d:labelloc>labelloc</A>
-</TD><TD>NGC</TD><TD>string</TD><TD ALIGN="CENTER">"t"(clusters)<BR>"b"(root graphs)<BR>"c"(nodes)</TD><TD></TD><TD></TD> </TR>
+</TD><TD>NGC</TD><TD>string</TD><TD ALIGN="CENTER">&#34;t&#34;(clusters)<BR>&#34;b&#34;(root graphs)<BR>&#34;c&#34;(nodes)</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:labeltarget HREF=#d:labeltarget>labeltarget</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">&#60;none&#62;</TD><TD></TD><TD>svg, map only</TD> </TR>
+</TD><TD ALIGN="CENTER">&lt;none&gt;</TD><TD></TD><TD>svg, map only</TD> </TR>
  <TR><TD><A NAME=a:labeltooltip HREF=#d:labeltooltip>labeltooltip</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg, cmap only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg, cmap only</TD> </TR>
  <TR><TD><A NAME=a:landscape HREF=#d:landscape>landscape</A>
 </TD><TD>G</TD><TD><A HREF=#k:bool>bool</A>
 </TD><TD ALIGN="CENTER">false</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:layer HREF=#d:layer>layer</A>
 </TD><TD>ENC</TD><TD><A HREF=#k:layerRange>layerRange</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:layerlistsep HREF=#d:layerlistsep>layerlistsep</A>
-</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">","</TD><TD></TD><TD></TD> </TR>
+</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">&#34;,&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:layers HREF=#d:layers>layers</A>
 </TD><TD>G</TD><TD><A HREF=#k:layerList>layerList</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:layerselect HREF=#d:layerselect>layerselect</A>
 </TD><TD>G</TD><TD><A HREF=#k:layerRange>layerRange</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:layersep HREF=#d:layersep>layersep</A>
-</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">" :&#92;t"</TD><TD></TD><TD></TD> </TR>
+</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">&#34; </TD><TD>&amp;#92;t&#34;</TD><TD></TD> </TR>
  <TR><TD><A NAME=a:layout HREF=#d:layout>layout</A>
-</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:len HREF=#d:len>len</A>
 </TD><TD>E</TD><TD>double</TD><TD ALIGN="CENTER">1.0(neato)<BR>0.3(fdp)</TD><TD></TD><TD>fdp, neato only</TD> </TR>
  <TR><TD><A NAME=a:levels HREF=#d:levels>levels</A>
@@ -298,21 +302,21 @@ of the layout programs.
  <TR><TD><A NAME=a:levelsgap HREF=#d:levelsgap>levelsgap</A>
 </TD><TD>G</TD><TD>double</TD><TD ALIGN="CENTER">0.0</TD><TD></TD><TD>neato only</TD> </TR>
  <TR><TD><A NAME=a:lhead HREF=#d:lhead>lhead</A>
-</TD><TD>E</TD><TD>string</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>dot only</TD> </TR>
+</TD><TD>E</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>dot only</TD> </TR>
  <TR><TD><A NAME=a:lheight HREF=#d:lheight>lheight</A>
 </TD><TD>GC</TD><TD>double</TD><TD ALIGN="CENTER"></TD><TD></TD><TD>write only</TD> </TR>
  <TR><TD><A NAME=a:lp HREF=#d:lp>lp</A>
 </TD><TD>EGC</TD><TD><A HREF=#k:point>point</A>
 </TD><TD ALIGN="CENTER"></TD><TD></TD><TD>write only</TD> </TR>
  <TR><TD><A NAME=a:ltail HREF=#d:ltail>ltail</A>
-</TD><TD>E</TD><TD>string</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>dot only</TD> </TR>
+</TD><TD>E</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>dot only</TD> </TR>
  <TR><TD><A NAME=a:lwidth HREF=#d:lwidth>lwidth</A>
 </TD><TD>GC</TD><TD>double</TD><TD ALIGN="CENTER"></TD><TD></TD><TD>write only</TD> </TR>
  <TR><TD><A NAME=a:margin HREF=#d:margin>margin</A>
 </TD><TD>NCG</TD><TD>double<BR><A HREF=#k:point>point</A>
-</TD><TD ALIGN="CENTER">&#60;device-dependent&#62;</TD><TD></TD><TD></TD> </TR>
+</TD><TD ALIGN="CENTER">&lt;device-dependent&gt;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:maxiter HREF=#d:maxiter>maxiter</A>
-</TD><TD>G</TD><TD>int</TD><TD ALIGN="CENTER">100 &#42; # nodes(mode == KK)<BR>200(mode == major)<BR>600(fdp)</TD><TD></TD><TD>fdp, neato only</TD> </TR>
+</TD><TD>G</TD><TD>int</TD><TD ALIGN="CENTER">100 * # nodes(mode == KK)<BR>200(mode == major)<BR>30(mode == sgd)<BR>600(fdp)</TD><TD></TD><TD>fdp, neato only</TD> </TR>
  <TR><TD><A NAME=a:mclimit HREF=#d:mclimit>mclimit</A>
 </TD><TD>G</TD><TD>double</TD><TD ALIGN="CENTER">1.0</TD><TD></TD><TD>dot only</TD> </TR>
  <TR><TD><A NAME=a:mindist HREF=#d:mindist>mindist</A>
@@ -344,11 +348,11 @@ of the layout programs.
 <BR><A NAME=a:nslimit1 HREF=#d:nslimit1>nslimit1</A>
 </TD><TD>G</TD><TD>double</TD><TD ALIGN="CENTER"></TD><TD></TD><TD>dot only</TD> </TR>
  <TR><TD><A NAME=a:ordering HREF=#d:ordering>ordering</A>
-</TD><TD>GN</TD><TD>string</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>dot only</TD> </TR>
+</TD><TD>GN</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>dot only</TD> </TR>
  <TR><TD><A NAME=a:orientation HREF=#d:orientation>orientation</A>
 </TD><TD>N</TD><TD>double</TD><TD ALIGN="CENTER">0.0</TD><TD>360.0</TD><TD></TD> </TR>
  <TR><TD><A NAME=aa:orientation HREF=#dd:orientation>orientation</A>
-</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:outputorder HREF=#d:outputorder>outputorder</A>
 </TD><TD>G</TD><TD><A HREF=#k:outputMode>outputMode</A>
 </TD><TD ALIGN="CENTER">breadthfirst</TD><TD></TD><TD></TD> </TR>
@@ -421,15 +425,15 @@ of the layout programs.
 </TD><TD>G</TD><TD>double</TD><TD ALIGN="CENTER">96.0<BR>0.0</TD><TD></TD><TD>svg, bitmap output only</TD> </TR>
  <TR><TD><A NAME=a:root HREF=#d:root>root</A>
 </TD><TD>GN</TD><TD>string<BR><A HREF=#k:bool>bool</A>
-</TD><TD ALIGN="CENTER">&#60;none&#62;(graphs)<BR>false(nodes)</TD><TD></TD><TD>circo, twopi only</TD> </TR>
+</TD><TD ALIGN="CENTER">&lt;none&gt;(graphs)<BR>false(nodes)</TD><TD></TD><TD>circo, twopi only</TD> </TR>
  <TR><TD><A NAME=a:rotate HREF=#d:rotate>rotate</A>
 </TD><TD>G</TD><TD>int</TD><TD ALIGN="CENTER">0</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:rotation HREF=#d:rotation>rotation</A>
 </TD><TD>G</TD><TD>double</TD><TD ALIGN="CENTER">0</TD><TD></TD><TD>sfdp only</TD> </TR>
  <TR><TD><A NAME=a:samehead HREF=#d:samehead>samehead</A>
-</TD><TD>E</TD><TD>string</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>dot only</TD> </TR>
+</TD><TD>E</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>dot only</TD> </TR>
  <TR><TD><A NAME=a:sametail HREF=#d:sametail>sametail</A>
-</TD><TD>E</TD><TD>string</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>dot only</TD> </TR>
+</TD><TD>E</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>dot only</TD> </TR>
  <TR><TD><A NAME=a:samplepoints HREF=#d:samplepoints>samplepoints</A>
 </TD><TD>N</TD><TD>int</TD><TD ALIGN="CENTER">8(output)<BR>20(overlap and image maps)</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:scale HREF=#d:scale>scale</A>
@@ -445,7 +449,7 @@ of the layout programs.
 </TD><TD>N</TD><TD><A HREF=#k:shape>shape</A>
 </TD><TD ALIGN="CENTER">ellipse</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:shapefile HREF=#d:shapefile>shapefile</A>
-</TD><TD>N</TD><TD>string</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD>N</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:showboxes HREF=#d:showboxes>showboxes</A>
 </TD><TD>ENG</TD><TD>int</TD><TD ALIGN="CENTER">0</TD><TD>0</TD><TD>dot only</TD> </TR>
  <TR><TD><A NAME=a:sides HREF=#d:sides>sides</A>
@@ -457,7 +461,7 @@ of the layout programs.
 </TD><TD>N</TD><TD>double</TD><TD ALIGN="CENTER">0.0</TD><TD>-100.0</TD><TD></TD> </TR>
  <TR><TD><A NAME=a:smoothing HREF=#d:smoothing>smoothing</A>
 </TD><TD>G</TD><TD><A HREF=#k:smoothType>smoothType</A>
-</TD><TD ALIGN="CENTER">"none"</TD><TD></TD><TD>sfdp only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;none&#34;</TD><TD></TD><TD>sfdp only</TD> </TR>
  <TR><TD><A NAME=a:sortv HREF=#d:sortv>sortv</A>
 </TD><TD>GCN</TD><TD>int</TD><TD ALIGN="CENTER">0</TD><TD>0</TD><TD></TD> </TR>
  <TR><TD><A NAME=a:splines HREF=#d:splines>splines</A>
@@ -465,15 +469,15 @@ of the layout programs.
 <BR>string</TD><TD ALIGN="CENTER"></TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:start HREF=#d:start>start</A>
 </TD><TD>G</TD><TD><A HREF=#k:startType>startType</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>fdp, neato only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>fdp, neato only</TD> </TR>
  <TR><TD><A NAME=a:style HREF=#d:style>style</A>
 </TD><TD>ENCG</TD><TD><A HREF=#k:style>style</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:stylesheet HREF=#d:stylesheet>stylesheet</A>
-</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg only</TD> </TR>
+</TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg only</TD> </TR>
  <TR><TD><A NAME=a:tailURL HREF=#d:tailURL>tailURL</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg, map only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg, map only</TD> </TR>
  <TR><TD><A NAME=a:tail_lp HREF=#d:tail_lp>tail_lp</A>
 </TD><TD>E</TD><TD><A HREF=#k:point>point</A>
 </TD><TD ALIGN="CENTER"></TD><TD></TD><TD>write only</TD> </TR>
@@ -482,25 +486,25 @@ of the layout programs.
 </TD><TD ALIGN="CENTER">true</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:tailhref HREF=#d:tailhref>tailhref</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg, map only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg, map only</TD> </TR>
  <TR><TD><A NAME=a:taillabel HREF=#d:taillabel>taillabel</A>
 </TD><TD>E</TD><TD><A HREF=#k:lblString>lblString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:tailport HREF=#d:tailport>tailport</A>
 </TD><TD>E</TD><TD><A HREF=#k:portPos>portPos</A>
 </TD><TD ALIGN="CENTER">center</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:tailtarget HREF=#d:tailtarget>tailtarget</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">&#60;none&#62;</TD><TD></TD><TD>svg, map only</TD> </TR>
+</TD><TD ALIGN="CENTER">&lt;none&gt;</TD><TD></TD><TD>svg, map only</TD> </TR>
  <TR><TD><A NAME=a:tailtooltip HREF=#d:tailtooltip>tailtooltip</A>
 </TD><TD>E</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg, cmap only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg, cmap only</TD> </TR>
  <TR><TD><A NAME=a:target HREF=#d:target>target</A>
 </TD><TD>ENGC</TD><TD><A HREF=#k:escString>escString</A>
-<BR>string</TD><TD ALIGN="CENTER">&#60;none&#62;</TD><TD></TD><TD>svg, map only</TD> </TR>
+<BR>string</TD><TD ALIGN="CENTER">&lt;none&gt;</TD><TD></TD><TD>svg, map only</TD> </TR>
  <TR><TD><A NAME=a:tooltip HREF=#d:tooltip>tooltip</A>
 </TD><TD>NEC</TD><TD><A HREF=#k:escString>escString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD>svg, cmap only</TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD>svg, cmap only</TD> </TR>
  <TR><TD><A NAME=a:truecolor HREF=#d:truecolor>truecolor</A>
 </TD><TD>G</TD><TD><A HREF=#k:bool>bool</A>
 </TD><TD ALIGN="CENTER"></TD><TD></TD><TD>bitmap output only</TD> </TR>
@@ -509,7 +513,7 @@ of the layout programs.
 </TD><TD ALIGN="CENTER"></TD><TD></TD><TD>write only</TD> </TR>
  <TR><TD><A NAME=a:viewport HREF=#d:viewport>viewport</A>
 </TD><TD>G</TD><TD><A HREF=#k:viewPort>viewPort</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:voro_margin HREF=#d:voro_margin>voro_margin</A>
 </TD><TD>G</TD><TD>double</TD><TD ALIGN="CENTER">0.05</TD><TD>0.0</TD><TD>not dot</TD> </TR>
  <TR><TD><A NAME=a:weight HREF=#d:weight>weight</A>
@@ -520,7 +524,7 @@ of the layout programs.
 </TD><TD>G</TD><TD>string</TD><TD ALIGN="CENTER"></TD><TD></TD><TD>xdot only</TD> </TR>
  <TR><TD><A NAME=a:xlabel HREF=#d:xlabel>xlabel</A>
 </TD><TD>EN</TD><TD><A HREF=#k:lblString>lblString</A>
-</TD><TD ALIGN="CENTER">""</TD><TD></TD><TD></TD> </TR>
+</TD><TD ALIGN="CENTER">&#34;&#34;</TD><TD></TD><TD></TD> </TR>
  <TR><TD><A NAME=a:xlp HREF=#d:xlp>xlp</A>
 </TD><TD>NE</TD><TD><A HREF=#k:point>point</A>
 </TD><TD ALIGN="CENTER"></TD><TD></TD><TD>write only</TD> </TR>
@@ -635,6 +639,26 @@ of the layout programs.
   <TT>"Latin1"</TT>. The <B>charset</B> attribute is case-insensitive.
   Note that if the character encoding used in the input does not
   match the <B>charset</B> value, the resulting output may be very strange.
+
+<DT><A NAME=d:class HREF=#a:class><STRONG>class</STRONG></A>
+<DD>  Classnames to attach to the node, edge, graph, or cluster's SVG element.
+  Combine with <a href="#d:stylesheet">stylesheet</a> for styling SVG output
+  using CSS classnames.
+  <p>
+  Multiple space-separated classes are supported.
+  <p>
+  <pre>
+  digraph G {
+    graph [class="cats"];
+  
+    subgraph cluster_big {
+      graph [class="big_cats"];
+  
+      "Lion" [class="yellow social"];
+      "Snow Leopard" [class="white solitary"];
+    };
+  }
+  </pre>
 
 <DT><A NAME=d:clusterrank HREF=#a:clusterrank><STRONG>clusterrank</STRONG></A>
 <DD>  Mode used for handling clusters. If <B>clusterrank</B> is "local", a
@@ -793,7 +817,7 @@ of the layout programs.
 
 <DT><A NAME=d:epsilon HREF=#a:epsilon><STRONG>epsilon</STRONG></A>
 <DD>  Terminating condition. If the length squared of all energy gradients are
-  < <B>epsilon</B>, the algorithm stops.
+  &lt; <B>epsilon</B>, the algorithm stops.
 
 <DT><A NAME=d:esep HREF=#a:esep><STRONG>esep</STRONG></A>
 <DD>  Margin used around polygons for purposes of spline edge routing.
@@ -989,7 +1013,7 @@ of the layout programs.
 <DT><A NAME=d:id HREF=#a:id><STRONG>id</STRONG></A>
 <DD>  Allows the graph author to provide an id for graph objects which is to be included in the output.
   Normal "&#92;N", "&#92;E", "&#92;G" substitutions are applied.
-  If provided, it is the responsiblity of the provider to keep
+  If provided, it is the responsibility of the provider to keep
   its values sufficiently unique for its intended downstream use.
   Note, in particular, that "&#92;E" does not provide a unique id for multi-edges.
   If no id attribute is provided, then a unique internal id is used. However, 
@@ -1035,6 +1059,22 @@ of the layout programs.
   The first directory in which a file of the given name is found will be used to
   load the image. If <tt>imagepath</tt> is not set, relative pathnames for the image
   file will be interpreted with respect to the current working directory.
+
+<DT><A NAME=d:imagepos HREF=#a:imagepos><STRONG>imagepos</STRONG></A>
+<DD>  Attribute controlling how an image is positioned within its containing node.  This
+  only has an effect when the image is smaller than the containing node.  The
+  default is to be centered both horizontally and vertically.  Valid values:
+  <TABLE>
+  <TR><TD>tl</TD><TD>Top Left</TD></TR>
+  <TR><TD>tc</TD><TD>Top Centered</TD></TR>
+  <TR><TD>tr</TD><TD>Top Right</TD></TR>
+  <TR><TD>ml</TD><TD>Middle Left</TD></TR>
+  <TR><TD>mc</TD><TD>Middle Centered <I>(the default)</I></TD></TR>
+  <TR><TD>mr</TD><TD>Middle Right</TD></TR>
+  <TR><TD>bl</TD><TD>Bottom Left</TD></TR>
+  <TR><TD>bc</TD><TD>Bottom Centered</TD></TR>
+  <TR><TD>br</TD><TD>Bottom Right</TD></TR>
+  </TABLE>
 
 <DT><A NAME=d:imagescale HREF=#a:imagescale><STRONG>imagescale</STRONG></A>
 <DD>  Attribute controlling how an image fills its
@@ -1197,7 +1237,7 @@ of the layout programs.
 <DD>  Specifies a linearly ordered list of layer names attached to the graph
   The graph is then output in separate layers. Only those components
   belonging to the current output layer appear. For more information,
-  see the page <A HREF="http://www.graphviz.org/wiki/how-use-drawing-layers-overlays">How to use drawing layers (overlays)</A>.
+  see the page <A HREF="../../../faq/#FaqOverlays">How to use drawing layers (overlays)</A>.
 
 <DT><A NAME=d:layerselect HREF=#a:layerselect><STRONG>layerselect</STRONG></A>
 <DD>  Selects a list of layers to be emitted.
@@ -1292,8 +1332,12 @@ of the layout programs.
   neato uses stress majorization. If <B>mode</B> is <TT>"KK"</TT>,
   neato uses a version of the gradient descent method. The only advantage
   to the latter technique is that it is sometimes appreciably faster for
-  small (number of nodes < 100) graphs. A significant disadvantage is that
-  it may cycle.
+  small (number of nodes &lt; 100) graphs. A significant disadvantage is that
+  it may cycle. If <B>mode</B> is <TT>"sgd"</TT>, neato uses a version of the
+  stochastic gradient descent method. The advantage of sgd is faster and more
+  reliable convergence than both the previous methods, while the disadvantage
+  is that it runs in a fixed number of iterations and may require larger
+  values of <TT>"maxiter"</TT> in some graphs.
   <P>
   There are two experimental modes in neato, "hier", which adds a top-down
   directionality similar to the layout used in dot, and "ipsep", which
@@ -1807,7 +1851,7 @@ of the layout programs.
   how the file is used depends on the
   <A HREF="output.html">output format</A>.  For further details, see
   <A HREF=output.html#d:image_fmts>Image Formats</A> and
-  <A HREF=http://www.graphviz.org/wiki/how-create-custom-shapes#ext_image>External PostScript files</A>.
+  <A HREF="../../../faq/#ext_image">External PostScript files</A>.
   <P>
   There is one exception to this usage.
   If <B>shape</B> is set to "epsf", shapefile gives
@@ -1815,12 +1859,12 @@ of the layout programs.
   The graphics defined must be contain all of the
   node content, including any desired boundaries.
   For further details, see
-  <A HREF=http://www.graphviz.org/wiki/how-create-custom-shapes#ext_ps>
+  <A HREF="../../../faq/#ext_ps_file">
   External PostScript files</A>.
 
 <DT><A NAME=d:showboxes HREF=#a:showboxes><STRONG>showboxes</STRONG></A>
 <DD>  Print guide boxes in PostScript at the beginning of
-  routesplines if 1, or at the end if 2. (Debugging)
+  routesplines if 1, or at the end if 2. (Debugging, TB mode only!)
 
 <DT><A NAME=d:sides HREF=#a:sides><STRONG>sides</STRONG></A>
 <DD>  Number of sides if <A HREF=#d:shape><B>shape</B></A>=polygon.
@@ -1931,7 +1975,8 @@ of the layout programs.
   Of course, the component can also explicitly set its <TT>style</TT> attribute to the desired value.
 
 <DT><A NAME=d:stylesheet HREF=#a:stylesheet><STRONG>stylesheet</STRONG></A>
-<DD>  A URL or pathname specifying an XML style sheet, used in SVG output.
+<DD>  A URL or pathname specifying an XML style sheet, used in SVG output. Combine
+  with <a href="#d:class">class</a> to style elements using CSS selectors.
 
 <DT><A NAME=d:tailURL HREF=#a:tailURL><STRONG>tailURL</STRONG></A>
 <DD>  If <B>tailURL</B> is defined, it is
@@ -2124,15 +2169,14 @@ enclosed in the parentheses,  <TT>(...)+</TT> indicates 1 or more, and
     <TR><TD>"open"<TD><IMG SRC="a_open.gif">
         <TD>"halfopen"<TD><IMG SRC="a_halfopen.gif"></TR>
     <TR><TD>"vee"<TD><IMG SRC="a_open.gif">
-        <TD>"circle"<TD><IMG SRC="a_circle.gif"></TR>
   </TABLE>
   <P>
-  These are the basic set of backward-compatible arrow shapes. In addition,
-  there is a grammar of <A HREF=arrows.html>arrow shapes</A>
-  which can be used to describe a collection of 2,313,441 arrow combinations of the 
-  39 varations of the primitive set of 10 arrows. The basic arrows shown
-  above contain all of the primitive shapes
-  (<TT>box</TT>, <TT>crow</TT>, <TT>circle</TT>, <TT>diamond</TT>,
+  The examples above show a set of commonly used arrow shapes.
+  There is a grammar of <A HREF=arrows.html>arrow shapes</A>
+  which can be used to describe a collection of 3,111,696 arrow combinations of the 
+  42 variations of the primitive set of 11 arrows. The basic arrows shown
+  above contain most of the primitive shapes
+  (<TT>box</TT>, <TT>crow</TT>, <TT>diamond</TT>,
   <TT>dot</TT>, <TT>inv</TT>, <TT>none</tt>,
   <TT>normal</tt>, <TT>tee</TT>, <TT>vee</TT>)
   plus ones that can be derived from the grammar
@@ -2149,11 +2193,11 @@ enclosed in the parentheses,  <TT>(...)+</TT> indicates 1 or more, and
 <DD>Colors can be specified using one of four formats.
          <TABLE><TR><TD>"#%2x%2x%2x"<TD>Red-Green-Blue (RGB)</TR>
          <TR><TD>"#%2x%2x%2x%2x"<TD>Red-Green-Blue-Alpha (RGBA)</TR>
-         <TR><TD>"H[,&#160;]+S[,&#160;]+V"<TD>Hue-Saturation-Value (HSV) 0.0 <= H,S,V <= 1.0</TR>
+         <TR><TD>"H[,&#160;]+S[,&#160;]+V"<TD>Hue-Saturation-Value (HSV) 0.0 &lt;= H,S,V &lt;= 1.0</TR>
          <TR><TD>string<TD><A HREF=colors.html>color name</A></TR></TABLE>
    The specification for the RGB and RGBA formats are the format strings used by
    <TT>sscanf</TT> to scan the color value. Thus, these values have the form
-   "#RGB" or "#RGBA", where R, G, B, and A each consist of 2 hexidecimal
+   "#RGB" or "#RGBA", where R, G, B, and A each consist of 2 hexadecimal
    digits, and can be separated by whitespace. HSV colors have the form of 3
    numbers between 0 and 1, separated by whitespace or commas.
   <P>
@@ -2517,6 +2561,7 @@ enclosed in the parentheses,  <TT>(...)+</TT> indicates 1 or more, and
   Examples of linear and radial gradient fill can be seen under  <A HREF=#k:colorList>colorList</A>.
   <P>
     <TABLE border=1>
+      <CAPTION>Basic style settings for nodes</CAPTION>
       <TR><TD align="center"><tt>solid</tt> <TD><IMG SRC="n_solid.png">
          <TD align="center"><tt>dashed</tt> <TD><IMG SRC="n_dashed.png">
          <TD align="center"><tt>dotted</tt> <TD><IMG SRC="n_dotted.png"> </TR>
@@ -2526,18 +2571,18 @@ enclosed in the parentheses,  <TT>(...)+</TT> indicates 1 or more, and
       <TR><TD align="center"><tt>filled</tt> <TD><IMG SRC="n_filled.png">
          <TD align="center"><tt>striped</tt> <TD><IMG SRC="n_striped.png">
          <TD align="center"><tt>wedged</tt> <TD><IMG SRC="n_wedged.png"></TR>
-      <CAPTION>Basic style settings for nodes</CAPTION>
     </TABLE>
   <P>
     <TABLE border=1>
+      <CAPTION>Basic style settings for edges</CAPTION>
       <TR><TD align="center"><tt>solid</tt> <TD><IMG SRC="e_solid.png"> 
           <TD align="center"><tt>dashed</tt> <TD><IMG SRC="e_dashed.png"> </TR>
       <TR><TD align="center"><tt>dotted</tt> <TD><IMG SRC="e_dotted.png">
           <TD align="center"><tt>bold</tt> <TD><IMG SRC="e_bold.png"></TR> <TR>
-      <CAPTION>Basic style settings for edges</CAPTION>
     </TABLE>
   <P>
     <TABLE border=1>
+      <CAPTION>Basic style settings for clusters</CAPTION>
       <TR><TD align="center"><tt>solid</tt> <TD><IMG SRC="c_solid.png"> 
           <TD align="center"><tt>dashed</tt> <TD><IMG SRC="c_dashed.png">
           <TD align="center"><tt>dotted</tt> <TD><IMG SRC="c_dotted.png">
@@ -2545,7 +2590,6 @@ enclosed in the parentheses,  <TT>(...)+</TT> indicates 1 or more, and
       <TR><TD align="center"><tt>rounded</tt> <TD><IMG SRC="c_rounded.png">
           <TD align="center"><tt>filled</tt> <TD><IMG SRC="c_filled.png">
           <TD align="center"><tt>striped</tt> <TD><IMG SRC="c_striped.png"></TR>
-      <CAPTION>Basic style settings for clusters</CAPTION>
     </TABLE>
   <P>
   The effect of <tt>style=tapered</tt> depends on the <A HREF=#d:penwidth>penwidth</A>,

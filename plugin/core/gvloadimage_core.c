@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#if HAVE_SYS_MMAN_H
+#ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
 #ifdef _MSC_VER
@@ -140,7 +140,7 @@ static void core_loadimage_vrml(GVJ_t * job, usershape_t *us, boxf b, boolean fi
 
 static void ps_freeimage(usershape_t *us)
 {
-#if HAVE_SYS_MMAN_H
+#ifdef HAVE_SYS_MMAN_H
     munmap(us->data, us->datasize);
 #else
     free(us->data);
@@ -175,8 +175,10 @@ static void core_loadimage_ps(GVJ_t * job, usershape_t *us, boxf b, boolean fill
             case FT_EPS:
 		fstat(fd, &statbuf);
 		us->datasize = statbuf.st_size;
-#if HAVE_SYS_MMAN_H
+#ifdef HAVE_SYS_MMAN_H
 		us->data = mmap(0, statbuf.st_size, PROT_READ, MAP_SHARED, fd, 0);
+		if (us->data == MAP_FAILED)
+			us->data = NULL;
 #else
 		us->data = malloc(statbuf.st_size);
 		read(fd, us->data, statbuf.st_size);
@@ -255,7 +257,7 @@ static void core_loadimage_tk(GVJ_t * job, usershape_t *us, boxf b, boolean fill
 	us->name, (b.UR.x + b.LL.x) / 2, (b.UR.y + b.LL.y) / 2);
 }
 
-void core_loadimage_null(GVJ_t *gvc, usershape_t *us, boxf b, boolean filled)
+static void core_loadimage_null(GVJ_t *gvc, usershape_t *us, boxf b, boolean filled)
 {
     /* null function - basically suppress the missing loader message */
 }

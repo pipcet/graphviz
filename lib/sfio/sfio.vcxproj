@@ -40,7 +40,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\Graphviz\bin\</OutDir>
-    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -68,7 +68,6 @@
     <ClCompile>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)windows\include;$(SolutionDir)lib\vmalloc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
       <EnablePREfast>true</EnablePREfast>
@@ -91,7 +90,6 @@
     <ClCompile Include="sfexcept.c" />
     <ClCompile Include="sfexit.c" />
     <ClCompile Include="sfextern.c" />
-    <ClCompile Include="sffcvt.c" />
     <ClCompile Include="sffilbuf.c" />
     <ClCompile Include="sfflsbuf.c" />
     <ClCompile Include="sfgetd.c" />
@@ -117,7 +115,6 @@
     <ClCompile Include="sfio_f\_sfvalue.c" />
     <ClCompile Include="sfllen.c" />
     <ClCompile Include="sfmode.c" />
-    <ClCompile Include="sfmove.c" />
     <ClCompile Include="sfmutex.c" />
     <ClCompile Include="sfnew.c" />
     <ClCompile Include="sfnotify.c" />

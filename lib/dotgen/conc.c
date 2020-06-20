@@ -150,7 +150,7 @@ static void rebuild_vlists(graph_t * g)
 	infuse(g, n);
 	for (e = agfstout(g, n); e; e = agnxtout(g, e)) {
 	    for (rep = e; ED_to_virt(rep); rep = ED_to_virt(rep));
-	    while (ND_rank(aghead(rep)) < ND_rank(aghead(e))) {
+	    while (rep != NULL && ND_rank(aghead(rep)) < ND_rank(aghead(e))) {
 		infuse(g, aghead(rep));
 		rep = ND_out(aghead(rep)).list[0];
 	    }
@@ -159,7 +159,11 @@ static void rebuild_vlists(graph_t * g)
 
     for (r = GD_minrank(g); r <= GD_maxrank(g); r++) {
 	lead = GD_rankleader(g)[r];
-	if (GD_rank(dot_root(g))[r].v[ND_order(lead)] != lead) {
+	if (lead == NULL) {
+		agerr(AGERR, "rebuiltd_vlists: lead is null for rank %d\n", r);
+		longjmp(jbuf, 1);
+	}
+	else if (GD_rank(dot_root(g))[r].v[ND_order(lead)] != lead) {
 	    agerr(AGERR, "rebuiltd_vlists: rank lead %s not in order %d of rank %d\n", 
 		agnameof(lead), ND_order(lead), r);
 	    longjmp(jbuf, 1);
