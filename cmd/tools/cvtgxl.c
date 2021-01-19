@@ -22,7 +22,7 @@
 #include <getopt.h>
 
 #include "convert.h"
-#include "ingraphs.h"
+#include <ingraphs/ingraphs.h>
 
 typedef enum { Unset, ToGV, ToGXL } mode;
 
@@ -150,6 +150,8 @@ static void initargs(int argc, char **argv)
 	    act = ToGXL;
 	    break;
 	case 'o':
+	    if (outFile != NULL)
+		fclose(outFile);
 	    outFile = openFile(optarg, "w");
 	    break;
 	case ':':

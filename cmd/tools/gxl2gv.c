@@ -13,7 +13,7 @@
 
 
 #include    "convert.h"
-#include    "agxbuf.h"
+#include    <cgraph/agxbuf.h>
 #ifdef HAVE_EXPAT
 #include    <expat.h>
 #include    <ctype.h>
@@ -48,15 +48,15 @@ struct slist {
     char buf[1];
 };
 
-#define NEW(t)      (t*)malloc(sizeof(t))
-#define N_NEW(n,t)  (t*)malloc((n)*sizeof(t))
+#define NEW(t)      malloc(sizeof(t))
+#define N_NEW(n,t)  calloc((n),sizeof(t))
 /* Round x up to next multiple of y, which is a power of 2 */
 #define ROUND2(x,y) (((x) + ((y)-1)) & ~((y)-1))
 
 static void pushString(slist ** stk, const char *s)
 {
     int sz = ROUND2(sizeof(slist) + strlen(s), sizeof(void *));
-    slist *sp = (slist *) N_NEW(sz, char);
+    slist *sp = N_NEW(sz, char);
     strcpy(sp->buf, s);
     sp->next = *stk;
     *stk = sp;
@@ -536,9 +536,7 @@ startElementHandler(void *userData, const char *name, const char **atts)
 
 	ud->listen = TRUE;
 	if (ud->compositeReadState) {
-	    agxbputc(&ud->composite_buffer, '<');
-	    agxbput(&ud->composite_buffer, (char *) name);
-	    agxbputc(&ud->composite_buffer, '>');
+	    agxbprint(&ud->composite_buffer, "<%s>", name);
 	}
     } else if (strcmp(name, "rel") == 0 || strcmp(name, "relend") == 0) {
 	fprintf(stderr, "%s element is ignored by DOT\n", name);
@@ -551,8 +549,7 @@ startElementHandler(void *userData, const char *name, const char **atts)
 	pos = get_xml_attr("xlink:href", atts);
 	if (pos > 0) {
 	    const char *href = atts[pos];
-	    agxbput(&ud->xml_attr_value, GXL_LOC);
-	    agxbput(&ud->xml_attr_value, (char *) href);
+	    agxbprint(&ud->xml_attr_value, "%s%s", GXL_LOC, href);
 	}
     } else if (strcmp(name, "seq") == 0
 	       || strcmp(name, "set") == 0
@@ -560,9 +557,7 @@ startElementHandler(void *userData, const char *name, const char **atts)
 	       || strcmp(name, "tup") == 0 || strcmp(name, "enum") == 0) {
 
 	ud->compositeReadState = TRUE;
-	agxbputc(&ud->composite_buffer, '<');
-	agxbput(&ud->composite_buffer, (char *) name);
-	agxbputc(&ud->composite_buffer, '>');
+	agxbprint(&ud->composite_buffer, "<%s>", name);
     } else {
 	/* must be some extension */
 	fprintf(stderr,
@@ -633,27 +628,20 @@ static void endElementHandler(void *userData, const char *name)
 	    setGraphAttr(G, name, value, ud);
 	    break;
 	}
-	if (dynbuf)
-	    free(dynbuf);
+	free(dynbuf);
 	ud->globalAttrType = TAG_NONE;
     } else if (strcmp(name, "string") == 0
 	       || strcmp(name, "bool") == 0
 	       || strcmp(name, "int") == 0 || strcmp(name, "float") == 0) {
 	ud->listen = FALSE;
 	if (ud->compositeReadState) {
-	    agxbputc(&ud->composite_buffer, '<');
-	    agxbputc(&ud->composite_buffer, '/');
-	    agxbput(&ud->composite_buffer, (char *) name);
-	    agxbputc(&ud->composite_buffer, '>');
+	    agxbprint(&ud->composite_buffer, "</%s>", name);
 	}
     } else if (strcmp(name, "seq") == 0
 	       || strcmp(name, "set") == 0
 	       || strcmp(name, "bag") == 0
 	       || strcmp(name, "tup") == 0 || strcmp(name, "enum") == 0) {
-	agxbputc(&ud->composite_buffer, '<');
-	agxbputc(&ud->composite_buffer, '/');
-	agxbput(&ud->composite_buffer, (char *) name);
-	agxbputc(&ud->composite_buffer, '>');
+	agxbprint(&ud->composite_buffer, "</%s>", name);
     }
 }
 

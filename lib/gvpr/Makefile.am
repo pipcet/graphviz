@@ -7,13 +7,7 @@ HOSTCC ?= $(CC)
 GVPR_VERSION="2:0:0"
 
 AM_CPPFLAGS = \
-	-I$(top_srcdir) \
-	-I$(top_srcdir)/lib/expr \
-	-I$(top_builddir)/lib/expr \
-	-I$(top_srcdir)/lib/vmalloc \
-	-I$(top_srcdir)/lib/sfio \
-	-I$(top_srcdir)/lib/ast \
-	-I$(top_srcdir)/lib/ingraphs \
+	-I$(top_srcdir)/lib \
 	-I$(top_srcdir)/lib/common \
 	-I$(top_builddir)/lib/common \
 	-I$(top_srcdir)/lib/cgraph \
@@ -26,7 +20,19 @@ noinst_LTLIBRARIES = libgvpr_C.la
 lib_LTLIBRARIES = libgvpr.la
 pkgconfig_DATA = libgvpr.pc
 man_MANS = gvpr.3
+if ENABLE_MAN_PDFS
 pdf_DATA = gvpr.3.pdf
+endif
+
+if ENABLE_MAN_PDFS
+if HAVE_PS2PDF
+pdf = $(pdf_DATA)
+else
+pdf = ERROR_NO_PS2PDF
+endif
+else
+pdf =
+endif
 
 libgvpr_C_la_SOURCES = actions.c compile.c gvpr.c gprstate.c parse.c queue.c 
 $(libgvpr_C_la_OBJECTS): gdefs.h
@@ -35,11 +41,15 @@ libgvpr_C_la_DEPENDENCIES = \
 	$(top_builddir)/lib/common/libcommon_C.la \
 	$(top_builddir)/lib/ingraphs/libingraphs_C.la
 
+if ENABLE_MAN_PDFS
+if HAVE_PS2PDF
 gvpr.3.pdf: gvpr.3.ps
-	@PS2PDF@ $< $@
+	@PS2PDF@ $<
 
 gvpr.3.ps: $(srcdir)/gvpr.3
 	@GROFF@ -Tps -man $< >$@
+endif
+endif
 
 libgvpr_la_LDFLAGS = -version-info $(GVPR_VERSION) -no-undefined
 libgvpr_la_SOURCES = $(libgvpr_C_la_SOURCES)
@@ -61,6 +71,6 @@ mkdefs$(EXEEXT):
 gdefs.h: $(top_srcdir)/lib/gvpr/gprdata mkdefs$(EXEEXT)
 	./mkdefs$(EXEEXT) gdefs.h < $(top_srcdir)/lib/gvpr/gprdata
 
-EXTRA_DIST = $(man_MANS) $(pdf_DATA) gprdata mkdefs.c gdefs.h trie.c gvprlib.vcxproj*
+EXTRA_DIST = $(man_MANS) $(pdf) gprdata mkdefs.c gdefs.h trie.c gvprlib.vcxproj*
 
-DISTCLEANFILES = $(pdf_DATA) gdefs.h mkdefs$(EXEEXT) gvpr.3.ps
+DISTCLEANFILES = $(pdf) gdefs.h mkdefs$(EXEEXT) gvpr.3.ps

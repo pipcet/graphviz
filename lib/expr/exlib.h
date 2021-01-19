@@ -25,8 +25,7 @@ extern "C" {
 #ifndef _EXLIB_H
 #define _EXLIB_H
 
-#include <align.h>
-#include <ast.h>
+#include <ast/ast.h>
 
 #define sfstrseek(f,p,m) \
     ( \
@@ -128,12 +127,11 @@ typedef struct Print_s			/* compiled printf arg node	*/
 	int		loopop;		/* break|continue|return op	*/ \
 	int		nesting;	/* exstatement() nesting	*/
 
-#include <expr.h>
+#include <expr/expr.h>
 #include <ctype.h>
-#include <error.h>
-#include <sfstr.h>
+#include <ast/error.h>
+#include <ast/sfstr.h>
 
-#define cast		excast
 #define id_string	(&exbuiltin[0])
 
 #define exunlex(p,c)	((p)->linep--,(p)->input->peek=(c))
@@ -183,11 +181,6 @@ extern const char*	exversion;
 extern Exstate_t	expr;
 
 extern int		exparse(void);	/* yacc should do this		*/
-#if defined(_WIN32)
-#define strtoll _strtoi64
-#define strtoull _strtoui64
-#endif
-extern Sflong_t		strToL(char *, char **);
 
 #endif
 

@@ -7,7 +7,7 @@
 
 #include "config.h"
 
-#include"red_black_tree.h"
+#include<rbtree/red_black_tree.h>
 #include<stdio.h>
 #include<ctype.h>
 
@@ -60,7 +60,7 @@ int main() {
 	{
 	  printf("type key for new node\n");
 	  scanf("%i",&newKey);
-	  newInt=(int*) malloc(sizeof(int));
+	  newInt= malloc(sizeof(int));
 	  *newInt=newKey;
 	  RBTreeInsert(tree,newInt,0);
 	}

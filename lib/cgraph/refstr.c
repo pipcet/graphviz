@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include <cghdr.h>
+#include <cgraph/cghdr.h>
 
 /*
  * reference counted strings.
@@ -107,7 +107,7 @@ char *agstrdup(Agraph_t * g, char *s)
 	if (g)
 	    r = (refstr_t *) agalloc(g, sz);
 	else
-	    r = (refstr_t *) malloc(sz);
+	    r = malloc(sz);
 	r->refcnt = 1;
 	strcpy(r->store, s);
 	r->s = r->store;
@@ -133,7 +133,7 @@ char *agstrdup_html(Agraph_t * g, char *s)
 	if (g)
 	    r = (refstr_t *) agalloc(g, sz);
 	else
-	    r = (refstr_t *) malloc(sz);
+	    r = malloc(sz);
 	r->refcnt = 1 | HTML_BIT;
 	strcpy(r->store, s);
 	r->s = r->store;
@@ -178,7 +178,7 @@ int aghtmlstr(char *s)
     if (s == NULL)
 	return 0;
     key = (refstr_t *) (s - offsetof(refstr_t, store[0]));
-    return (key->refcnt & HTML_BIT);
+    return (key->refcnt & HTML_BIT) != 0;
 }
 
 void agmarkhtmlstr(char *s)
@@ -206,6 +206,7 @@ static int refstrprint(Dict_t * dict, void *ptr, void *user)
 
 void agrefstrdump(Agraph_t * g)
 {
+    NOTUSED(g);
     dtwalk(Refdict_default, refstrprint, 0);
 }
 #endif

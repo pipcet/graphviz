@@ -42,7 +42,7 @@
 #include <poll.h>
 #endif
 
-#include "gvplugin_device.h"
+#include <gvc/gvplugin_device.h>
 
 #include <cairo.h>
 #ifdef CAIRO_HAS_XLIB_SURFACE
@@ -272,7 +272,7 @@ static void init_window(GVJ_t *job, Display *dpy, int scr)
     int w, h;
     double zoom_to_fit;
 
-    window = (window_t *)malloc(sizeof(window_t));
+    window = malloc(sizeof(window_t));
     if (window == NULL) {
 	fprintf(stderr, "Failed to malloc window_t\n");
 	return;
@@ -452,6 +452,8 @@ static int handle_file_events(GVJ_t *job, int inotify_fd)
 }
 #endif
 
+static boolean initialized;
+
 static void xlib_initialize(GVJ_t *firstjob)
 {
     Display *dpy;
@@ -471,7 +473,7 @@ static void xlib_initialize(GVJ_t *firstjob)
     firstjob->display = (void*)dpy;
     firstjob->screen = scr;
 
-    keycodes = (KeyCode *)malloc(firstjob->numkeys * sizeof(KeyCode));
+    keycodes = malloc(firstjob->numkeys * sizeof(KeyCode));
     if (keycodes == NULL) {
         fprintf(stderr, "Failed to malloc %d*KeyCode\n", firstjob->numkeys);
         return;
@@ -489,6 +491,8 @@ static void xlib_initialize(GVJ_t *firstjob)
     firstjob->device_dpi.x = DisplayWidth(dpy, scr) * 25.4 / DisplayWidthMM(dpy, scr);
     firstjob->device_dpi.y = DisplayHeight(dpy, scr) * 25.4 / DisplayHeightMM(dpy, scr);
     firstjob->device_sets_dpi = TRUE;
+
+    initialized = TRUE;
 }
 
 static void xlib_finalize(GVJ_t *firstjob)
@@ -513,6 +517,11 @@ static void xlib_finalize(GVJ_t *firstjob)
 	return;
     }
 #endif
+
+    /* skip if initialization previously failed */
+    if (!initialized) {
+        return;
+    }
 
     numfds = xlib_fd = XConnectionNumber(dpy);
 

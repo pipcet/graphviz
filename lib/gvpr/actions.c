@@ -16,14 +16,15 @@
  *  Code for main functions in gpr
  */
 
-#include <actions.h>
-#include <error.h>
-#include <ast.h>
-#include "compile.h"
-#include "sfstr.h"
+#include <gvpr/actions.h>
+#include <ast/error.h>
+#include <ast/ast.h>
+#include <gvpr/compile.h>
+#include <ast/sfstr.h>
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <cgraph/strcasecmp.h>
 
 #define KINDS(p) ((AGTYPE(p) == AGRAPH) ? "graph" : (AGTYPE(p) == AGNODE) ? "node" : "edge")
 
@@ -317,7 +318,7 @@ static void cloneGraph(Agraph_t * tgt, Agraph_t * src)
     Agraph_t *sg;
     char* name;
     Dt_t* emap = dtopen (&edgepair, Dtoset);
-    edgepair_t* data = (edgepair_t*)malloc(sizeof(edgepair_t)*agnedges(src));
+    edgepair_t* data = malloc(sizeof(edgepair_t)*agnedges(src));
     edgepair_t* ep = data;
 
     for (t = agfstnode(src); t; t = agnxtnode(src, t)) {
@@ -814,21 +815,12 @@ char *canon(Expr_t * pgm, char *arg)
 }
 
 #include <stdlib.h>
-#ifdef _WIN32
-#include "compat.h"
-#endif
 
-#include "arith.h"
-#include "color.h"
-#include "colortbl.h"
+#include <common/arith.h>
+#include <common/color.h>
+#include <common/colortbl.h>
 
 static char* colorscheme;
-
-#ifdef _MSC_VER
-extern int strcasecmp(const char *s1, const char *s2);
-extern int strncasecmp(const char *s1, const char *s2, unsigned int n);
-#endif
-
 
 static void hsv2rgb(double h, double s, double v,
 			double *r, double *g, double *b)
@@ -932,7 +924,7 @@ static void rgb2cmyk(double r, double g, double b, double *c, double *m,
 
 static int colorcmpf(const void *p0, const void *p1)
 {
-    return strcasecmp(((hsvrgbacolor_t *) p0)->name, ((hsvrgbacolor_t *) p1)->name);
+    return strcasecmp(((const hsvrgbacolor_t *) p0)->name, ((const hsvrgbacolor_t *) p1)->name);
 }
 
 static char *canontoken(char *str)

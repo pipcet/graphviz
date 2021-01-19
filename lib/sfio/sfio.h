@@ -186,12 +186,6 @@ extern "C" {
 #define SFFMT_JFLAG	04000000	/* 'j' flag, intmax_t                  */
 #define SFFMT_SET	07777770	/* flags settable on calling extf      */
 
-/* for sfmutex() call */
-#define SFMTX_LOCK	0	/* up mutex count                       */
-#define SFMTX_TRYLOCK	1	/* try to up mutex count                */
-#define SFMTX_UNLOCK	2	/* down mutex count                     */
-#define SFMTX_CLRLOCK	3	/* clear mutex count                    */
-
 /* various constants */
 #ifndef NULL
 #define NULL		0
@@ -236,10 +230,6 @@ extern "C" {
 #define SF_BUFCONST	0400000	/* unused flag - for compatibility only */
 #endif
 
-/* for sfgetr/sfreserve to hold a record */
-#define SF_LOCKR	0000010	/* lock record, stop access to stream   */
-#define SF_LASTR	0000020	/* get the last incomplete record       */
-
 /* exception events: SF_NEW(0), SF_READ(1), SF_WRITE(2) and the below 	*/
 #define SF_SEEK		3	/* seek error                           */
 
@@ -255,7 +245,6 @@ extern "C" {
 #define SF_DPOLL	7	/* see if stream is ready for I/O       */
 #define SF_DBUFFER	8	/* buffer not empty during push or pop  */
 #define SF_SYNC		9	/* announcing start/end synchronization */
-#define SF_PURGE	10	/* a sfpurge() call was issued          */
 #define SF_FINAL	11	/* closing is done except stream free   */
 #define SF_READY	12	/* a polled stream is ready             */
 #define SF_LOCKED	13	/* stream is in a locked state          */
@@ -302,33 +291,21 @@ extern "C" {
 
     extern Sfio_t *sfnew(Sfio_t *, void *, size_t, int, int);
     extern Sfio_t *sfopen(Sfio_t *, const char *, const char *);
-    extern Sfio_t *sfpopen(Sfio_t *, const char *, const char *);
     extern Sfio_t *sfstack(Sfio_t *, Sfio_t *);
     extern Sfio_t *sfswap(Sfio_t *, Sfio_t *);
-    extern Sfio_t *sftmp(size_t);
-    extern int sfpurge(Sfio_t *);
-    extern int sfpoll(Sfio_t **, int, int);
-    extern void *sfreserve(Sfio_t *, ssize_t, int);
     extern int sfsync(Sfio_t *);
-    extern int sfclrlock(Sfio_t *);
     extern void *sfsetbuf(Sfio_t *, void *, size_t);
     extern Sfdisc_t *sfdisc(Sfio_t *, Sfdisc_t *);
     extern int sfraise(Sfio_t *, int, void *);
-    extern int sfnotify(void (*)(Sfio_t *, int, int));
-    extern int sfset(Sfio_t *, int, int);
     extern int sfsetfd(Sfio_t *, int);
-    extern Sfio_t *sfpool(Sfio_t *, Sfio_t *, int);
     extern ssize_t sfread(Sfio_t *, void *, size_t);
     extern ssize_t sfwrite(Sfio_t *, const void *, size_t);
     extern int sfclose(Sfio_t *);
-    extern Sfoff_t sftell(Sfio_t *);
     extern Sfoff_t sfseek(Sfio_t *, Sfoff_t, int);
     extern ssize_t sfputr(Sfio_t *, const char *, int);
-    extern char *sfgetr(Sfio_t *, int, int);
     extern ssize_t sfnputc(Sfio_t *, int, size_t);
     extern int sfungetc(Sfio_t *, int);
     extern int sfprintf(Sfio_t *, const char *, ...);
-    extern char *sfprints(const char *, ...);
     extern int sfsprintf(char *, int, const char *, ...);
     extern int sfvsprintf(char *, int, const char *, va_list);
     extern int sfvprintf(Sfio_t *, const char *, va_list);
@@ -338,108 +315,42 @@ extern "C" {
     extern int sfvscanf(Sfio_t *, const char *, va_list);
     extern int sfresize(Sfio_t *, Sfoff_t);
 
-/* mutex locking for thread-safety */
-    extern int sfmutex(Sfio_t *, int);
-
 /* io functions with discipline continuation */
     extern ssize_t sfrd(Sfio_t *, void *, size_t, Sfdisc_t *);
     extern ssize_t sfwr(Sfio_t *, const void *, size_t, Sfdisc_t *);
     extern Sfoff_t sfsk(Sfio_t *, Sfoff_t, int, Sfdisc_t *);
     extern ssize_t sfpkrd(int, void *, size_t, int, long, int);
 
-/* portable handling of primitive types */
-    extern int sfdlen(Sfdouble_t);
-    extern int sfllen(Sflong_t);
-    extern int sfulen(Sfulong_t);
-
-    extern int sfputd(Sfio_t *, Sfdouble_t);
-    extern int sfputl(Sfio_t *, Sflong_t);
-    extern int sfputu(Sfio_t *, Sfulong_t);
-    extern int sfputm(Sfio_t *, Sfulong_t, Sfulong_t);
     extern int sfputc(Sfio_t *, int);
 
-    extern Sfdouble_t sfgetd(Sfio_t *);
-    extern Sflong_t sfgetl(Sfio_t *);
-    extern Sfulong_t sfgetu(Sfio_t *);
-    extern Sfulong_t sfgetm(Sfio_t *, Sfulong_t);
     extern int sfgetc(Sfio_t *);
 
-    extern int _sfputd(Sfio_t *, Sfdouble_t);
-    extern int _sfputl(Sfio_t *, Sflong_t);
-    extern int _sfputu(Sfio_t *, Sfulong_t);
-    extern int _sfputm(Sfio_t *, Sfulong_t, Sfulong_t);
     extern int _sfflsbuf(Sfio_t *, int);
 
     extern int _sffilbuf(Sfio_t *, int);
 
-    extern int _sfdlen(Sfdouble_t);
-    extern int _sfllen(Sflong_t);
-    extern int _sfulen(Sfulong_t);
-
 /* miscellaneous function analogues of fast in-line functions */
-    extern Sfoff_t sfsize(Sfio_t *);
-    extern int sfclrerr(Sfio_t *);
-    extern int sfeof(Sfio_t *);
-    extern int sferror(Sfio_t *);
     extern int sffileno(Sfio_t *);
-    extern int sfstacked(Sfio_t *);
-    extern ssize_t sfvalue(Sfio_t *);
     extern ssize_t sfslen(void);
 
 #undef extern
 
-/* coding long integers in a portable and compact fashion */
-#define SF_SBITS	6
-#define SF_UBITS	7
-#define SF_BBITS	8
-#define SF_SIGN		(1 << SF_SBITS)
-#define SF_MORE		(1 << SF_UBITS)
-#define SF_BYTE		(1 << SF_BBITS)
-#define SF_U1		SF_MORE
-#define SF_U2		(SF_U1*SF_U1)
-#define SF_U3		(SF_U2*SF_U1)
-#define SF_U4		(SF_U3*SF_U1)
 #if defined(__cplusplus)
 #define _SF_(f)		(f)
 #else
 #define _SF_(f)		((Sfio_t*)(f))
 #endif
-#define __sf_putd(f,v)		(_sfputd(_SF_(f),(Sfdouble_t)(v)))
-#define __sf_putl(f,v)		(_sfputl(_SF_(f),(Sflong_t)(v)))
-#define __sf_putu(f,v)		(_sfputu(_SF_(f),(Sfulong_t)(v)))
-#define __sf_putm(f,v,m)	(_sfputm(_SF_(f),(Sfulong_t)(v),(Sfulong_t)(m)))
 #define __sf_putc(f,c)	(_SF_(f)->next >= _SF_(f)->endw ? \
 			 _sfflsbuf(_SF_(f),(int)((unsigned char)(c))) : \
 			 (int)(*_SF_(f)->next++ = (unsigned char)(c)) )
 #define __sf_getc(f)	(_SF_(f)->next >= _SF_(f)->endr ? _sffilbuf(_SF_(f),0) : \
 			 (int)(*_SF_(f)->next++) )
-#define __sf_dlen(v)	(_sfdlen((Sfdouble_t)(v)) )
-#define __sf_llen(v)	(_sfllen((Sflong_t)(v)) )
-#define __sf_ulen(v)	((Sfulong_t)(v) < SF_U1 ? 1 : (Sfulong_t)(v) < SF_U2 ? 2 : \
-			 (Sfulong_t)(v) < SF_U3 ? 3 : (Sfulong_t)(v) < SF_U4 ? 4 : 5)
 #define __sf_fileno(f)	((f) ? _SF_(f)->file : -1)
-#define __sf_eof(f)	((f) ? (_SF_(f)->flags&SF_EOF) : 0)
-#define __sf_error(f)	((f) ? (_SF_(f)->flags&SF_ERROR) : 0)
-#define __sf_clrerr(f)	((f) ? (_SF_(f)->flags &= ~(SF_ERROR|SF_EOF)) : 0)
-#define __sf_stacked(f)	((f) ? (_SF_(f)->push != (Sfio_t*)0) : 0)
-#define __sf_value(f)	((f) ? (_SF_(f)->val) : 0)
 #define __sf_slen()	(_Sfi)
 
-#define sfputd(f,v)				( __sf_putd((f),(v))		)
-#define sfputl(f,v)				( __sf_putl((f),(v))		)
-#define sfputu(f,v)				( __sf_putu((f),(v))		)
-#define sfputm(f,v,m)				( __sf_putm((f),(v),(m))	)
 #define sfputc(f,c)				( __sf_putc((f),(c))		)
 #define sfgetc(f)				( __sf_getc(f)			)
-#define sfdlen(v)				( __sf_dlen(v)			)
-#define sfllen(v)				( __sf_llen(v)			)
-#define sfulen(v)				( __sf_ulen(v)			)
 #define sffileno(f)				( __sf_fileno(f)		)
-#define sfeof(f)				( __sf_eof(f)			)
-#define sferror(f)				( __sf_error(f)			)
-#define sfclrerr(f)				( __sf_clrerr(f)		)
-#define sfstacked(f)				( __sf_stacked(f)		)
-#define sfvalue(f)				( __sf_value(f)			)
 #define sfslen()				( __sf_slen()			)
 #endif				/* _SFIO_H */
 #ifdef __cplusplus

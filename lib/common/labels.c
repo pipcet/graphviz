@@ -11,9 +11,9 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-
-#include "render.h"
-#include "htmltable.h"
+#include <cgraph/agxbuf.h>
+#include <common/render.h>
+#include <common/htmltable.h>
 #include <limits.h>
 
 static char *strdup_and_subst_obj0 (char *str, void *obj, int escBackslash);
@@ -197,7 +197,7 @@ void free_textspan(textspan_t * tl, int cnt)
 
     if (!tl) return;
     for (i = 0; i < cnt; i++) { 
-	if ((i == 0) && tlp->str)
+	if (i == 0)
 	    free(tlp->str);
 	if (tlp->layout && tlp->free_layout)
 	    tlp->free_layout (tlp->layout);
@@ -288,160 +288,109 @@ void emit_label(GVJ_t * job, emit_state_t emit_state, textlabel_t * lp)
  */
 static char *strdup_and_subst_obj0 (char *str, void *obj, int escBackslash)
 {
-    char c, *s, *p, *t, *newstr;
+    char c, *s, *newstr;
     char *tp_str = "", *hp_str = "";
     char *g_str = "\\G", *n_str = "\\N", *e_str = "\\E",
 	*h_str = "\\H", *t_str = "\\T", *l_str = "\\L";
-    size_t g_len = 2, n_len = 2, e_len = 2,
-	h_len = 2, t_len = 2, l_len = 2,
-	tp_len = 0, hp_len = 0;
-    size_t newlen = 0;
+    boolean has_hp = FALSE;
+    boolean has_tp = FALSE;
     int isEdge = 0;
     textlabel_t *tl;
     port pt;
+    agxbuf buf;
 
     /* prepare substitution strings */
     switch (agobjkind(obj)) {
 	case AGRAPH:
 	    g_str = agnameof((graph_t *)obj);
-	    g_len = strlen(g_str);
 	    tl = GD_label((graph_t *)obj);
 	    if (tl) {
 		l_str = tl->text;
-	    	if (str) l_len = strlen(l_str);
 	    }
 	    break;
 	case AGNODE:
 	    g_str = agnameof(agraphof((node_t *)obj));
-	    g_len = strlen(g_str);
 	    n_str = agnameof((node_t *)obj);
-	    n_len = strlen(n_str);
 	    tl = ND_label((node_t *)obj);
 	    if (tl) {
 		l_str = tl->text;
-	    	if (str) l_len = strlen(l_str);
 	    }
 	    break;
 	case AGEDGE:
 	    isEdge = 1;
 	    g_str = agnameof(agroot(agraphof(agtail(((edge_t *)obj)))));
-	    g_len = strlen(g_str);
 	    t_str = agnameof(agtail(((edge_t *)obj)));
-	    t_len = strlen(t_str);
 	    pt = ED_tail_port((edge_t *)obj);
 	    if ((tp_str = pt.name))
-	        tp_len = strlen(tp_str);
+	        has_tp = (*tp_str != '\0');
 	    h_str = agnameof(aghead(((edge_t *)obj)));
-	    h_len = strlen(h_str);
 	    pt = ED_head_port((edge_t *)obj);
 	    if ((hp_str = pt.name))
-		hp_len = strlen(hp_str);
-	    h_len = strlen(h_str);
+		has_hp = (*hp_str != '\0');
 	    tl = ED_label((edge_t *)obj);
 	    if (tl) {
 		l_str = tl->text;
-	    	if (str) l_len = strlen(l_str);
 	    }
 	    if (agisdirected(agroot(agraphof(agtail(((edge_t*)obj))))))
 		e_str = "->";
 	    else
 		e_str = "--";
-	    e_len = t_len + (tp_len?tp_len+1:0) + 2 + h_len + (hp_len?hp_len+1:0);
 	    break;
     }
 
-    /* two passes over str.
-     *
-     * first pass prepares substitution strings and computes 
-     * total length for newstring required from malloc.
-     */
+    /* allocate a dynamic buffer that we will use to construct the result */
+    agxbinit(&buf, 0, NULL);
+
+    /* assemble new string */
     for (s = str; (c = *s++);) {
 	if (c == '\\' && *s != '\0') {
 	    switch (c = *s++) {
 	    case 'G':
-		newlen += g_len;
+		agxbput(&buf, g_str);
 		break;
 	    case 'N':
-		newlen += n_len;
-		break;
-	    case 'E':
-		newlen += e_len;
-		break;
-	    case 'H':
-		newlen += h_len;
-		break;
-	    case 'T':
-		newlen += t_len;
-		break; 
-	    case 'L':
-		newlen += l_len;
-		break; 
-	    case '\\':
-		if (escBackslash) {
-		    newlen += 1;
-		    break; 
-		}
-		/* Fall through */
-	    default:  /* leave other escape sequences unmodified, e.g. \n \l \r */
-		newlen += 2;
-	    }
-	} else {
-	    newlen++;
-	}
-    }
-    /* allocate new string */
-    newstr = gmalloc(newlen + 1);
-
-    /* second pass over str assembles new string */
-    for (s = str, p = newstr; (c = *s++);) {
-	if (c == '\\' && *s != '\0') {
-	    switch (c = *s++) {
-	    case 'G':
-		for (t = g_str; (*p = *t++); p++);
-		break;
-	    case 'N':
-		for (t = n_str; (*p = *t++); p++);
+		agxbput(&buf, n_str);
 		break;
 	    case 'E':
 		if (isEdge) {
-		    for (t = t_str; (*p = *t++); p++);
-		    if (tp_len) {
-			*p++ = ':';
-			for (t = tp_str; (*p = *t++); p++);
+		    agxbput(&buf, t_str);
+		    if (has_tp) {
+			agxbprint(&buf, ":%s", tp_str);
 		    }
-		    for (t = e_str; (*p = *t++); p++);
-		    for (t = h_str; (*p = *t++); p++);
-		    if (hp_len) {
-			*p++ = ':';
-			for (t = hp_str; (*p = *t++); p++);
+		    agxbprint(&buf, "%s%s", e_str, h_str);
+		    if (has_hp) {
+			agxbprint(&buf, ":%s", hp_str);
 		    }
 		}
 		break;
 	    case 'T':
-		for (t = t_str; (*p = *t++); p++);
+		agxbput(&buf, t_str);
 		break;
 	    case 'H':
-		for (t = h_str; (*p = *t++); p++);
+		agxbput(&buf, h_str);
 		break;
 	    case 'L':
-		for (t = l_str; (*p = *t++); p++);
+		agxbput(&buf, l_str);
 		break;
 	    case '\\':
 		if (escBackslash) {
-		    *p++ = '\\';
+		    agxbputc(&buf, '\\');
 		    break; 
 		}
 		/* Fall through */
 	    default:  /* leave other escape sequences unmodified, e.g. \n \l \r */
-		*p++ = '\\';
-		*p++ = c;
+		agxbprint(&buf, "\\%c", c);
 		break;
 	    }
 	} else {
-	    *p++ = c;
+	    agxbputc(&buf, c);
 	}
     }
-    *p++ = '\0';
+
+    /* extract the final string with replacements applied */
+    newstr = agxbdisown(&buf);
+    agxbfree(&buf);
+
     return newstr;
 }
 

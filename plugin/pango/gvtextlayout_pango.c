@@ -15,18 +15,16 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "gvplugin_render.h"
-#include "agxbuf.h"
-#include "utils.h"
-#include "gvplugin_textlayout.h"
+#include <gvc/gvplugin_render.h>
+#include <cgraph/agxbuf.h>
+#include <common/utils.h>
+#include <gvc/gvplugin_textlayout.h>
 
 #include <pango/pangocairo.h>
 #include "gvgetfontlist.h"
 #ifdef HAVE_PANGO_FC_FONT_LOCK_FACE
 #include <pango/pangofc-font.h>
 #endif
-
-#define N_NEW(n,t)      (t*)malloc((n)*sizeof(t))
 
 static void pango_free_layout (void *layout)
 {
@@ -60,6 +58,16 @@ static char* pango_psfontResolve (PostscriptAlias* pa)
 #define FULL_MARKUP "<span weight=\"bold\" style=\"italic\" underline=\"single\"><sup><sub></sub></sup></span>"
 #endif
 
+/* strdup, exiting on failure */
+static char *xstrdup(const char *str) {
+  char *s = strdup(str);
+  if (s == NULL) {
+    fprintf(stderr, "out of memory\n");
+    abort();
+  }
+  return s;
+}
+
 static boolean pango_textlayout(textspan_t * span, char **fontpath)
 {
     static char buf[1024];  /* returned in fontpath, only good until next call */
@@ -86,11 +94,7 @@ static boolean pango_textlayout(textspan_t * span, char **fontpath)
     if (!context) {
 	fontmap = pango_cairo_font_map_new();
 	gv_fmap = get_font_mapping(fontmap);
-#ifdef HAVE_PANGO_FONT_MAP_CREATE_CONTEXT
 	context = pango_font_map_create_context (fontmap);
-#else
-	context = pango_cairo_font_map_create_context (PANGO_CAIRO_FONT_MAP(fontmap));
-#endif
 	options=cairo_font_options_create();
 	cairo_font_options_set_antialias(options,CAIRO_ANTIALIAS_GRAY);
 	cairo_font_options_set_hint_style(options,CAIRO_HINT_STYLE_FULL);
@@ -103,7 +107,14 @@ static boolean pango_textlayout(textspan_t * span, char **fontpath)
     }
 
     if (!fontname || strcmp(fontname, span->font->name) != 0 || fontsize != span->font->size) {
-	fontname = span->font->name;
+
+	/* check if the conversion to Pango units below will overflow */
+	if ((double)(G_MAXINT / PANGO_SCALE) < span->font->size) {
+	    return FALSE;
+	}
+
+	free(fontname);
+	fontname = xstrdup(span->font->name);
 	fontsize = span->font->size;
 	pango_font_description_free (desc);
 

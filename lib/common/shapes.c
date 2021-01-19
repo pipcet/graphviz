@@ -11,9 +11,10 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include "render.h"
-#include "htmltable.h"
+#include <common/render.h>
+#include <common/htmltable.h>
 #include <limits.h>
+#include <stddef.h>
 
 #define RBCONST 12
 #define RBCURVE .5
@@ -3500,7 +3501,7 @@ static void pos_reclbl(field_t * f, pointf ul, int sides)
     }
 }
 
-#if DEBUG > 1
+#if defined(DEBUG) && DEBUG > 1
 static void indent(int l)
 {
     int i;
@@ -3537,7 +3538,8 @@ static void record_init(node_t * n)
 {
     field_t *info;
     pointf ul, sz;
-    int flip, len;
+    int flip;
+    size_t len;
     char *textbuf;		/* temp buffer for storing labels */
     int sides = BOTTOM | RIGHT | TOP | LEFT;
 
@@ -3546,9 +3548,10 @@ static void record_init(node_t * n)
     reclblp = ND_label(n)->text;
     len = strlen(reclblp);
     /* For some forgotten reason, an empty label is parsed into a space, so
-     * we need at least two bytes in textbuf.
+     * we need at least two bytes in textbuf, as well as accounting for the
+     * error path involving "\\N" below.
      */
-    len = MAX(len, 1);
+    len = MAX(MAX(len, 1), strlen("\\N"));
     textbuf = N_NEW(len + 1, char);
     if (!(info = parse_reclbl(n, flip, TRUE, textbuf))) {
 	agerr(AGERR, "bad label format %s\n", ND_label(n)->text);
@@ -3786,7 +3789,7 @@ static void record_gencode(GVJ_t * job, node_t * n)
 
     gen_fields(job, n, f);
 
-    if (clrs[0]) free (clrs[0]);
+    free (clrs[0]);
 
     if (doMap) {
 	if (job->flags & EMIT_CLUSTERS_LAST)

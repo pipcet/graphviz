@@ -23,22 +23,18 @@
 #define _BLD_sfio 1
 #endif
 
-#include "exlib.h"
-#include "exop.h"
+#include <expr/exlib.h>
+#include <expr/exop.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <time.h>
 #ifdef _WIN32
-#include <stdlib.h>
 #define srand48 srand
 #define drand48 rand
 #endif
 
-#ifdef OLD
-#include <tm.h>
-#else
 #define TIME_LEN 80             /* max. characters to store time */
-#endif
 
 static Extype_t	eval(Expr_t*, Exnode_t*, void*);
 
@@ -49,20 +45,20 @@ static Extype_t	eval(Expr_t*, Exnode_t*, void*);
 static char*
 lexname(int op, int subop)
 {
-	register char*	b;
+	char*	b;
 
 	static int	n;
 	static char	buf[TOTNAME][MAXNAME];
 
 	if (op > MINTOKEN && op < MAXTOKEN)
-		return (char*)exop[op - MINTOKEN];
+		return (char*)exop((size_t)op - MINTOKEN);
 	if (++n >= TOTNAME)
 		n = 0;
 	b = buf[n];
 	if (op == '=')
 	{
 		if (subop > MINTOKEN && subop < MAXTOKEN)
-			sfsprintf(b, MAXNAME, "%s=", exop[subop - MINTOKEN]);
+			sfsprintf(b, MAXNAME, "%s=", exop((size_t)subop - MINTOKEN));
 		else if (subop > ' ' && subop <= '~')
 			sfsprintf(b, MAXNAME, "%c=", subop);
 		else
@@ -83,7 +79,7 @@ lexname(int op, int subop)
  * 
  */
 static int
-evaldyn (Expr_t * ex, register Exnode_t * expr, void *env, int delete)
+evaldyn (Expr_t * ex, Exnode_t * expr, void *env, int delete)
 {
 	Exassoc_t *b;
 	Extype_t v;
@@ -126,7 +122,7 @@ evaldyn (Expr_t * ex, register Exnode_t * expr, void *env, int delete)
  */
 
 static Extype_t
-getdyn(Expr_t* ex, register Exnode_t* expr, void* env, Exassoc_t** assoc)
+getdyn(Expr_t* ex, Exnode_t* expr, void* env, Exassoc_t** assoc)
 {
 	Exassoc_t*	b;
 	Extype_t	v;
@@ -198,17 +194,15 @@ typedef struct
 static int
 prformat(Sfio_t* sp, void* vp, Sffmt_t* dp)
 {
-	register Fmt_t*		fmt = (Fmt_t*)dp;
-	register Exnode_t*	node;
-	register char*		s;
-	register char*		txt;
+	Fmt_t*		fmt = (Fmt_t*)dp;
+	Exnode_t*	node;
+	char*		s;
+	char*		txt;
 	int			n;
 	int			from;
 	int			to = 0;
 	time_t			tm;
-#ifndef OLD
     struct tm *stm;
-#endif
 
 
 	dp->flags |= SFFMT_VALUE;
@@ -324,21 +318,21 @@ prformat(Sfio_t* sp, void* vp, Sffmt_t* dp)
 			{
 				for (; *s; s++)
 					if (isupper(*s))
-						*s = tolower(*s);
+						*s = (char)tolower(*s);
 					else if (islower(*s))
-						*s = toupper(*s);
+						*s = (char)toupper(*s);
 			}
 			else if (streq(txt, "lower"))
 			{
 				for (; *s; s++)
 					if (isupper(*s))
-						*s = tolower(*s);
+						*s = (char)tolower(*s);
 			}
 			else if (streq(txt, "upper"))
 			{
 				for (; *s; s++)
 					if (islower(*s))
-						*s = toupper(*s);
+						*s = (char)toupper(*s);
 			}
 			else if (streq(txt, "variable"))
 			{
@@ -354,16 +348,12 @@ prformat(Sfio_t* sp, void* vp, Sffmt_t* dp)
 	case 'T':
 		if ((tm = *((Sflong_t*)vp)) == -1)
 			tm = time(NiL);
-#ifndef OLD
         if (!txt)
             txt = "%?%K";
         s = fmtbuf(TIME_LEN);
         stm = localtime(&tm);
         strftime(s, TIME_LEN, txt, stm);
         *((char **) vp) = s;
-#else
-		*((char**)vp) = fmttime(txt ? txt : "%?%K", tm);
-#endif
 		dp->fmt = 's';
 		dp->size = -1;
 		break;
@@ -376,7 +366,7 @@ prformat(Sfio_t* sp, void* vp, Sffmt_t* dp)
  */
 
 static int
-prints(Expr_t * ex, register Exnode_t * expr, void *env, Sfio_t * sp)
+prints(Expr_t * ex, Exnode_t * expr, void *env, Sfio_t * sp)
 {
     Extype_t v;
     Exnode_t *args;
@@ -398,7 +388,7 @@ prints(Expr_t * ex, register Exnode_t * expr, void *env, Sfio_t * sp)
 static int
 print(Expr_t* ex, Exnode_t* expr, void* env, Sfio_t* sp)
 {
-	register Print_t*	x;
+	Print_t*	x;
 	Extype_t		v;
 	Fmt_t			fmt;
 
@@ -450,8 +440,8 @@ print(Expr_t* ex, Exnode_t* expr, void* env, Sfio_t* sp)
 static int
 scformat(Sfio_t* sp, void* vp, Sffmt_t* dp)
 {
-	register Fmt_t*		fmt = (Fmt_t*)dp;
-	register Exnode_t*	node;
+	Fmt_t*		fmt = (Fmt_t*)dp;
+	Exnode_t*	node;
 
 	if (!fmt->actuals)
 	{
@@ -482,6 +472,7 @@ scformat(Sfio_t* sp, void* vp, Sffmt_t* dp)
 			node->data.variable.symbol->value->data.constant.value.string = 0;
 		fmt->fmt.size = 1024;
 		*((void**)vp) = node->data.variable.symbol->value->data.constant.value.string = vmnewof(fmt->expr->vm, node->data.variable.symbol->value->data.constant.value.string, char, fmt->fmt.size, 0);
+		memset(node->data.variable.symbol->value->data.constant.value.string, 0, sizeof(char) * (size_t)fmt->fmt.size);
 		break;
 	case 'c':
 		if (node->type != CHARACTER) {
@@ -555,7 +546,7 @@ scan(Expr_t* ex, Exnode_t* expr, void* env, Sfio_t* sp)
  */
 
 static char*
-str_add(Expr_t* ex, register char* l, register char* r)
+str_add(Expr_t* ex, char* l, char* r)
 {
 	sfprintf(ex->tmp, "%s%s", l, r);
 	return exstash(ex->tmp, ex->ve);
@@ -566,10 +557,10 @@ str_add(Expr_t* ex, register char* l, register char* r)
  */
 
 static char*
-str_ior(Expr_t* ex, register char* l, register char* r)
+str_ior(Expr_t* ex, char* l, char* r)
 {
-	register int	c;
-	register char*	s = l;
+	int	c;
+	char*	s = l;
 
 	while ((c = *s++))
 		if (!strchr(s, c))
@@ -585,9 +576,9 @@ str_ior(Expr_t* ex, register char* l, register char* r)
  */
 
 static char*
-str_and(Expr_t* ex, register char* l, register char* r)
+str_and(Expr_t* ex, char* l, char* r)
 {
-	register int	c;
+	int	c;
 
 	while ((c = *l++))
 		if (strchr(r, c) && !strchr(l, c))
@@ -600,10 +591,10 @@ str_and(Expr_t* ex, register char* l, register char* r)
  */
 
 static char*
-str_xor(Expr_t* ex, register char* l, register char* r)
+str_xor(Expr_t* ex, char* l, char* r)
 {
-	register int	c;
-	register char*	s = l;
+	int	c;
+	char*	s = l;
 
 	while ((c = *s++))
 		if (!strchr(r, c) && !strchr(s, c))
@@ -619,9 +610,9 @@ str_xor(Expr_t* ex, register char* l, register char* r)
  */
 
 static char*
-str_mod(Expr_t* ex, register char* l, register char* r)
+str_mod(Expr_t* ex, char* l, char* r)
 {
-	register int	c;
+	int	c;
 
 	while ((c = *l++))
 		if (!strchr(r, c) && !strchr(l, c))
@@ -634,10 +625,10 @@ str_mod(Expr_t* ex, register char* l, register char* r)
  */
 
 static char*
-str_mpy(Expr_t* ex, register char* l, register char* r)
+str_mpy(Expr_t* ex, char* l, char* r)
 {
-	register int	lc;
-	register int	rc;
+	int	lc;
+	int	rc;
 
 	while ((lc = *l++) && (rc = *r++))
 		sfputc(ex->tmp, lc == rc ? lc : ' ');
@@ -649,7 +640,7 @@ str_mpy(Expr_t* ex, register char* l, register char* r)
  * \digit is replaced with a subgroup match, if any.
  */
 static void
-replace(Sfio_t * s, char *base, register char *repl, int ng, int *sub)
+replace(Sfio_t * s, char *base, char *repl, int ng, int *sub)
 {
 	char c;
 	int idx, offset;
@@ -691,7 +682,7 @@ addItem (Dt_t* arr, Extype_t v, char* tok)
  * return number of fields
  */
 static Extype_t
-exsplit(Expr_t * ex, register Exnode_t * expr, void *env)
+exsplit(Expr_t * ex, Exnode_t * expr, void *env)
 {
 	Extype_t v;
 	char *str;
@@ -743,7 +734,7 @@ exsplit(Expr_t * ex, register Exnode_t * expr, void *env)
  * return number of tokens
  */
 static Extype_t
-extokens(Expr_t * ex, register Exnode_t * expr, void *env)
+extokens(Expr_t * ex, Exnode_t * expr, void *env)
 {
 	Extype_t v;
 	char *str;
@@ -782,7 +773,7 @@ extokens(Expr_t * ex, register Exnode_t * expr, void *env)
  * return string after pattern substitution
  */
 static Extype_t
-exsub(Expr_t * ex, register Exnode_t * expr, void *env, int global)
+exsub(Expr_t * ex, Exnode_t * expr, void *env, int global)
 {
 	char *str;
 	char *pat;
@@ -858,7 +849,7 @@ exsub(Expr_t * ex, register Exnode_t * expr, void *env, int global)
 /* exsubstr:
  * return substring.
  */
-static Extype_t exsubstr(Expr_t * ex, register Exnode_t * expr, void *env)
+static Extype_t exsubstr(Expr_t * ex, Exnode_t * expr, void *env)
 {
 	Extype_t s;
 	Extype_t i;
@@ -926,12 +917,12 @@ xPrint(Expr_t * ex, Exnode_t * expr, Extype_t v, Exnode_t * tmp)
 static long seed;
 
 static Extype_t
-eval(Expr_t* ex, register Exnode_t* expr, void* env)
+eval(Expr_t* ex, Exnode_t* expr, void* env)
 {
-	register Exnode_t*	x;
-	register Exnode_t*	a;
-	register Extype_t**	t;
-	register int		n;
+	Exnode_t*	x;
+	Exnode_t*	a;
+	Extype_t**	t;
+	int		n;
 	Extype_t		v;
 	Extype_t		r = {0};
 	Extype_t		i;
@@ -970,13 +961,11 @@ eval(Expr_t* ex, register Exnode_t* expr, void* env)
 				i = eval(ex, x->data.variable.index, env);
 			else
 				i.integer = EX_SCALAR;
-#ifndef OLD
 			if (x->data.variable.dyna) {
 				Extype_t locv;
 				locv = getdyn(ex, x->data.variable.dyna, env, &assoc);
 				x->data.variable.dyna->data.variable.dyna->data.constant.value = locv;
 			}
-#endif
 			r = (*ex->disc->getf)(ex, x, x->data.variable.symbol, x->data.variable.reference, env, (int)i.integer, ex->disc);
 		}
 		v = r;
@@ -1012,13 +1001,11 @@ eval(Expr_t* ex, register Exnode_t* expr, void* env)
 				i = eval(ex, x->data.variable.index, env);
 			else
 				i.integer = EX_SCALAR;
-#ifndef OLD
 			if (x->data.variable.dyna) {
 				Extype_t locv;
 				locv = getdyn(ex, x->data.variable.dyna, env, &assoc);
 				x->data.variable.dyna->data.variable.dyna->data.constant.value = locv;
 			}
-#endif
 			if ((*ex->disc->setf)(ex, x, x->data.variable.symbol, x->data.variable.reference, env, (int)i.integer, v, ex->disc) < 0)
 				exerror("%s: cannot set value", x->data.variable.symbol->name);
 		}
@@ -1268,13 +1255,11 @@ eval(Expr_t* ex, register Exnode_t* expr, void* env)
 			i = eval(ex, expr->data.variable.index, env);
 		else
 			i.integer = EX_SCALAR;
-#ifndef OLD
 		if (expr->data.variable.dyna) {
 			Extype_t locv;
 			locv = getdyn(ex, expr->data.variable.dyna, env, &assoc);
 			expr->data.variable.dyna->data.variable.dyna->data.constant.  value = locv;
 		}
-#endif
 		return (*ex->disc->getf)(ex, expr, expr->data.variable.symbol, expr->data.variable.reference, env, (int)i.integer, ex->disc);
 	case INC:
 		n = 1;
@@ -1285,12 +1270,6 @@ eval(Expr_t* ex, register Exnode_t* expr, void* env)
 	case PRINTF:
 		v.integer = print(ex, expr, env, NiL);
 		return v;
-#ifdef UNUSED
-	case QUERY:
-		print(ex, expr, env, sfstderr);
-		v.integer = !astquery(2, "");
-		return v;
-#endif
 	case RETURN:
 		ex->loopret = eval(ex, x, env);
 		ex->loopcount = 32767;
@@ -1317,13 +1296,11 @@ eval(Expr_t* ex, register Exnode_t* expr, void* env)
 					v = eval(ex, x->data.variable.index, env);
 				else
 					v.integer = EX_SCALAR;
-#ifndef OLD
 				if (x->data.variable.dyna) {
 					Extype_t locv;
 					locv = getdyn(ex, x->data.variable.dyna, env, &assoc);
 					x->data.variable.dyna->data.variable.dyna->data.  constant.value = locv;
 				}
-#endif
 				v = (*ex->disc->getf)(ex, x, x->data.variable.symbol, x->data.variable.reference, env, (int)v.integer, ex->disc);
 			}
 			switch (x->type)
@@ -1897,34 +1874,6 @@ exeval(Expr_t* ex, Exnode_t* expr, void* env)
 	return v;
 }
 
-#if 0
-/* strToL:
- * Convert a string representation of an integer
- * to an integer. The string can specify its own form
- * using 0x, etc.
- * If p != NULL, it points to the first character in
- * s where numeric parsing fails, or the last character.
- * The value is returned, with 0 returned for "".
- */
-Sflong_t strToL(char *s, char **p)
-{
-    Sflong_t v;
-    int i;
-    int n;
-
-    v = 0;
-    if (p) {
-	n = sfsscanf(s, "%I*i%n", sizeof(v), &v, &i);
-	if (n > 0)
-	    *p = s + i;
-	else
-	    *p = s;
-    } else
-	sfsscanf(s, "%I*i", sizeof(v), &v);
-    return v;
-}
-#endif
-
 /* exstring:
  * Generate copy of input string using
  * string memory.
@@ -1940,7 +1889,7 @@ char *exstring(Expr_t * ex, char *s)
  */
 void *exstralloc(Expr_t * ex, void *p, size_t sz)
 {
-    return vmresize(ex->ve, p, sz, VM_RSCOPY | VM_RSMOVE);
+    return vmresize(ex->ve, p, sz);
 }
 
 /* exstrfree:

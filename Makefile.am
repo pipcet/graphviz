@@ -27,6 +27,7 @@ doxygen:
 
 dist-hook:
 	echo "@VERSION@" >VERSION
+	echo "@GRAPHVIZ_VERSION_DATE@" >DATE
 	echo "@GRAPHVIZ_COLLECTION@" >COLLECTION
 #	find $(distdir) -name CVS -type d -prune -exec rm -rf {} \;
 #	rm -f ToPAS
@@ -39,8 +40,8 @@ $(top_builddir)/graphviz_version.h: config.h
 
 EXTRA_DIST = $(txt) $(html) graphviz.spec \
 	autogen.sh config/depcomp config/config.rpath \
-	builddate.h compat.h \
-	Makeargs iffe config.iffe \
+	builddate.h \
+	Makeargs \
 	m4/README m4/iconv.m4 m4/lib-ld.m4 m4/lib-link.m4 m4/lib-prefix.m4 \
 	graphviz.7 Doxyfile.in Doxyfile awk \
 	config/config_perl.pl config/config_python.py \

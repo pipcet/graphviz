@@ -13,7 +13,7 @@
 
 
 #include    "convert.h"
-#include    "agxbuf.h"
+#include    <cgraph/agxbuf.h>
 #include    <getopt.h>
 #ifdef HAVE_EXPAT
 #include    <expat.h>
@@ -55,15 +55,15 @@ struct slist {
     char buf[1];
 };
 
-#define NEW(t)      (t*)malloc(sizeof(t))
-#define N_NEW(n,t)  (t*)malloc((n)*sizeof(t))
+#define NEW(t)      malloc(sizeof(t))
+#define N_NEW(n,t)  calloc((n),sizeof(t))
 /* Round x up to next multiple of y, which is a power of 2 */
 #define ROUND2(x,y) (((x) + ((y)-1)) & ~((y)-1))
 
 static void pushString(slist ** stk, const char *s)
 {
     int sz = ROUND2(sizeof(slist) + strlen(s), sizeof(void *));
-    slist *sp = (slist *) N_NEW(sz, char);
+    slist *sp = N_NEW(sz, char);
     strcpy(sp->buf, s);
     sp->next = *stk;
     *stk = sp;
@@ -498,7 +498,7 @@ startElementHandler(void *userData, const char *name, const char **atts)
 	    head = tname;
 
         if (G == 0)
-            fprintf(stderr,"edge source %s target %s outside graph, ignored\n",(char*)tail,(char*)head);
+            fprintf(stderr,"edge source %s target %s outside graph, ignored\n",tail,head);
         else {
             bind_edge(tail, head);
 
@@ -586,8 +586,7 @@ static void endElementHandler(void *userData, const char *name)
 	    setGraphAttr(G, name, value, ud);
 	    break;
 	}
-	if (dynbuf)
-	    free(dynbuf);
+	free(dynbuf);
 	ud->globalAttrType = TAG_NONE;
     } 
 }
@@ -723,6 +722,8 @@ static void initargs(int argc, char **argv)
 	    Verbose = 1;
 	    break;
 	case 'o':
+	    if (outFile != NULL)
+		fclose(outFile);
 	    outFile = openFile(optarg, "w");
 	    break;
 	case ':':

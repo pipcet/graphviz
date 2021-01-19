@@ -17,11 +17,10 @@
 #define DEBUG
 
 #include <stddef.h>
-#include <maze.h>
-#include <partition.h>
-#include <memory.h>
-#include <arith.h>
-/* #include <values.h> */
+#include <ortho/maze.h>
+#include <ortho/partition.h>
+#include <common/memory.h>
+#include <common/arith.h>
 
 #define MARGIN 36;
 
@@ -320,7 +319,7 @@ chkSgraph (sgraph* g)
 static sgraph*
 mkMazeGraph (maze* mp, boxf bb)
 {
-    int nsides, i, ncnt, maxdeg;
+    int nsides, i, maxdeg;
     int bound = 4*mp->ncells;
     sgraph* g = createSGraph (bound + 2);
     Dt_t* vdict = dtopen(&vdictDisc,Dtoset);
@@ -333,7 +332,6 @@ mkMazeGraph (maze* mp, boxf bb)
      * a pointer to the cell.
      */
     sides = N_NEW(4*mp->ncells, snode*);
-    ncnt = 0;
     for (i = 0; i < mp->ncells; i++) {
 	cell* cp = mp->cells+i;
         snode* np;

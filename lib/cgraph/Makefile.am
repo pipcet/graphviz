@@ -6,18 +6,27 @@ CGRAPH_VERSION="6:0:0"
 pdfdir = $(pkgdatadir)/doc/pdf
 pkgconfigdir = $(libdir)/pkgconfig
 
-AM_CPPFLAGS = \
-	-I$(top_srcdir) \
-	-I$(top_srcdir)/lib/cdt \
-	-Iinclude
+AM_CPPFLAGS = -I$(top_srcdir)/lib -I$(top_srcdir)/lib/cdt
 
 pkginclude_HEADERS = cgraph.h
-noinst_HEADERS = agxbuf.h cghdr.h include/malloc.h
+noinst_HEADERS = agxbuf.h cghdr.h strcasecmp.h
 noinst_LTLIBRARIES = libcgraph_C.la
 lib_LTLIBRARIES = libcgraph.la
 pkgconfig_DATA = libcgraph.pc
 man_MANS = cgraph.3
+if ENABLE_MAN_PDFS
 pdf_DATA = cgraph.3.pdf
+endif
+
+if ENABLE_MAN_PDFS
+if HAVE_PS2PDF
+pdf = $(pdf_DATA)
+else
+pdf = ERROR_NO_PS2PDF
+endif
+else
+pdf =
+endif
 
 libcgraph_C_la_SOURCES = agerror.c agxbuf.c apply.c attr.c edge.c \
 	flatten.c graph.c grammar.y id.c imap.c io.c mem.c node.c \
@@ -30,33 +39,23 @@ libcgraph_la_LIBADD = $(top_builddir)/lib/cdt/libcdt.la
 scan.o scan.lo: scan.c grammar.h
 
 scan.c: $(top_srcdir)/lib/cgraph/scan.l
-	@LEX@ -i $(top_srcdir)/lib/cgraph/scan.l
-	@SED@ "s/yy/aag/g" < @LEX_OUTPUT_ROOT@.c | @SED@ '/extern.*isatty/d' > scan.c
-	rm @LEX_OUTPUT_ROOT@.c
+	@LEX@ --outfile=$@ -i $(top_srcdir)/lib/cgraph/scan.l
 
-grammar.c: y.tab.c
-	@SED@ "s/yy/aag/g" < y.tab.c | \
-		@SED@ "s/unsigned long int/uint64_t/g" | \
-                @SED@ "s/unsigned long/uint64_t/g" > grammar.c
+grammar.c grammar.h: $(top_srcdir)/lib/cgraph/grammar.y
+	@YACC@ -Wno-yacc -dv --output=grammar.c $(top_srcdir)/lib/cgraph/grammar.y
 
-grammar.h: y.tab.h
-	@SED@ "s/yy/aag/g" < y.tab.h | \
-		@SED@ "s/unsigned long int/uint64_t/g" | \
-                @SED@ "s/unsigned long/uint64_t/g" > grammar.h
-
-y.tab.c y.tab.h: y.output
-
-y.output: $(top_srcdir)/lib/cgraph/grammar.y
-	@YACC@ -dv $(top_srcdir)/lib/cgraph/grammar.y
-
+if ENABLE_MAN_PDFS
+if HAVE_PS2PDF
 cgraph.3.pdf: cgraph.3.ps
-	@PS2PDF@ $< $@
+	@PS2PDF@ $<
 
 cgraph.3.ps: $(srcdir)/cgraph.3
 	@GROFF@ -Tps -man $< >$@
+endif
+endif
 
-EXTRA_DIST = $(man_MANS) $(pdf_DATA) cmpnd.c \
-	main.c tester.c grammar.c grammar.h scan.c \
-	y.tab.c y.tab.h y.output cgraph.vcxproj*
+EXTRA_DIST = $(man_MANS) $(pdf) cmpnd.c \
+	grammar.c grammar.h scan.c \
+	cgraph.vcxproj*
 
-DISTCLEANFILES = $(pdf_DATA) grammar.[ch] scan.c y.output y.tab.[ch] cgraph.3.ps
+DISTCLEANFILES = $(pdf) grammar.[ch] scan.c cgraph.3.ps

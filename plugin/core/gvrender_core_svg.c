@@ -28,15 +28,16 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "macros.h"
-#include "const.h"
+#include <common/macros.h>
+#include <common/const.h>
 
-#include "gvplugin_render.h"
-#include "agxbuf.h"
-#include "utils.h"
-#include "gvplugin_device.h"
-#include "gvio.h"
-#include "gvcint.h"
+#include <gvc/gvplugin_render.h>
+#include <cgraph/agxbuf.h>
+#include <common/utils.h>
+#include <gvc/gvplugin_device.h>
+#include <gvc/gvio.h>
+#include <gvc/gvcint.h>
+#include <cgraph/strcasecmp.h>
 
 #define LOCALNAMEPREFIX		'%'
 
@@ -46,10 +47,6 @@ typedef enum { FORMAT_SVG, FORMAT_SVGZ, } format_type;
 static char *sdasharray = "5,2";
 /* SVG dot array */
 static char *sdotarray = "1,5";
-
-#ifndef HAVE_STRCASECMP
-extern int strcasecmp(const char *s1, const char *s2);
-#endif
 
 static void svg_bzptarray(GVJ_t * job, pointf * A, int n)
 {
@@ -727,7 +724,7 @@ static char *svg_knowncolors[] = {
     "saddlebrown", "salmon", "sandybrown", "seagreen", "seashell",
     "sienna", "silver", "skyblue", "slateblue", "slategray",
     "slategrey", "snow", "springgreen", "steelblue",
-    "tan", "teal", "thistle", "tomato", "turquoise",
+    "tan", "teal", "thistle", "tomato", "transparent", "turquoise",
     "violet",
     "wheat", "white", "whitesmoke",
     "yellow", "yellowgreen"

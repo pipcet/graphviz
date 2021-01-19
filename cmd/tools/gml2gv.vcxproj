@@ -14,16 +14,16 @@
     <ProjectGuid>{2C551E96-B2EE-48B2-84BF-F6494AF7C004}</ProjectGuid>
     <RootNamespace>gml2gv</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -53,7 +53,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)windows\include;$(SolutionDir)windows\getopt;$(SolutionDir);$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)windows\include;$(SolutionDir)windows\dependencies\libraries\vcpkg\installed\x86-windows\include;$(SolutionDir);$(SolutionDir)lib;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -68,23 +68,20 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)windows\getopt</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)windows\dependencies\libraries\vcpkg\installed\x86-windows\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>getopt.lib;cdt.lib;cgraph.lib;ingraphs.lib;gvc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)windows\dependencies\libraries\vcpkg\installed\x86-windows\bin\getopt.dll $(OutDir)getopt.dll</Command>
+    </PostBuildEvent>
     <PreBuildEvent>
-      <Command>flex  -o gmlscan-intermediate.c -i gmlscan.l
-sed "s/yy/gml/g" &lt; gmlscan-intermediate.c &gt; gmlscan.c
-del gmlscan-intermediate.c
-bison -dy gmlparse.y -o gmlparse-intermediate.c
-sed "s/yy/gml/g" &lt; gmlparse-intermediate.h &gt; gmlparse.h
-sed "s/yy/gml/g" &lt; gmlparse-intermediate.c &gt; gmlparse.c
-del gmlparse-intermediate.h
-del gmlparse-intermediate.c</Command>
+      <Command>win_flex --outfile=gmlscan.c -i gmlscan.l
+win_bison -dy -Wno-yacc gmlparse.y -o gmlparse.c</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)windows\include;$(SolutionDir)windows\getopt;$(SolutionDir);$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)windows\include;$(SolutionDir)windows\dependencies\libraries\vcpkg\installed\x86-windows\include;$(SolutionDir);$(SolutionDir)lib;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
@@ -97,18 +94,15 @@ del gmlparse-intermediate.c</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)windows\getopt</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)windows\dependencies\libraries\vcpkg\installed\x86-windows\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>getopt.lib;cdt.lib;cgraph.lib;ingraphs.lib;gvc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)windows\dependencies\libraries\vcpkg\installed\x86-windows\bin\getopt.dll $(OutDir)getopt.dll</Command>
+    </PostBuildEvent>
     <PreBuildEvent>
-      <Command>flex  -o gmlscan-intermediate.c -i gmlscan.l
-sed "s/yy/gml/g" &lt; gmlscan-intermediate.c &gt; gmlscan.c
-del gmlscan-intermediate.c
-bison -dy gmlparse.y -o gmlparse-intermediate.c
-sed "s/yy/gml/g" &lt; gmlparse-intermediate.h &gt; gmlparse.h
-sed "s/yy/gml/g" &lt; gmlparse-intermediate.c &gt; gmlparse.c
-del gmlparse-intermediate.h
-del gmlparse-intermediate.c</Command>
+      <Command>win_flex --outfile=gmlscan.c -i gmlscan.l
+win_bison -dy -Wno-yacc gmlparse.y -o gmlparse.c</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -119,10 +113,6 @@ del gmlparse-intermediate.c</Command>
     <ClCompile Include="gml2gv.c" />
     <ClCompile Include="gmlparse.c" />
     <ClCompile Include="gmlscan.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="debug\BuildLog.htm" />
-    <None Include="release\BuildLog.htm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

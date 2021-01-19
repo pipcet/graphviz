@@ -16,21 +16,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define STANDALONE
-#include "general.h"
-#include "QuadTree.h"
+#include <sparse/general.h>
+#include <sparse/QuadTree.h>
 #include <time.h>
-#include "SparseMatrix.h"
+#include <sparse/SparseMatrix.h>
 #include <getopt.h>
-#include "string.h"
+#include <string.h>
 #include "make_map.h"
-#include "spring_electrical.h"
-#include "post_process.h"
-#include "overlap.h"
-#include "clustering.h"
-#include "ingraphs.h"
-#include "DotIO.h"
-#include "colorutil.h"
-#include "color_palette.h"
+#include <sfdpgen/spring_electrical.h>
+#include <sfdpgen/post_process.h>
+#include <neatogen/overlap.h>
+#include <sparse/clustering.h>
+#include <ingraphs/ingraphs.h>
+#include <sparse/DotIO.h>
+#include <sparse/colorutil.h>
+#include <sparse/color_palette.h>
 
 #ifdef _WIN32
 #define strdup(x) _strdup(x)
@@ -39,32 +39,6 @@ enum {POINTS_ALL = 1, POINTS_LABEL, POINTS_RANDOM};
 enum {maxlen = 10000000};
 enum {MAX_GRPS = 10000};
 static char swork[maxlen];
-
-#if 0
-void *gmalloc(size_t nbytes)
-{
-    char *rv;
-    if (nbytes == 0)
-        return NULL;
-    rv = malloc(nbytes);
-    if (rv == NULL) {
-        fprintf(stderr, "out of memory\n");
-        abort();
-    }
-    return rv;
-}
-
-void *grealloc(void *ptr, size_t size)
-{
-    void *p = realloc(ptr, size);
-    if (p == NULL && size) {
-        fprintf(stderr, "out of memory\n");
-        abort();
-    }
-    return p;
-}
-
-#endif
 
 typedef struct {
     char* cmd;
@@ -280,7 +254,7 @@ init(int argc, char **argv, params_t* pm)
   pm->bbox_margin[0] =  pm->bbox_margin[1] = 0;
 
   opterr = 0;
-  while ((c = getopt(argc, argv, ":evODQko:m:s:r:p:c:C:l:b:g:t:a:h:z:d:")) != -1) {
+  while ((c = getopt(argc, argv, ":evODQko:m:s:r:p:c:C:l:b:g:t:a:h:z:d:?")) != -1) {
     switch (c) {
     case 'm':
       if ((sscanf(optarg,"%lf",&s) > 0) && (s != 0)){
@@ -408,18 +382,18 @@ init(int argc, char **argv, params_t* pm)
       }
       break;
     case 'l':
-      if (pm->plot_label) free (pm->plot_label);
+      free (pm->plot_label);
       pm->plot_label = strdup (optarg);
       break;
     case ':':
       fprintf(stderr, "gvpack: option -%c missing argument - ignored\n", optopt);
       break;
     case '?':
-      if (optopt == '?')
+      if (optopt == '\0' || optopt == '?')
         usage(cmd, 0);
       else {
-        fprintf(stderr, " option -%c unrecognized - ignored\n", optopt);
-        usage(cmd, 0);
+        fprintf(stderr, " option -%c unrecognized\n", optopt);
+        usage(cmd, 1);
       }
       break;
     }

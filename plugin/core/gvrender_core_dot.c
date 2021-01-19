@@ -15,7 +15,6 @@
 
 #ifdef _WIN32
 #include <io.h>
-#include "compat.h"
 #endif
 
 #include <stdarg.h>
@@ -23,16 +22,16 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "macros.h"
-#include "const.h"
+#include <common/macros.h>
+#include <common/const.h>
 
-#include "gvplugin_render.h"
-#include "gvplugin_device.h"
-#include "agxbuf.h"
-#include "utils.h"
-#include "gvio.h"
+#include <gvc/gvplugin_render.h>
+#include <gvc/gvplugin_device.h>
+#include <cgraph/agxbuf.h>
+#include <common/utils.h>
+#include <gvc/gvio.h>
 
-#define GNEW(t)          (t*)malloc(sizeof(t))
+#define GNEW(t)          malloc(sizeof(t))
 
 /* #define NEW_XDOT */
 
@@ -85,12 +84,7 @@ static xdot_state_t* xd;
 
 static void xdot_str_xbuf (agxbuf* xb, char* pfx, char* s)
 {
-    char buf[BUFSIZ];
-
-    sprintf (buf, "%s%d -", pfx, (int)strlen(s));
-    agxbput(xb, buf);
-    agxbput(xb, s);
-    agxbputc(xb, ' ');
+    agxbprint (xb, "%s%d -%s ", pfx, (int)strlen(s), s);
 }
 
 static void xdot_str (GVJ_t *job, char* pfx, char* s)
@@ -161,12 +155,9 @@ static void xdot_num(agxbuf *xbuf, double v)
 static void xdot_points(GVJ_t *job, char c, pointf * A, int n)
 {
     emit_state_t emit_state = job->obj->emit_state;
-    char buf[BUFSIZ];
     int i;
 
-    agxbputc(xbufs[emit_state], c);
-    sprintf(buf, " %d ", n);
-    agxbput(xbufs[emit_state], buf);
+    agxbprint(xbufs[emit_state], "%c %d ", c, n);
     for (i = 0; i < n; i++)
         xdot_point(xbufs[emit_state], A[i]);
 }
@@ -209,8 +200,7 @@ static void xdot_style (GVJ_t *job)
 	agxbput (&xbuf, "setlinewidth(");
 	sprintf (buf, "%.3f", job->obj->penwidth);
 	xdot_trim_zeros (buf, 0);
-	agxbput(&xbuf, buf);
-	agxbputc (&xbuf, ')');
+	agxbprint(&xbuf, "%s)", buf);
         xdot_str (job, "S ", agxbuse(&xbuf));
     }
 
@@ -245,13 +235,48 @@ static void xdot_style (GVJ_t *job)
 
 }
 
+/** set the value of a symbol within a node, escaping backslashes
+ *
+ * The back ends that output certain text-based formats, e.g. xdot, assume that
+ * all characters that have special meaning within a string have already been
+ * escaped, with the exception of double quote ("). Hence, any string being
+ * constructed from user-provided input needs to be escaped for other
+ * problematic characters (namely \) beforehand. This is a little utility
+ * function to do such.
+ *
+ * @param n Node to operate on
+ * @param sym Symbol to set
+ * @param value Unescaped string
+ */
+static void put_escaping_backslashes(Agobj_t* n, Agsym_t *sym, const char *value)
+{
+    agxbuf buf;
+
+    /* create a temporary buffer */
+    agxbinit(&buf, 0, NULL);
+
+    /* print the given string to the buffer, escaping as we go */
+    for (; *value != '\0'; ++value) {
+        if (*value == '\\') {
+            agxbputc(&buf, '\\');
+        }
+        agxbputc(&buf, *value);
+    }
+
+    /* update the node's symbol to the escaped text */
+    agxset(n, sym, agxbuse(&buf));
+
+    /* discard the buffer */
+    agxbfree(&buf);
+}
+
 static void xdot_end_node(GVJ_t* job)
 {
     Agnode_t* n = job->obj->u.n; 
     if (agxblen(xbufs[EMIT_NDRAW]))
 	agxset(n, xd->n_draw, agxbuse(xbufs[EMIT_NDRAW]));
     if (agxblen(xbufs[EMIT_NLABEL]))
-	agxset(n, xd->n_l_draw, agxbuse(xbufs[EMIT_NLABEL]));
+	put_escaping_backslashes(&n->base, xd->n_l_draw, agxbuse(xbufs[EMIT_NLABEL]));
     penwidth[EMIT_NDRAW] = 1;
     penwidth[EMIT_NLABEL] = 1;
     textflags[EMIT_NDRAW] = 0;
@@ -269,7 +294,7 @@ static void xdot_end_edge(GVJ_t* job)
     if (agxblen(xbufs[EMIT_HDRAW]))
 	agxset(e, xd->h_draw, agxbuse(xbufs[EMIT_HDRAW]));
     if (agxblen(xbufs[EMIT_ELABEL]))
-	agxset(e, xd->e_l_draw,agxbuse(xbufs[EMIT_ELABEL]));
+	put_escaping_backslashes(&e->base, xd->e_l_draw, agxbuse(xbufs[EMIT_ELABEL]));
     if (agxblen(xbufs[EMIT_TLABEL]))
 	agxset(e, xd->tl_draw, agxbuse(xbufs[EMIT_TLABEL]));
     if (agxblen(xbufs[EMIT_HLABEL]))
@@ -296,7 +321,6 @@ static void xdot_end_edge(GVJ_t* job)
 static void xdot_begin_anchor(GVJ_t * job, char *href, char *tooltip, char *target, char *id)
 {
     emit_state_t emit_state = job->obj->emit_state;
-    char buf[3];  /* very small integer */
     unsigned int flags = 0;
 
     agxbput(xbufs[emit_state], "H ");
@@ -306,8 +330,7 @@ static void xdot_begin_anchor(GVJ_t * job, char *href, char *tooltip, char *targ
 	flags |= 2;
     if (target)
 	flags |= 4;
-    sprintf (buf, "%d ", flags);
-    agxbput(xbufs[emit_state], buf);
+    agxbprint(xbufs[emit_state], "%d ", flags);
     if (href)
 	xdot_str (job, "", href);
     if (tooltip)
@@ -481,7 +504,7 @@ static void xdot_end_graph(graph_t* g)
 	agxset(g, xd->g_draw, agxbuse(xbufs[EMIT_GDRAW]));
     }
     if (GD_label(g))
-	agxset(g, xd->g_l_draw, agxbuse(xbufs[EMIT_GLABEL]));
+	put_escaping_backslashes(&g->base, xd->g_l_draw, agxbuse(xbufs[EMIT_GLABEL]));
     agsafeset (g, "xdotversion", xd->version_s, "");
 
     for (i = 0; i < NUMXBUFS; i++)
@@ -567,8 +590,7 @@ static void xdot_textspan(GVJ_t * job, pointf p, textspan_t * span)
 	unsigned int mask = flag_masks[xd->version-15];
 	unsigned int bits = flags & mask;
 	if (textflags[emit_state] != bits) {
-	    sprintf (buf, "t %u ", bits);
-	    agxbput(xbufs[emit_state], buf);
+	    agxbprint(xbufs[emit_state], "t %u ", bits);
 	    textflags[emit_state] = bits;
 	}
     }
@@ -576,8 +598,7 @@ static void xdot_textspan(GVJ_t * job, pointf p, textspan_t * span)
     p.y += span->yoffset_centerline;
     agxbput(xbufs[emit_state], "T ");
     xdot_point(xbufs[emit_state], p);
-    sprintf(buf, "%d ", j);
-    agxbput(xbufs[emit_state], buf);
+    agxbprint(xbufs[emit_state], "%d ", j);
     xdot_fmt_num (buf, span->size.x);
     agxbput(xbufs[emit_state], buf);
     xdot_str (job, "", span->str);

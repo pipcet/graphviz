@@ -1,5 +1,9 @@
 /* manually generated configuration for Windows */
 
+/* Include generated files */
+#include "builddate.h"
+#include "version.h"
+
 /* Command to open a browser on a URL */
 #define BROWSER "xdg-open"
 
@@ -37,9 +41,6 @@
 /* Define to 1 if you have the `cbrt' function. */
 //#define HAVE_CBRT 1
 
-/* Define to 1 if you have the <crt_externs.h> header file. */
-/* #undef HAVE_CRT_EXTERNS_H */
-
 /* Define to 1 if you have the `deflateBound' function. */
 /* #undef HAVE_DEFLATEBOUND */
 
@@ -59,7 +60,7 @@
 #define HAVE_EXPAT_H 1
 
 /* Define if FILE structure provides _cnt */
-#define HAVE_FILE_CNT 1
+#define HAVE_FILE_CNT 0
 
 /* Define if FILE structure provides _IO_read_end */
 /* #undef HAVE_FILE_IO_READ_END */
@@ -167,9 +168,6 @@
 /* Define to 1 if you have the `lrand48' function. */
 /* #undef HAVE_LRAND48 */
 
-/* Define to 1 if you have the <malloc.h> header file. */
-#define HAVE_MALLOC_H 1
-
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
 
@@ -209,14 +207,8 @@
 /* Define to 1 if you have the `srand48' function. */
 /* #undef HAVE_SRAND48 */
 
-/* Define to 1 if you have the `strcasecmp' function. */
-//#define HAVE_STRCASECMP 1
-
 /* Define to 1 if you have the <strings.h> header file. */
 //#define HAVE_STRINGS_H 1
-
-/* Define to 1 if you have the `strncasecmp' function. */
-//#define HAVE_STRNCASECMP 1
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
@@ -277,9 +269,6 @@
 /* Define to 1 if the system has the type `_Bool'. */
 #define HAVE__BOOL 1
 
-/* Define to 1 if you have the `_NSGetEnviron' function. */
-/* #undef HAVE__NSGETENVIRON */
-
 /* Define as const if the declaration of iconv() needs const. */
 #define ICONV_CONST const
 
@@ -294,13 +283,13 @@
 #define ORTHO 1
 
 /* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "http://www.graphviz.org/"
+#define PACKAGE_BUGREPORT "https://gitlab.com/graphviz/graphviz/-/issues"
 
 /* Define to the full name of this package. */
 #define PACKAGE_NAME "graphviz"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "graphviz 2.39.20160612.1140"
+#define PACKAGE_STRING VERSION "(" BUILDDATE ")"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "graphviz"
@@ -309,7 +298,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "2.39.20160612.1140"
+#define PACKAGE_VERSION VERSION
 
 /* Path separator character. */
 #define PATHSEPARATOR ":"
@@ -350,6 +339,3 @@
 
 /* Define to `int' if <sys/types.h> does not define. */
 typedef int ssize_t;
-
-/* Define to `int' if <sys/types.h> doesn't define. */
-#define uid_t int

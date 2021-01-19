@@ -7,16 +7,27 @@ pdfdir = $(pkgdatadir)/doc/pdf
 gveditdir = $(pkgdatadir)/gvedit
 
 mans = gvedit.1
+if ENABLE_MAN_PDFS
+if HAVE_PS2PDF
 pdfs = gvedit.1.pdf
+else
+pdfs = ERROR_NO_PS2PDF
+endif
+else
+pdfs =
+endif
 
 if WITH_QT
 bin_PROGRAMS = gvedit
 gvedit_DATA = attrs.txt
 man_MANS = $(mans)
-pdf_DATA = $(pdfs)
+if ENABLE_MAN_PDFS
+pdf_DATA = gvedit.1.pdf
+endif
 endif
 
 AM_CPPFLAGS = \
+	-I$(top_srcdir)/lib \
 	-I$(top_srcdir)/lib/common \
 	-I$(top_srcdir)/lib/gvc \
 	-I$(top_srcdir)/lib/pathplan \
@@ -46,11 +57,8 @@ gvedit_SOURCES = main.cpp csettings.cpp imageviewer.cpp mainwindow.cpp mdichild.
 
 $(MOCABLES): mocables
 
-gvedit gvedit$(EXEEXT): $(MOCABLES)
-
 .PHONY: mocables
 mocables: qMakefile
-	rm -f $(MOCABLES) # don't use distributed mocables poss from diff version of Qt
 	$(MAKE) -f qMakefile prefix=${prefix} exec_prefix=${exec_prefix} mocables compiler_rcc_make_all
 
 qMakefile: gvedit.pro
@@ -59,17 +67,21 @@ qMakefile: gvedit.pro
 attrs.txt: $(top_srcdir)/doc/infosrc/attrs
 	cp $(top_srcdir)/doc/infosrc/attrs attrs.txt
 
+if ENABLE_MAN_PDFS
+if HAVE_PS2PDF
 gvedit.1.pdf: gvedit.1.ps
-	@PS2PDF@ $< $@
+	@PS2PDF@ $<
 
 gvedit.1.ps: $(srcdir)/gvedit.1
 	@GROFF@ -Tps -man $< >$@
+endif
+endif
 
 EXTRA_DIST = gvedit.vcxproj* gvedit.pro.in mdi.qrc $(mans) $(pdfs)
 
 CLEANFILES = moc_csettings.cpp moc_imageviewer.cpp moc_mainwindow.cpp moc_mdichild.cpp qrc_mdi.cpp
-	
-DISTCLEANFILES = attrs.txt $(pdf_DATA) qMakefile gvedit.1.ps
+
+DISTCLEANFILES = attrs.txt $(pdf) qMakefile gvedit.1.ps
 
 clean-local:
 	-$(MAKE) -f qMakefile clean

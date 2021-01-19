@@ -1,17 +1,5 @@
 add_definitions(-D_BLD_gvc=1 -DGVC_EXPORTS -DGVLIBDIR="${LIBRARY_INSTALL_DIR}/graphviz")
 
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${TOP_SOURCE_DIR}
-    ${GRAPHVIZ_LIB_DIR}/ast
-    ${GRAPHVIZ_LIB_DIR}/cdt
-    ${GRAPHVIZ_LIB_DIR}/cgraph
-    ${GRAPHVIZ_LIB_DIR}/common
-    ${GRAPHVIZ_LIB_DIR}/pathplan
-    ${LTDL_INCLUDE_DIRS}
-    ${RXSPENCER_INCLUDE_DIRS}
-)
-
 add_library(gvc SHARED
     # Header files
     gvc.h
@@ -48,26 +36,42 @@ add_library(gvc SHARED
     gvc.def
 )
 
-target_link_libraries(gvc
+target_include_directories(gvc PRIVATE
+    ${GRAPHVIZ_LIB_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${TOP_SOURCE_DIR}
+    ${GRAPHVIZ_LIB_DIR}/ast
+    ${GRAPHVIZ_LIB_DIR}/cdt
+    ${GRAPHVIZ_LIB_DIR}/cgraph
+    ${GRAPHVIZ_LIB_DIR}/common
+    ${GRAPHVIZ_LIB_DIR}/pathplan
+    ${LTDL_INCLUDE_DIRS}
+    ${RxSpencer_INCLUDE_DIRS}
+)
+
+target_link_libraries(gvc PRIVATE
+    $<TARGET_OBJECTS:common_obj>
+    $<TARGET_OBJECTS:pack_obj>
+)
+
+target_link_libraries(gvc PUBLIC
     cdt
     cgraph
-    common
     label
-    pack
     pathplan
     xdot
     ${EXPAT_LIBRARIES}
-    ${RXSPENCER_LIBRARIES}
+    ${RxSpencer_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${MATH_LIB}
 )
 
 if (NOT WIN32)
-    target_link_libraries(gvc ${LTDL_LIBRARIES})
+    target_link_libraries(gvc PUBLIC ${LTDL_LIBRARIES})
 endif()
 
 if (${with_ortho})
-    target_link_libraries(gvc ortho)
+    target_link_libraries(gvc PUBLIC ortho)
 endif()
 
 # Installation location of library files

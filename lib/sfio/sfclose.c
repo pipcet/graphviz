@@ -11,16 +11,16 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 
 /*	Close a stream. A file stream is synced before closing.
 **
 **	Written by Kiem-Phong Vo
 */
 
-int sfclose(reg Sfio_t * f)
+int sfclose(Sfio_t * f)
 {
-    reg int local, ex, rv;
+    int local, ex, rv;
     void *data = NIL(void *);
 
     SFMTXSTART(f, -1);
@@ -35,7 +35,7 @@ int sfclose(reg Sfio_t * f)
 
     /* closing a stack of streams */
     while (f->push) {
-	reg Sfio_t *pop;
+	Sfio_t *pop;
 
 	if (!(pop = (*_Sfstack) (f, NIL(Sfio_t *))))
 	    SFMTXRETURN(f, -1);
@@ -63,9 +63,8 @@ int sfclose(reg Sfio_t * f)
 
     if (!local && f->pool) {	/* remove from pool */
 	if (f->pool == &_Sfpool) {
-	    reg int n;
+	    int n;
 
-	    POOLMTXLOCK(&_Sfpool);
 	    for (n = 0; n < _Sfpool.n_sf; ++n) {
 		if (_Sfpool.sf[n] != f)
 		    continue;
@@ -75,7 +74,6 @@ int sfclose(reg Sfio_t * f)
 		    _Sfpool.sf[n] = _Sfpool.sf[n + 1];
 		break;
 	    }
-	    POOLMTXUNLOCK(&_Sfpool);
 	} else {
 	    f->mode &= ~SF_LOCK;
 	    /**/ ASSERT(_Sfpmove);
@@ -110,23 +108,12 @@ int sfclose(reg Sfio_t * f)
     f->endb = f->endr = f->endw = f->next = f->data;
 
     /* zap any associated auxiliary buffer */
-    if (f->rsrv) {
-	free(f->rsrv);
-	f->rsrv = NIL(Sfrsrv_t *);
-    }
+    free(f->rsrv);
+    f->rsrv = NIL(Sfrsrv_t *);
 
     /* delete any associated sfpopen-data */
     if (f->proc)
 	rv = _sfpclose(f);
-
-    /* destroy the mutex */
-    if (f->mutex) {
-	vtmtxclrlock(f->mutex);
-	if (f != sfstdin && f != sfstdout && f != sfstderr) {
-	    vtmtxclose(f->mutex);
-	    f->mutex = NIL(Vtmutex_t *);
-	}
-    }
 
     if (!local) {
 	if (f->disc && (ex = SFRAISE(f, SF_FINAL, NIL(void *))) != 0) {
@@ -144,7 +131,6 @@ int sfclose(reg Sfio_t * f)
     }
 
   done:
-    if (data)
-	free(data);
+    free(data);
     return rv;
 }

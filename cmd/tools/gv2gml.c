@@ -26,9 +26,9 @@
 
 #include <getopt.h>
 
-#include <cgraph.h>
+#include <cgraph/cgraph.h>
 #include <ctype.h>
-#include <ingraphs.h>
+#include <ingraphs/ingraphs.h>
 
 static FILE *outFile;
 static char *CmdName;
@@ -704,6 +704,8 @@ static void initargs(int argc, char **argv)
     while ((c = getopt(argc, argv, ":o:")) != -1) {
 	switch (c) {
 	case 'o':
+	    if (outFile != NULL)
+		fclose(outFile);
 	    outFile = openFile(optarg, "w");
 	    break;
 	case ':':

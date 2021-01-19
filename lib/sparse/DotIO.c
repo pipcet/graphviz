@@ -12,13 +12,13 @@
  *************************************************************************/
 
 #define STANDALONE
-#include "general.h"
-#include "DotIO.h"
-#include "clustering.h"
-#include "mq.h"
-/* #include "spring_electrical.h" */
-#include "color_palette.h"
-#include "colorutil.h"
+#include <sparse/general.h>
+#include <sparse/DotIO.h>
+#include <sparse/clustering.h>
+#include <math.h>
+#include <sparse/mq.h>
+#include <sparse/color_palette.h>
+#include <sparse/colorutil.h>
 
 typedef struct {
     Agrec_t h;
@@ -462,7 +462,7 @@ makeDotGraph (SparseMatrix A, char *name, int dim, real *x, int with_color, int 
   Agedge_t* e;
   int i, j;
   char buf[1024], buf2[1024];
-  Agsym_t *sym, *sym2 = NULL, *sym3 = NULL;
+  Agsym_t *sym2 = NULL, *sym3 = NULL;
   int* ia=A->ia;
   int* ja=A->ja;
   real* val = (real*)(A->a);
@@ -496,10 +496,10 @@ makeDotGraph (SparseMatrix A, char *name, int dim, real *x, int with_color, int 
   label_string = strcat(label_string, " edges.");
 
 
-  if (with_label) sym = agattr(g, AGRAPH, "label", label_string); 
-  sym = agattr(g, AGRAPH, "fontcolor", "#808090");
-  if (with_color) sym = agattr(g, AGRAPH, "bgcolor", "black"); 
-  sym = agattr(g, AGRAPH, "outputorder", "edgesfirst"); 
+  if (with_label) agattr(g, AGRAPH, "label", label_string);
+  agattr(g, AGRAPH, "fontcolor", "#808090");
+  if (with_color) agattr(g, AGRAPH, "bgcolor", "black");
+  agattr(g, AGRAPH, "outputorder", "edgesfirst");
 
   if (A->m > 100) {
     /* -Estyle=setlinewidth(0.0)' -Eheadclip=false -Etailclip=false -Nstyle=invis*/
@@ -566,7 +566,7 @@ makeDotGraph (SparseMatrix A, char *name, int dim, real *x, int with_color, int 
 	}
       } else {
 	for (j = ia[i]; j < ia[i+1]; j++) {
-	  color[j] = ABS(val[j]);
+	  color[j] = fabs(val[j]);
 	  if (i != ja[j]){
 	    if (first){
 	      mindist = color[j];
@@ -673,7 +673,6 @@ Agraph_t *convert_edge_labels_to_nodes(Agraph_t* g){
   Agraph_t *dg;
 
   int nnodes;
-  int nedges;
 
 
   Agedge_t *ep, *e;
@@ -688,7 +687,6 @@ Agraph_t *convert_edge_labels_to_nodes(Agraph_t* g){
   dg = agopen("test", g->desc, 0);
 
   nnodes = agnnodes (g);
-  nedges = agnedges (g);
 
   ndmap = malloc(sizeof(Agnode_t *)*nnodes);
 

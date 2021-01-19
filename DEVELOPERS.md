@@ -8,20 +8,13 @@
 
 ### A note about the examples below
 
-The examples below are for the 2.44 release. Modify the version
-number for the actual release. The example commits were cherry-picked
-from different releases since mistakes were made during the 2.44
-release (and all other previous releases as well).
+The examples below are for the 2.44.1 release. Modify the version
+number for the actual release.
 
 ### Using a fork or a clone of the original repo
 
-The instructions below assume that the actions are performed from a
-fork and that the orignal repository has been added as a remote with:
-
-`git remote add graphviz https://gitlab.com/graphviz/graphviz.git`
-
-If the actions instead are performed from a clone of the orignal repo,
-`git push graphviz` should be replaced with `git push origin`.
+The instructions below can be used from a fork (recommended) or from a
+clone of the master repo.
 
 ### Deciding the release version number
 
@@ -32,24 +25,7 @@ Before making the release, it must be decided if it is a *major*, *minor* or
 
 #### Stable release versions and development versions numbering convention
 
-Stable release versions always have an *even* minor version and
-development versions always have an *odd* minor version that is the
-latest stable release minor version *plus* 1. Development releases
-have the patch version automatically set to the
-[committer date](https://git-scm.com/docs/pretty-formats#Documentation/pretty-formats.txt-emciem)
-(not the [author date](https://git-scm.com/docs/pretty-formats#Documentation/pretty-formats.txt-emadem)
-which is what `git log` shows by default) of the latest commit using the format `%Y%m%d.%H%M`.
-
-Release version examples:
-
-- 2.42.3
-- 2.42.4
-- 2.44.0
-
-Development version examples:
-
-- 2.43.20200403.0503
-- 2.45.20200601.1555
+See [`gen_version.py`](https://gitlab.com/graphviz/graphviz/-/blob/master/gen_version.py).
 
 ### Instructions
 
@@ -57,60 +33,71 @@ Development version examples:
 [master pipeline](https://gitlab.com/graphviz/graphviz/-/pipelines?ref=master)
 is green
 
-1. Edit `autogen.sh`, `appveyor.yml` and `CMakeLists.txt`:
+1. Create a local branch and name it e.g. `stable-release-<version>`
 
-   Incement patch version with 1 *or* minor version to the next *even* number.
+   Example: `stable-release-2.44.1`
 
-   Example: 466402bb70105dd74282cd9da6bbde9da02a9b3c
-   and 2cc6ed876212ec65fccd4a90028335b338d3ccc0 (for release 2.42.4).
+1. Edit `gen_version.py` according to instructions in that file.
 
-1. Edit `CHANGELOG.md` (provided that !1394 is merged)
+1. Edit `CHANGELOG.md`
 
-   Add the new version between `[Unreleased]` and the previous
-   version.
+    Add the new version between `[Unreleased]` and the previous
+    version.
 
-   At the bottom of the file, add an entry for the new version. These
-   entries are not visible in the rendered page, but are essential for
-   the version links to the GitLab commit comparisons to work.
+    At the bottom of the file, add an entry for the new version. These
+    entries are not visible in the rendered page, but are essential
+    for the version links to the GitLab commit comparisons to work.
 
-   Updating the `CHANGELOG.md` has never yet been done for the
-   Graphviz project, but [this
-   example](https://github.com/magjac/d3-graphviz/commit/59f515686a3fdb4da2a04d02665abfb2e583d898#diff-4ac32a78649ca5bdd8e0ba38b7006a1e)
-   shows how it's done for another project.
+    Example (from
+    https://gitlab.com/graphviz/graphviz/-/commit/5e0d3b1841b7e358274c916b52276d251eabef3d#ab09011fa121d0a2bb9fa4ca76094f2482b902b7):
+
+    ```diff
+     ## [Unreleased]
+     
+    +## [2.44.1] - 2020-06-29
+    +
+    ```
+    ```diff
+    -[Unreleased]: https://gitlab.com/graphviz/graphviz/compare/2.44.0...master
+    +[Unreleased]: https://gitlab.com/graphviz/graphviz/compare/2.44.1...master
+    +[2.44.1]: https://gitlab.com/graphviz/graphviz/compare/2.44.0...2.44.1
+     [2.44.0]: https://gitlab.com/graphviz/graphviz/compare/2.42.4...2.44.0
+     [2.42.4]: https://gitlab.com/graphviz/graphviz/compare/2.42.3...2.42.4
+     [2.42.3]: https://gitlab.com/graphviz/graphviz/compare/2.42.2...2.42.3
+    ```
 
 1. Commit:
 
    `git add -p`
 
-   `git commit -m "Stable Release 2.44.0"`
+   `git commit -m "Stable Release 2.44.1"`
 
 1. Push:
 
-   `git push graphviz master`
+   Example: `git push origin stable-release-2.44.1`
+
+1. Wait until the pipeline has run for your branch and check that it's green
+
+1. Create a merge request
+
+1. Merge the merge request
 
 1. Wait for the
 [master pipeline](https://gitlab.com/graphviz/graphviz/-/pipelines?ref=master)
-to run for the new commit and check that it succeeds
+  to run for the new commit and check that it's green
 
-1. Tag release:
+1. The “deployment” CI task will automatically create a release on the
+   [Gitlab releases tab](https://gitlab.com/graphviz/graphviz/-/releases). If a
+   release is not created, check that your modifications to `gen_version.py`
+   correctly set a version conforming to the regular expression `\d+\.\d+\.\d+`.
+   The “deployment” CI task will also create a Git tag for the version, e.g.
+   `2.44.1`.
 
-   `git tag -a -m "Stable Release 2.44.0" stable_release_2.44.0`
+1. Create a new local branch and name it e.g. `return-to-<version>-dev`
 
-1. Push tag:
+   Example: `return-to-2.45-dev`
 
-   `git push graphviz stable_release_2.44.0`
-
-1. Create a release at [GitHub releases](https://gitlab.com/graphviz/graphviz/-/releases)
-
-   Create a new tag *without* the `stable_release_` prefix: `2.44.0`
-
-1. Edit `autogen.sh`, `appveyor.yml` and `CMakeLists.txt`.
-
-   Update the release again for the next devevelopment series. If
-   minor release, increment minor version to the next odd number and
-   zero the patch version, *otherwise* increment the patch
-   version. See e.g.  28e09c876c4c01e979b5801c89f6f59855c8b4ca and
-   fa40209b378c8435fd1c8d6c74ff0ff95c9f45b2
+1. Edit `gen_version.py` again according to instructions in that file.
 
 1. Commit:
 
@@ -118,52 +105,106 @@ to run for the new commit and check that it succeeds
 
     If patch version was incremented:
 
-    `git commit -m "Move back to 2.43 development series"`
+    Example: `git commit -m "Move back to 2.45 development series"`
 
     else (if major or minor version was incremented):
 
-    `git commit -m "Start 2.45 development series"`
+    Example: `git commit -m "Start 2.47 development series"`
 
 1. Push:
 
-    `git push graphviz master`
+   Example: `git push origin return-to-2.45-dev`
 
-1. Update the links to the release on the **Downloads** web page through
-[Edit this page](https://gitlab.com/graphviz/graphviz.gitlab.io/-/edit/master/_pages/10_download.md):
-   - Visit the
-   [Appveyor history](https://ci.appveyor.com/project/ellson/graphviz-pl238/history)
-   and find the URL to the Windows release build.
-   - In the **Windows** section, for the **Stable 2.44 Windows install packages** link:
-     - Update the text with the new version number.
-     - Update the link with the new URL.
-     Example: [23bf8be297b9b4d11d345020acbe823f76bee267](https://gitlab.com/graphviz/graphviz.gitlab.io/-/commit/23bf8be297b9b4d11d345020acbe823f76bee267).
+1. Wait until the pipeline has run for your new branch and check that it's green
 
-1. Update the links to the released source code package files on the **Sources** web
-page through
-[Edit this page](https://gitlab.com/graphviz/graphviz.gitlab.io/-/edit/master/download/source/index.md):
-   - Visit the
-   [portable_source](https://www2.graphviz.org/Packages/stable/portable_source/)
-   directory
-   and find the URL's to the `tar.gz` and the `tar.gz.md5` files.
-   - In the **current stable release** column in the **graphviz** table:
-     - Update the text with the new version number.
-     - Update the links with the new URL's.
+1. Create a merge request
 
-### TODO (with these release instructions)
+1. Merge the merge request
 
-- Update the example commits above after next release (provided that
-  we manage to get it right the first time) and remove the note about
-  it at the top and the reference to "another project".
+## Performance and profiling
 
-- Add an example commit for the **Sources** page after the next release.
+The runtime and memory usage of Graphviz is dependent on the user’s graph. It is
+easy to create “expensive” graphs without realizing it using only moderately
+sized input. For this reason, users regularly encounter performance bottlenecks
+that they need help with. This situation is likely to persist even with hardware
+advances, as the size and complexity of the graphs users construct will expand
+as well.
 
-- Investigate if the tagging can be simplifed when making the next
-  release. The current approach using dual tags is based on that we
-  wanted to tag before push and then make a GitLab release. It didn't
-  seem possible to create a GitLab release for an existing tag, hence
-  to need to create another tag without the `stable_release_` prefix
-  (This seemed to be a good idea at the time but might have been the
-  wrong conclusion).
+This section documents how to build performance-optimized Graphviz binaries and
+how to identify performance bottlenecks. Note that this information assumes you
+are working in a Linux environment.
+
+### Building an optimized Graphviz
+
+The first step to getting an optimized build is to make sure you are using a
+recent compiler. If you have not upgraded your C and C++ compilers for a while,
+make sure you do this first.
+
+The simplest way to change flags used during compilation is by setting the
+`CFLAGS` and `CXXFLAGS` environment variables:
+
+```sh
+env CFLAGS="..." CXXFLAGS="..." ./configure
+```
+
+You should use the maximum optimization level for your compiler. E.g. `-O3` for
+GCC and Clang. If your toolchain supports it, it is recommended to also enable
+link-time optimization (`-flto`).
+
+You can further optimize compilation for the machine you are building on with
+`-march=native -mtune=native`. Be aware that the resulting binaries will no
+longer be portable (may not run if copied to another machine). These flags are
+also not recommended if you are debugging a user issue, because you will end up
+profiling and optimizing different code than what may execute on their machine.
+
+Most profilers need a symbol table and/or debugging metadata to give you useful
+feedback. You can enable this on GCC and Clang with `-g`.
+
+Putting this all together:
+
+```sh
+env CFLAGS="-O3 -flto -march=native -mtune=native -g" \
+  CXXFLAGS="-O3 -flto -march=native -mtune=native -g" ./configure
+```
+
+### Profiling
+
+#### [Callgrind](https://valgrind.org/docs/manual/cl-manual.html)
+
+Callgrind is a tool of [Valgrind](https://valgrind.org/) that can measure how
+many times a function is called and how expensive the execution of a function is
+compared to overall runtime. When you have built an optimized binary according
+to the above instructions, you can run it under Callgrind:
+
+```sh
+valgrind --tool=callgrind dot -Tsvg test.dot
+```
+
+This will produce a file like callgrind.out.2534 in the current directory. You
+can use [Kcachegrind](https://kcachegrind.github.io/) to view the results by
+running it in the same directory with no arguments:
+
+```sh
+kcachegrind
+```
+
+If you have multiple trace results in the current directory, Kcachegrind will
+load all of them and even let you compare them to each other. See the
+Kcachegrind documentation for more information about how to use this tool.
+
+Be aware that execution under Callgrind will be a lot slower than a normal run.
+If you need to see instruction-level execution costs, you can pass
+`--dump-instr=yes` to Valgrind, but this will further slow execution and is
+usually not necessary. To profile with less overhead, you can use a statistical
+profiler like Linux Perf.
+
+#### [Linux Perf](https://perf.wiki.kernel.org/index.php/Main_Page)
+
+TODO
+
+## TODO with this guide
+
+* Update with new example commits after next stable release.
 
 ## How to update this guide
 

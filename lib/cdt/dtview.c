@@ -1,4 +1,4 @@
-#include	"dthdr.h"
+#include	<cdt/dthdr.h>
 
 /*	Set a view path from dict to view.
 **
@@ -6,12 +6,13 @@
 */
 
 
-static void* dtvsearch(Dt_t* dt, reg void* obj, reg int type)
+static void* dtvsearch(Dt_t* dt, void* obj, int type)
 {
 	Dt_t		*d, *p;
 	void		*o, *n, *ok, *nk;
 	int		cmp, lk, sz, ky;
 	Dtcompar_f	cmpf;
+	NOTUSED(lk);
 
 	/* these operations only happen at the top level */
 	if(type&(DT_INSERT|DT_DELETE|DT_CLEAR|DT_RENEW))
@@ -86,9 +87,9 @@ static void* dtvsearch(Dt_t* dt, reg void* obj, reg int type)
 	}
 }
 
-Dt_t* dtview(reg Dt_t* dt, reg Dt_t* view)
+Dt_t* dtview(Dt_t* dt, Dt_t* view)
 {
-	reg Dt_t*	d;
+	Dt_t*	d;
 
 	UNFLATTEN(dt);
 	if(view)

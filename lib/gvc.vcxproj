@@ -14,16 +14,16 @@
     <ProjectGuid>{15229511-9F6C-48A5-9194-660CA6492563}</ProjectGuid>
     <RootNamespace>gvc</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -51,7 +51,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)windows\dependencies\GTK2\include;$(SolutionDir)windows\dependencies\libraries\x86\include;$(SolutionDir);$(SolutionDir)lib\ast;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\fdpgen;$(SolutionDir)lib\label;$(SolutionDir)lib\pathplan;$(SolutionDir)lib\gvc;$(SolutionDir)lib\xdot;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)windows\dependencies\GTK2\include;$(SolutionDir)windows\dependencies\libraries\x86\include;$(SolutionDir);$(SolutionDir)lib;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\pathplan;$(SolutionDir)lib\gvc;$(SolutionDir)lib\xdot;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;GVC_EXPORTS;WIN32_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -68,15 +68,11 @@
       <SubSystem>Windows</SubSystem>
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
-      <ModuleDefinitionFile>gvc.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)lib\gvc\gvc.def</ModuleDefinitionFile>
       <AdditionalDependencies>cdt.lib;cgraph.lib;xml2.lib;expat.lib;zlib.lib;rxspencer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>bison -dy common\htmlparse.y -o common\htmlparse-intermediate.c
-sed "s/yy/html/g" &lt; common\htmlparse-intermediate.c &gt; common\htmlparse.c
-sed "s/yy/html/g" &lt; common\htmlparse-intermediate.h &gt; common\htmlparse.h
-del common\htmlparse-intermediate.c
-del common\htmlparse-intermediate.h
+      <Command>win_bison -dy -Wno-yacc common\htmlparse.y -o common\htmlparse.c
 awk -f $(SolutionDir)awk\svgcolor.awk common\svgcolor_names &gt; common\svgcolor_lib
 awk -f $(SolutionDir)awk\brewer.awk common\brewer_colors &gt; common\brewer_lib
 type common\brewer_lib common\svgcolor_lib common\color_names | sort /L C &gt; color_lib
@@ -88,7 +84,7 @@ awk -f $(SolutionDir)awk\colortbl.awk color_lib &gt; common\colortbl.h</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)windows\dependencies\GTK2\include;$(SolutionDir)windows\dependencies\libraries\x86\include;$(SolutionDir);$(SolutionDir)lib\ast;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\fdpgen;$(SolutionDir)lib\label;$(SolutionDir)lib\pathplan;$(SolutionDir)lib\gvc;$(SolutionDir)lib\xdot;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)windows\dependencies\GTK2\include;$(SolutionDir)windows\dependencies\libraries\x86\include;$(SolutionDir);$(SolutionDir)lib;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\pathplan;$(SolutionDir)lib\gvc;$(SolutionDir)lib\xdot;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;GVC_EXPORTS;WIN32_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
@@ -103,15 +99,11 @@ awk -f $(SolutionDir)awk\colortbl.awk color_lib &gt; common\colortbl.h</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
-      <ModuleDefinitionFile>gvc.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)lib\gvc\gvc.def</ModuleDefinitionFile>
       <AdditionalDependencies>cdt.lib;cgraph.lib;xml2.lib;expat.lib;zlib.lib;rxspencer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>bison -dy common\htmlparse.y -o common\htmlparse-intermediate.c
-sed "s/yy/html/g" &lt; common\htmlparse-intermediate.c &gt; common\htmlparse.c
-sed "s/yy/html/g" &lt; common\htmlparse-intermediate.h &gt; common\htmlparse.h
-del common\htmlparse-intermediate.c
-del common\htmlparse-intermediate.h
+      <Command>win_bison -dy -Wno-yacc common\htmlparse.y -o common\htmlparse.c
 awk -f $(SolutionDir)awk\svgcolor.awk common\svgcolor_names &gt; common\svgcolor_lib
 awk -f $(SolutionDir)awk\brewer.awk common\brewer_colors &gt; common\brewer_lib
 type common\brewer_lib common\svgcolor_lib common\color_names | sort /L C &gt; color_lib
@@ -209,7 +201,7 @@ awk -f $(SolutionDir)awk\colortbl.awk color_lib &gt; common\colortbl.h</Command>
   </ItemGroup>
   <ItemGroup>
     <None Include="common\entities.html" />
-    <None Include="gvc.def" />
+    <None Include="gvc\gvc.def" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="cdt\cdt.vcxproj">

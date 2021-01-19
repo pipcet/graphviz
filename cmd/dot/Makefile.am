@@ -4,17 +4,24 @@
 pdfdir = $(pkgdatadir)/doc/pdf
 
 linkedman = neato.1 twopi.1 fdp.1 circo.1
+if ENABLE_MAN_PDFS
 linkedpdf = neato.1.pdf twopi.1.pdf fdp.1.pdf circo.1.pdf
+else
+linkedpdf =
+endif
 linkedprogram = neato$(EXEEXT) twopi$(EXEEXT) fdp$(EXEEXT) circo$(EXEEXT) \
     osage$(EXEEXT) patchwork$(EXEEXT)
 
 if WITH_SFDP
 linkedman += sfdp.1
+if ENABLE_MAN_PDFS
 linkedpdf += sfdp.1.pdf
+endif
 linkedprogram += sfdp$(EXEEXT)
 endif
 
 AM_CPPFLAGS = \
+	-I$(top_srcdir)/lib \
         -I$(top_srcdir)/lib/common \
         -I$(top_srcdir)/lib/gvc \
 	-I$(top_srcdir)/lib/pathplan \
@@ -42,7 +49,19 @@ endif
 endif
 
 man_MANS = dot.1 osage.1 patchwork.1
+if ENABLE_MAN_PDFS
 pdf_DATA = dot.1.pdf osage.1.pdf patchwork.1.pdf
+endif
+
+if ENABLE_MAN_PDFS
+if HAVE_PS2PDF
+pdf = $(pdf_DATA)
+else
+pdf = ERROR_NO_PS2PDF
+endif
+else
+pdf =
+endif
 
 dot_SOURCES = dot.c no_builtins.c
 dot_CPPFLAGS = $(AM_CPPFLAGS) -DDEMAND_LOADING=1
@@ -66,23 +85,27 @@ uninstall-hook:
 	(cd $(DESTDIR)$(bindir); for i in $(linkedprogram); do rm -f $$i; done;)
 	(cd $(DESTDIR)$(libdir); rm -f config;)
 
+if ENABLE_MAN_PDFS
+if HAVE_PS2PDF
 dot.1.pdf: dot.1.ps
-	@PS2PDF@ $< $@
+	@PS2PDF@ $<
 
 dot.1.ps: $(srcdir)/dot.1
 	@GROFF@ -Tps -man $< >$@
 
 osage.1.pdf: osage.1.ps
-	@PS2PDF@ $< $@
+	@PS2PDF@ $<
 
 osage.1.ps: $(srcdir)/osage.1
 	@GROFF@ -Tps -man $< >$@
 
 patchwork.1.pdf: patchwork.1.ps
-	@PS2PDF@ $< $@
+	@PS2PDF@ $<
 
 patchwork.1.ps: $(srcdir)/patchwork.1
 	@GROFF@ -Tps -man $< >$@
+endif
+endif
 
 dot_static_SOURCES = dot.c dot_builtins.c
 dot_static_CPPFLAGS = $(AM_CPPFLAGS) -DDEMAND_LOADING=0
@@ -116,10 +139,6 @@ dot_builtins_LDADD += $(top_builddir)/plugin/gd/libgvplugin_gd.la $(GDLIB_LIBS)
 endif
 
 if WITH_PANGOCAIRO
-if WITH_WEBP
-dot_static_LDADD += $(top_builddir)/plugin/webp/.libs/libgvplugin_webp_C.a $(WEBP_LIBS)
-dot_builtins_LDADD += $(top_builddir)/plugin/webp/libgvplugin_webp.la $(WEBP_LIBS)
-endif
 dot_static_LDADD += $(top_builddir)/plugin/pango/.libs/libgvplugin_pango_C.a $(PANGOCAIRO_LIBS) $(PANGOFT2_LIBS)
 dot_builtins_LDADD += $(top_builddir)/plugin/pango/libgvplugin_pango.la $(PANGOCAIRO_LIBS)
 if WITH_WEBP
@@ -129,16 +148,15 @@ endif
 endif
 
 if WITH_LASI
-dot_static_LDADD += $(top_builddir)/plugin/lasi/.libs/libgvplugin_lasi_C.a $(LASI_LIBS) -lstdc++
-dot_builtins_LDADD += $(top_builddir)/plugin/lasi/libgvplugin_lasi.la $(LASI_LIBS) -lstdc++
+dot_static_LDADD += $(top_builddir)/plugin/lasi/.libs/libgvplugin_lasi_C.a $(LASI_LIBS)
+dot_builtins_LDADD += $(top_builddir)/plugin/lasi/libgvplugin_lasi.la $(LASI_LIBS)
 endif
 
-if WITH_LASI
-dot_static_LDADD += $(top_builddir)/plugin/lasi/.libs/libgvplugin_lasi_C.a $(LASI_LIBS) -lstdc++
-dot_builtins_LDADD += $(top_builddir)/plugin/lasi/libgvplugin_lasi.la $(LASI_LIBS) -lstdc++
-endif
+# add a non-existent C++ source to force the C++ compiler to be used for
+# linking, so the C++ standard library is included for our C++ dependencies
+nodist_EXTRA_dot_static_SOURCES = fake.cxx
+nodist_EXTRA_dot_builtins_SOURCES = fake.cxx
 
+EXTRA_DIST = dot.1 osage.1 patchwork.1 $(pdf) dot.vcxproj*
 
-EXTRA_DIST = dot.1 dot.1.pdf osage.1 osage.1.pdf patchwork.1 patchwork.1.pdf dot.vcxproj*
-
-DISTCLEANFILES = dot.1.pdf osage.1.pdf dot.1.ps osage.1.ps patchwork.1.ps
+DISTCLEANFILES = $(pdf) dot.1.ps osage.1.ps patchwork.1.ps

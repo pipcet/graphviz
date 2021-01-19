@@ -13,12 +13,12 @@
 
 #include "config.h"
 
-#include	"memory.h"
-#include	"types.h"
-#include        "gvplugin.h"
-#include        "gvcjob.h"
-#include        "gvcint.h"
-#include        "gvcproc.h"
+#include	<common/memory.h>
+#include	<common/types.h>
+#include        <gvc/gvplugin.h>
+#include        <gvc/gvcjob.h>
+#include        <gvc/gvcint.h>
+#include        <gvc/gvcproc.h>
 
 static GVJ_t *output_filename_job;
 static GVJ_t *output_langname_job;
@@ -118,8 +118,7 @@ void gv_argvlist_set_item(gv_argvlist_t *list, int index, char *item)
 
 void gv_argvlist_reset(gv_argvlist_t *list)
 {
-    if (list->argv)
-	free(list->argv);
+    free(list->argv);
     list->argv = NULL;
     list->alloc = 0;
     list->argc = 0;
@@ -127,8 +126,7 @@ void gv_argvlist_reset(gv_argvlist_t *list)
 
 void gv_argvlist_free(gv_argvlist_t *list)
 {
-    if (list->argv)
-	free(list->argv);
+    free(list->argv);
     free(list);
 }
 
@@ -141,10 +139,8 @@ void gvjobs_delete(GVC_t * gvc)
 	job = job->next;
 	gv_argvlist_reset(&(j->selected_obj_attributes));
 	gv_argvlist_reset(&(j->selected_obj_type_name));
-	if (j->active_tooltip)
-	    free(j->active_tooltip);
-	if (j->selected_href)
-	    free(j->selected_href);
+	free(j->active_tooltip);
+	free(j->selected_href);
 	free(j);
     }
     gvc->jobs = gvc->job = gvc->active_jobs = output_filename_job = output_langname_job =

@@ -28,7 +28,7 @@
 #include "support.h"
 #include "menucallbacks.h"
 #include "gltemplate.h"
-#include "memory.h"
+#include <common/memory.h>
 #include "gvprpipe.h"
 #include "frmobjectui.h"
 #ifdef ENABLE_NLS
@@ -81,7 +81,7 @@ char *smyrnaPath(char *suffix)
     return buf;
 }
 
-static char *useString = "Usage: smyrns [-v?] <file>\n\
+static char *useString = "Usage: smyrna [-v?] <file>\n\
   -f<WxH:bits@rate>         - full-screen mode\n\
   -e         - draw edges as splines if available\n\
   -v         - verbose\n\
@@ -134,12 +134,14 @@ static char *parseArgs(int argc, char *argv[], ViewInfo * view)
 	    exit (0);
 	    break;
 	case '?':
-	    if (optopt == '?')
+	    if (optopt == '\0')
 		usage(0);
-	    else
+	    else {
 		fprintf(stderr,
-			"smyrna: option -%c unrecognized - ignored\n",
+			"smyrna: option -%c unrecognized\n",
 			optopt);
+		usage(1);
+	    }
 	    break;
 	}
     }

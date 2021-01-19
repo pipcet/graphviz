@@ -13,11 +13,16 @@
 
 #include "config.h"
 
-#include <partition.h>
-#include <trap.h>
-#include <memory.h>
+#include <ortho/partition.h>
+#include <ortho/trap.h>
+#include <common/memory.h>
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
+
+#ifndef DEBUG
+  #define DEBUG 0
+#endif
 
 #define NPOINTS 4   /* only rectangles */
 #define TRSIZE(ss) (5*(ss)+1)
@@ -205,7 +210,7 @@ static int
 get_vertex_positions (int v0, int v1, int *ip, int *iq)
 {
   vertexchain_t *vp0, *vp1;
-  register int i;
+  int i;
   double angle, temp;
   int tp = 0, tq = 0;
 
@@ -303,7 +308,7 @@ make_new_monotone_poly (int mcur, int v0, int v1)
   vp0->nextfree++;
   vp1->nextfree++;
 
-#ifdef DEBUG
+#if DEBUG > 0
   fprintf(stderr, "make_poly: mcur = %d, (v0, v1) = (%d, %d)\n", 
 	  mcur, v0, v1);
   fprintf(stderr, "next posns = (p, q) = (%d, %d)\n", p, q);
@@ -319,14 +324,14 @@ static int
 traverse_polygon (int* visited, boxf* decomp, int size, segment_t* seg, trap_t* tr,
     int mcur, int trnum, int from, int flip, int dir)
 {
-  trap_t *t = &tr[trnum];
+  trap_t *t;
   int mnew;
   int v0, v1;
-  int retval;
-  int do_switch = FALSE;
 
   if ((trnum <= 0) || visited[trnum])
     return size;
+
+  t = &tr[trnum];
 
   visited[trnum] = TRUE;
   
@@ -365,7 +370,6 @@ traverse_polygon (int* visited, boxf* decomp, int size, segment_t* seg, trap_t* 
 	  v1 = t->lseg;
 	  if (from == t->d1)
 	    {
-	      do_switch = TRUE;
 	      mnew = make_new_monotone_poly(mcur, v1, v0);
 	      size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->d1, trnum, flip, TR_FROM_UP);
 	      size = traverse_polygon (visited, decomp, size, seg, tr, mnew, t->d0, trnum, flip, TR_FROM_UP);	    
@@ -379,7 +383,7 @@ traverse_polygon (int* visited, boxf* decomp, int size, segment_t* seg, trap_t* 
 	}
       else
 	{
-	  retval = SP_NOSPLIT;	/* Just traverse all neighbours */
+	  /* Just traverse all neighbours */
 	  size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->u0, trnum, flip, TR_FROM_DN);
 	  size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->u1, trnum, flip, TR_FROM_DN);
 	  size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->d0, trnum, flip, TR_FROM_UP);
@@ -395,7 +399,6 @@ traverse_polygon (int* visited, boxf* decomp, int size, segment_t* seg, trap_t* 
 	  v1 = tr[t->u0].rseg;
 	  if (from == t->u1)
 	    {
-	      do_switch = TRUE;
 	      mnew = make_new_monotone_poly(mcur, v1, v0);
 	      size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->u1, trnum, flip, TR_FROM_DN);
 	      size = traverse_polygon (visited, decomp, size, seg, tr, mnew, t->u0, trnum, flip, TR_FROM_DN);	    
@@ -409,7 +412,7 @@ traverse_polygon (int* visited, boxf* decomp, int size, segment_t* seg, trap_t* 
 	}
       else
 	{
-	  retval = SP_NOSPLIT;	/* Just traverse all neighbours */
+	  /* Just traverse all neighbours */
 	  size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->u0, trnum, flip, TR_FROM_DN);
 	  size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->u1, trnum, flip, TR_FROM_DN);
 	  size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->d0, trnum, flip, TR_FROM_UP);
@@ -423,11 +426,9 @@ traverse_polygon (int* visited, boxf* decomp, int size, segment_t* seg, trap_t* 
 	{
 	  v0 = tr[t->d1].lseg;
 	  v1 = tr[t->u0].rseg;
-	  retval = SP_2UP_2DN;
 	  if (((dir == TR_FROM_DN) && (t->d1 == from)) ||
 	      ((dir == TR_FROM_UP) && (t->u1 == from)))
 	    {
-	      do_switch = TRUE;
 	      mnew = make_new_monotone_poly(mcur, v1, v0);
 	      size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->u1, trnum, flip, TR_FROM_DN);
 	      size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->d1, trnum, flip, TR_FROM_UP);
@@ -450,10 +451,8 @@ traverse_polygon (int* visited, boxf* decomp, int size, segment_t* seg, trap_t* 
 	      v0 = tr[t->u0].rseg;
 	      v1 = seg[t->lseg].next;
 
-	      retval = SP_2UP_LEFT;
 	      if ((dir == TR_FROM_UP) && (t->u0 == from))
 		{
-		  do_switch = TRUE;
 		  mnew = make_new_monotone_poly(mcur, v1, v0);
 		  size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->u0, trnum, flip, TR_FROM_DN);
 		  size = traverse_polygon (visited, decomp, size, seg, tr, mnew, t->d0, trnum, flip, TR_FROM_UP);
@@ -473,10 +472,8 @@ traverse_polygon (int* visited, boxf* decomp, int size, segment_t* seg, trap_t* 
 	    {
 	      v0 = t->rseg;
 	      v1 = tr[t->u0].rseg;	
-	      retval = SP_2UP_RIGHT;
 	      if ((dir == TR_FROM_UP) && (t->u1 == from))
 		{
-		  do_switch = TRUE;
 		  mnew = make_new_monotone_poly(mcur, v1, v0);
 		  size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->u1, trnum, flip, TR_FROM_DN);
 		  size = traverse_polygon (visited, decomp, size, seg, tr, mnew, t->d1, trnum, flip, TR_FROM_UP);
@@ -502,10 +499,8 @@ traverse_polygon (int* visited, boxf* decomp, int size, segment_t* seg, trap_t* 
 	    {
 	      v0 = tr[t->d1].lseg;
 	      v1 = t->lseg;
-	      retval = SP_2DN_LEFT;
 	      if (!((dir == TR_FROM_DN) && (t->d0 == from)))
 		{
-		  do_switch = TRUE;
 		  mnew = make_new_monotone_poly(mcur, v1, v0);
 		  size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->u1, trnum, flip, TR_FROM_DN);
 		  size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->d1, trnum, flip, TR_FROM_UP);
@@ -526,10 +521,8 @@ traverse_polygon (int* visited, boxf* decomp, int size, segment_t* seg, trap_t* 
 	      v0 = tr[t->d1].lseg;
 	      v1 = seg[t->rseg].next;
 
-	      retval = SP_2DN_RIGHT;	    
 	      if ((dir == TR_FROM_DN) && (t->d1 == from))
 		{
-		  do_switch = TRUE;
 		  mnew = make_new_monotone_poly(mcur, v1, v0);
 		  size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->d1, trnum, flip, TR_FROM_UP);
 		  size = traverse_polygon (visited, decomp, size, seg, tr, mnew, t->u1, trnum, flip, TR_FROM_DN);
@@ -553,10 +546,8 @@ traverse_polygon (int* visited, boxf* decomp, int size, segment_t* seg, trap_t* 
 	    {
 	      v0 = t->rseg;
 	      v1 = t->lseg;
-	      retval = SP_SIMPLE_LRDN;
 	      if (dir == TR_FROM_UP)
 		{
-		  do_switch = TRUE;
 		  mnew = make_new_monotone_poly(mcur, v1, v0);
 		  size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->u0, trnum, flip, TR_FROM_DN);
 		  size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->u1, trnum, flip, TR_FROM_DN);
@@ -578,10 +569,8 @@ traverse_polygon (int* visited, boxf* decomp, int size, segment_t* seg, trap_t* 
 	      v0 = seg[t->rseg].next;
 	      v1 = seg[t->lseg].next;
 
-	      retval = SP_SIMPLE_LRUP;
 	      if (dir == TR_FROM_UP)
 		{
-		  do_switch = TRUE;
 		  mnew = make_new_monotone_poly(mcur, v1, v0);
 		  size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->u0, trnum, flip, TR_FROM_DN);
 		  size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->u1, trnum, flip, TR_FROM_DN);
@@ -599,7 +588,6 @@ traverse_polygon (int* visited, boxf* decomp, int size, segment_t* seg, trap_t* 
 	    }
 	  else			/* no split possible */
 	    {
-	      retval = SP_NOSPLIT;
 	      size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->u0, trnum, flip, TR_FROM_DN);
 	      size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->d0, trnum, flip, TR_FROM_UP);
 	      size = traverse_polygon (visited, decomp, size, seg, tr, mcur, t->u1, trnum, flip, TR_FROM_DN);
@@ -730,26 +718,32 @@ partition (cell* cells, int ncells, int* nrects, boxf bb)
     boxf* vert_decomp = N_NEW(ntraps, boxf);
     int nt;
 
-    /* fprintf (stderr, "cells = %d segs = %d traps = %d\n", ncells, nsegs, ntraps);  */
+    if (DEBUG) {
+	fprintf (stderr, "cells = %d segs = %d traps = %d\n", ncells, nsegs, ntraps);
+    }
     genSegments (cells, ncells, bb, segs, 0);
-#if 0
-fprintf (stderr, "%d\n\n", ncells+1);
-for (i = 1; i<= nsegs; i++) {
-  if (i%4 == 1) fprintf(stderr, "4\n");
-  fprintf (stderr, "%f %f\n", segs[i].v0.x, segs[i].v0.y);
-  if (i%4 == 0) fprintf(stderr, "\n");
-}
-#endif
+    if (DEBUG) {
+	fprintf (stderr, "%d\n\n", ncells+1);
+	for (i = 1; i<= nsegs; i++) {
+	    if (i%4 == 1) fprintf(stderr, "4\n");
+	    fprintf (stderr, "%f %f\n", segs[i].v0.x, segs[i].v0.y);
+	    if (i%4 == 0) fprintf(stderr, "\n");
+	}
+    }
     srand48(173);
     generateRandomOrdering (nsegs, permute);
     nt = construct_trapezoids(nsegs, segs, permute, ntraps, trs);
-    /* fprintf (stderr, "hor traps = %d\n", nt); */
+    if (DEBUG) {
+	fprintf (stderr, "hor traps = %d\n", nt);
+    }
     hd_size = monotonate_trapezoids (nsegs, segs, trs, 0, hor_decomp);
 
     genSegments (cells, ncells, bb, segs, 1);
     generateRandomOrdering (nsegs, permute);
     nt = construct_trapezoids(nsegs, segs, permute, ntraps, trs);
-    /* fprintf (stderr, "ver traps = %d\n", nt); */
+    if (DEBUG) {
+	fprintf (stderr, "ver traps = %d\n", nt);
+    }
     vd_size = monotonate_trapezoids (nsegs, segs, trs, 1, vert_decomp);
 
     rs = N_NEW (hd_size*vd_size, boxf);

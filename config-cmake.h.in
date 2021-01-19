@@ -1,5 +1,4 @@
 // Include headers
-#cmakedefine HAVE_CRT_EXTERNS_H
 #cmakedefine HAVE_FCNTL_H
 #cmakedefine HAVE_MALLOC_H
 #cmakedefine HAVE_SEARCH_H
@@ -18,9 +17,9 @@
 #cmakedefine HAVE_VFORK_H
 #cmakedefine HAVE_X11_INTRINSIC_H
 #cmakedefine HAVE_X11_XAW_TEXT_H
+#cmakedefine HAVE_GETOPT_H
 
 // Functions
-#cmakedefine HAVE__NSGETENVIRON
 #cmakedefine HAVE_DRAND48
 #cmakedefine HAVE_CBRT
 #cmakedefine HAVE_GETPAGESIZE
@@ -33,8 +32,6 @@
 #cmakedefine HAVE_SETMODE
 #cmakedefine HAVE_SINCOS
 #cmakedefine HAVE_SRAND48
-#cmakedefine HAVE_STRCASECMP
-#cmakedefine HAVE_STRNCASECMP
 #cmakedefine HAVE_VSNPRINTF
 
 // Types

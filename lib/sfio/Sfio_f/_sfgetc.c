@@ -11,11 +11,11 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 
 #undef sfgetc
 
-int sfgetc(reg Sfio_t * f)
+int sfgetc(Sfio_t * f)
 {
     return __sf_getc(f);
 }

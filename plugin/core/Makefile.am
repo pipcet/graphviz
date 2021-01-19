@@ -2,18 +2,14 @@
 ## Process this file with automake to produce Makefile.in
 
 AM_CPPFLAGS = \
-	-I$(top_srcdir) \
+	-I$(top_srcdir)/lib \
 	-I$(top_srcdir)/lib/common \
 	-I$(top_srcdir)/lib/pathplan \
 	-I$(top_srcdir)/lib/gvc \
 	-I$(top_srcdir)/lib/cgraph \
 	-I$(top_srcdir)/lib/cdt \
 	-I$(top_srcdir)/lib/gvpr \
-	-I$(top_srcdir)/lib/expr \
-	-I$(top_srcdir)/lib/ast \
-	-I$(top_srcdir)/lib/sfio \
 	-I$(top_srcdir)/lib/xdot \
-	-I$(top_srcdir)/lib/vmalloc \
 	$(LIBGVC_CFLAGS)
 
 noinst_LTLIBRARIES = libgvplugin_core_C.la

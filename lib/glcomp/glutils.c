@@ -11,10 +11,10 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include "glutils.h"
-#include "stdlib.h"
-#include "string.h"
-#include "glcompdefs.h"
+#include <glcomp/glutils.h>
+#include <stdlib.h>
+#include <string.h>
+#include <glcomp/glcompdefs.h>
 /* #include "glexpose.h" */
 
 /* at given depth value, tranforms 2d Window location to 3d gl coords*/
@@ -30,6 +30,9 @@ int GetFixedOGLPos(int x, int y, float kts, GLfloat * X, GLfloat * Y,
     GLdouble projection[16];
     GLfloat winX, winY;
     GLdouble posX, posY, posZ;
+
+    /* unused */
+    (void)kts;
 
     glColor4f((GLfloat) 0, (GLfloat) 0, (GLfloat) 0, (GLfloat) 0.001);
     glBegin(GL_POINTS);
@@ -410,8 +413,7 @@ void make_plane(glCompPoint a, glCompPoint b, glCompPoint c, plane * P)
 void replacestr(char *source, char **target)
 {
 
-    if (*target)
-	free(*target);
+    free(*target);
     *target = strdup(source);
 }
 

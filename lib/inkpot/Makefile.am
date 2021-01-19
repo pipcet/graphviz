@@ -6,6 +6,8 @@ INKPOT_VERSION="1:0:0"
 pdfdir = $(pkgdatadir)/doc/pdf
 pkgconfigdir = $(libdir)/pkgconfig
 
+AM_CPPFLAGS = -I$(top_srcdir)/lib
+
 pkginclude_HEADERS = inkpot.h
 lib_LTLIBRARIES = libinkpot.la
 pkgconfig_DATA = libinkpot.pc
@@ -17,7 +19,17 @@ noinst_HEADERS = inkpot_scheme.h inkpot_xlate.h inkpot_value.h \
 noinst_LTLIBRARIES = libinkpot_C.la
 
 man_MANS = inkpot.3 inkpot.1
+if ENABLE_MAN_PDFS
 pdf_DATA = inkpot.3.pdf inkpot.1.pdf
+
+if HAVE_PS2PDF
+pdf = $(pdf_DATA)
+else
+pdf = ERROR_NO_PS2PDF
+endif
+else
+pdf =
+endif
 
 inkpot_SOURCES = inkpot.c
 inkpot_LDADD = $(top_builddir)/lib/inkpot/libinkpot.la
@@ -67,23 +79,27 @@ $(top_builddir)/lib/inkpot/inkpot_lib_tk.dat: inkpot_lib_tk.tcl data/xcolors.c
 $(top_builddir)/lib/inkpot/inkpot_lib_brewer.dat: inkpot_lib_brewer.tcl data/brewer_colors
 	$(TCLSH) inkpot_lib_brewer.tcl data/brewer_colors
 
+if ENABLE_MAN_PDFS
+if HAVE_PS2PDF
 inkpot.1.pdf: inkpot.1.ps
-	@PS2PDF@ $< $@
+	@PS2PDF@ $<
 
 inkpot.1.ps: inkpot.1
 	@GROFF@ -Tps -man $< >$@
 
 inkpot.3.pdf: inkpot.3.ps
-	@PS2PDF@ $< $@
+	@PS2PDF@ $<
 
 inkpot.3.ps: inkpot.3
 	@GROFF@ -Tps -man $< >$@
+endif
+endif
 
 CLEANFILES = inkpot_lib_*.dat
 
-EXTRA_DIST = $(man_MANS) $(pdf_DATA) *.tcl data/* \
+EXTRA_DIST = $(man_MANS) $(pdf) *.tcl data/* \
 	inkpot_lib_define.h inkpot_lib_value.h inkpot_lib_scheme.h inkpot_lib_string.h
 
-DISTCLEANFILES = $(pdf_DATA) \
+DISTCLEANFILES = $(pdf) \
 	inkpot_lib_define.h inkpot_lib_value.h inkpot_lib_scheme.h inkpot_lib_string.h \
 	inkpot.1.ps inkpot.3.ps

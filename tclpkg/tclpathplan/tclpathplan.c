@@ -35,9 +35,9 @@
 #include <inttypes.h>
 #include <assert.h>
 #include <math.h>
-#include <pathutil.h>
-#include <vispath.h>
-#include <tri.h>
+#include <pathplan/pathutil.h>
+#include <pathplan/vispath.h>
+#include <pathplan/tri.h>
 #include <tcl.h>
 #include "tclhandle.h"
 
@@ -139,13 +139,13 @@ static void dgsprintxy(Tcl_DString * result, int npts, point p[])
 }
 
 static void expandPercentsEval(Tcl_Interp * interp,	/* interpreter context */
-			       register char *before,	/* Command with percent expressions */
+			       char *before,	/* Command with percent expressions */
 			       char *r,	/* vgpaneHandle string to substitute for "%r" */
 			       int npts,	/* number of coordinates */
 			       point * ppos	/* Cordinates to substitute for %t */
     )
 {
-    register char *string;
+    char *string;
     Tcl_DString scripts;
 
     Tcl_DStringInit(&scripts);
@@ -238,8 +238,7 @@ static char *buildBindings(char *s1, char *s2)
 	    }
 	}
     } else {
-	if (s1)
-	    free(s1);
+	free(s1);
 	l = strlen(s2);
 	if (l) {
 	    s3 = malloc(l + 2);
@@ -502,7 +501,7 @@ vgpanecmd(ClientData clientData, Tcl_Interp * interp, int argc,
 	    Pobsclose(vgp->vc);
 	free(vgp->poly);	/* ### */
 	Tcl_DeleteCommand(interp, argv[0]);
-	free((char *) tclhandleFree(vgpaneTable, argv[0]));
+	free(tclhandleFree(vgpaneTable, argv[0]));
 	return TCL_OK;
 
     } else if ((c == 'f') && (strncmp(argv[1], "find", length) == 0)) {
@@ -889,7 +888,7 @@ vgpane(ClientData clientData, Tcl_Interp * interp, int argc, char *argv[])
     char vbuf[30];
     vgpane_t *vgp;
 
-    vgp = (vgpane_t *) malloc(sizeof(vgpane_t));
+    vgp = malloc(sizeof(vgpane_t));
     *(vgpane_t **) tclhandleAlloc(vgpaneTable, vbuf, NULL) = vgp;
 
     vgp->vc = (vconfig_t *) 0;

@@ -7,14 +7,14 @@
  *
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
-#include "general.h"
-#include "QuadTree.h"
-#include "lab.h"
-#include "math.h"
-#include "stdio.h"
-#include "stdlib.h"
-#include "color_palette.h"
-#include "lab_gamut.h"
+#include <sparse/general.h>
+#include <sparse/QuadTree.h>
+#include <edgepaint/lab.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sparse/color_palette.h>
+#include <edgepaint/lab_gamut.h>
 
 color_rgb color_rgb_init(double r, double g, double b){
   color_rgb rgb;
@@ -222,20 +222,19 @@ double *lab_gamut(const char *lightness, int *n){
   if (Verbose)
     fprintf(stderr,"LAB color lightness range = %d,%d\n", l1, l2);
 
-  /* m = sizeof(lab_gamut_data)/sizeof(lab_gamut_data[0]); */
   m = lab_gamut_data_size; 
 
   if (Verbose)
     fprintf(stderr,"size of lab gamut = %d\n", m);
 
-  x = malloc(sizeof(double)*3*m);
+  x = malloc(sizeof(double)*m);
   xx = x;
   *n = 0;
-  for (i = 0; i < m; i++){
-    if (lab_gamut_data[i].l >= l1 && lab_gamut_data[i].l <= l2){
-      xx[0] = lab_gamut_data[i].l;
-      xx[1] = lab_gamut_data[i].a;
-      xx[2] = lab_gamut_data[i].b;
+  for (i = 0; i < m; i += 3){
+    if (lab_gamut_data[i] >= l1 && lab_gamut_data[i] <= l2){
+      xx[0] = lab_gamut_data[i];
+      xx[1] = lab_gamut_data[i+1];
+      xx[2] = lab_gamut_data[i+2];
       xx += 3;
       (*n)++;
     }

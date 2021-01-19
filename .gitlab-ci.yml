@@ -11,12 +11,14 @@ portable-source:
     image: "graphviz/graphviz:ubuntu-18.04"
     script:
         - ./autogen.sh
+        - ./configure --enable-man-pdfs
         - make dist
     artifacts:
         when: on_success
         expire_in: 1 week
         paths:
             - VERSION
+            - DATE
             - COLLECTION
             - graphviz-*.tar.gz
     except:
@@ -25,7 +27,11 @@ portable-source:
 .build_template: &rpm_build_definition
     stage: build
     script:
-        - ci/build.sh
+        - logfile=`mktemp`
+        - ci/build.sh |& tee $logfile
+        - echo "$CI_JOB_NAME-warnings `grep -c 'warning:' $logfile`" > metrics.txt
+        - rm $logfile
+        - cat metrics.txt
     artifacts:
         when: on_success
         expire_in: 1 week
@@ -33,13 +39,19 @@ portable-source:
             - Packages/*/*/*/*/*/*.rpm
             - Packages/*/*/*/*/*.rpm
             - Metadata/*/*/*/configure.log
+        reports:
+            metrics: metrics.txt
     except:
         - tags
 
 .build_template: &deb_build_definition
     stage: build
     script:
-        - ci/build.sh
+        - logfile=`mktemp`
+        - ci/build.sh |& tee $logfile
+        - echo "$CI_JOB_NAME-warnings `grep -c 'warning:' $logfile`" > metrics.txt
+        - rm $logfile
+        - cat metrics.txt
     artifacts:
         when: on_success
         expire_in: 1 week
@@ -47,13 +59,137 @@ portable-source:
             - Packages/*/*/*/*/*/*deb
             - Packages/*/*/*/*/*.gz
             - Metadata/*/*/*/configure.log
+        reports:
+            metrics: metrics.txt
     except:
         - tags
+
+.build_template: &macos_build_definition
+    stage: build
+    script:
+        - brew update
+        - brew install autogen || brew upgrade autogen
+        - brew install cmake || brew upgrade cmake
+        - brew install bison || brew upgrade bison
+        - brew install pango || brew upgrade pango
+        - brew install libxaw || brew upgrade libxaw
+        - export PATH="/usr/local/opt/bison/bin:$PATH"
+        - python3 gen_version.py > VERSION # FIXME: remove when building from portable source
+        - echo experimental > COLLECTION
+        - logfile=`mktemp`
+        - ci/build.sh 2>&1 | tee $logfile
+        - echo "$CI_JOB_NAME-warnings `grep -c 'warning:' $logfile`" > metrics.txt
+        - rm $logfile
+        - cat metrics.txt
+    artifacts:
+        when: on_success
+        expire_in: 1 week
+        paths:
+            - Packages/*/*/*/*/*/*.zip
+            - Packages/*/*/*/*/*/*.tar.gz
+            - Metadata/*/*/*/configure.log
+        reports:
+            metrics: metrics.txt
+    except:
+        - tags
+
+.build_template: &windows_build_definition
+    stage: build
+    needs: []
+    script:
+        - $ErrorActionPreference = "Stop"
+        - $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
+        # Toolchain definitions
+        - if($Env:project_platform -eq "x64") {
+            $TARGET_ARCH = "x64";
+          }
+          else {
+            $TARGET_ARCH = "x86";
+          }
+        # Retrieve submodules, dependencies are stored there.
+        - git submodule update --init
+        # Install and set PATH
+        - $Env:graphviz_install_dir = "C:\Graphviz"
+        # Build
+        - Set-ExecutionPolicy Bypass -Force -Scope Process
+        - $logfile = New-TemporaryFile
+        - windows/bin/setup-and-build.ps1 -buildsystem $env:build_system -platform $Env:project_platform -configuration $env:configuration 2>&1 | tee $logfile
+        - $warnings_count = Invoke-Expression "grep -c ' warning ' $logfile"
+        - echo "$CI_JOB_NAME-warnings $warnings_count" > metrics.txt
+        - rm $logfile
+        - cat metrics.txt
+        - python3 gen_version.py > VERSION
+        - python3 gen_version.py --collection > COLLECTION
+        # Package
+        - $Env:GV_VERSION=$( cat VERSION )
+        - >-
+            if($Env:project_platform -eq "x64") {
+                $API = "win64";
+            } else {
+                $API = "win32";
+            }
+        # Test
+        # Set up VCTools variables and import into PowerShell environment
+        - cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsall.bat`" $TARGET_ARCH && set > %temp%\vcvars.txt";
+        - >-
+            Get-Content "$env:temp\vcvars.txt" | Foreach-Object {
+              if ($_ -match "^([A-Za-z0-9_()]*)=(.*)$") {
+                Set-Content "env:\$($matches[1])" $matches[2];
+              }
+            }
+        - >-
+            if($env:build_system -eq "cmake") {
+              cd build;
+              $FILENAME = & invoke-Expression "Get-ChildItem Graphviz*.exe";
+              mv $FILENAME graphviz-install.exe;
+              # Install using installer and add bin directory to path.
+              # Piping the output of the installer to Out-Null, makes the script wait
+              # for the .exe to exit, instead continuing to the next command (which
+              # will then fail because the install hasn't finished)
+              ./graphviz-install.exe /S /D=$env:graphviz_install_dir | Out-Null;
+              mv graphviz-install.exe graphviz-install-$Env:GV_VERSION-$API.exe;
+              $env:Path = $env:graphviz_install_dir + "\bin" + ";" + $env:Path
+              cd ..;
+              $Env:INCLUDE += ";C:\Graphviz\include";
+              $Env:LIB += ";C:\Graphviz\lib";
+            }
+            elseif($env:build_system -eq "msbuild") {
+              # Append build destination to the PATH, configure dot and execute regression tests
+              # The following is per https://gitlab.com/graphviz/graphviz/-/merge_requests/1345
+              $env:Path = $env:CI_PROJECT_DIR + "\" + $env:configuration + "\Graphviz\bin" + ";" + $env:Path;
+            }
+        - python3 -m pytest --verbose --junitxml=report.xml ci/tests.py tests rtest
+        # Create artifacts to archive
+        - $ID = "windows"
+        - $VERSION_ID = "10"
+        - $COLLECTION = $( cat COLLECTION )
+        - $DIR = "Packages\${COLLECTION}\${ID}\${VERSION_ID}\$env:build_system\$env:configuration\$Env:project_platform"
+        - mkdir -p $DIR
+        - >-
+            if($env:build_system -eq "cmake") {
+                mv "build\*.exe" $DIR;
+            } else {
+                Compress-Archive -Path "$env:configuration\*" -DestinationPath "$DIR\graphviz-$Env:GV_VERSION-$API.zip";
+            }
+    artifacts:
+        when: on_success
+        expire_in: 1 week
+        paths:
+        - Packages/*/*/*/*/*/*/*.exe
+        - Packages/*/*/*/*/*/*/*.zip
+        reports:
+            metrics: metrics.txt
+            junit: ./report.xml
+    tags:
+        - windows
 
 .test_template: &test_definition
     stage: test
     script:
-        - ci/test.sh
+        - ci/install-packages.sh
+        - export GV_VERSION=$( cat VERSION )
+        - export OS_ID=$( cat OS_ID )
+        - python3 -m pytest --verbose --junitxml=report.xml ci/tests.py tests rtest
     artifacts:
         reports:
             junit: ./report.xml
@@ -75,28 +211,6 @@ centos8-build:
     tags:
         - linux
     image: "graphviz/graphviz:centos8"
-
-          #fedora27-build:
-          #<<: *rpm_build_definition
-          #tags:
-          #- graphviz,fedora27
-
-          #fedora28-build:
-          #<<: *rpm_build_definition
-          #tags:
-          #- graphviz,fedora28
-
-fedora29-build:
-    <<: *rpm_build_definition
-    tags:
-        - linux
-    image: "graphviz/graphviz:fedora29"
-
-fedora30-build:
-    <<: *rpm_build_definition
-    tags:
-        - linux
-    image: "graphviz/graphviz:fedora30"
 
 fedora31-build:
     <<: *rpm_build_definition
@@ -122,6 +236,15 @@ ubuntu18-04-build:
         - linux
     image: "graphviz/graphviz:ubuntu-18.04"
 
+ubuntu20-04-debug-build:
+    <<: *deb_build_definition
+    before_script:
+        - export CFLAGS="-DDEBUG"
+        - export CXXFLAGS="-DDEBUG"
+    tags:
+        - linux
+    image: "graphviz/graphviz:ubuntu-20.04"
+
 ubuntu19-10-build:
     <<: *deb_build_definition
     tags:
@@ -133,6 +256,123 @@ ubuntu20-04-build:
     tags:
         - linux
     image: "graphviz/graphviz:ubuntu-20.04"
+
+ubuntu20-10-build:
+    <<: *deb_build_definition
+    tags:
+        - linux
+    image: "graphviz/graphviz:ubuntu-20.10"
+
+macos-autotools-build:
+    <<: *macos_build_definition
+    before_script:
+        - export build_system="autotools"
+    tags:
+        - macos
+
+ubuntu18-04-cmake-build:
+    <<: *deb_build_definition
+    before_script:
+        - export build_system="cmake"
+        # fail on any compiler warnings
+        - export CFLAGS=-Werror
+        - export CXXFLAGS=-Werror
+        - echo experimental > COLLECTION
+    tags:
+        - linux
+    image: "graphviz/graphviz:ubuntu-18.04"
+
+ubuntu20-10-cmake-build:
+    <<: *deb_build_definition
+    before_script:
+        - export build_system="cmake"
+        # fail on any compiler warnings
+        - export CFLAGS=-Werror
+        - export CXXFLAGS=-Werror
+        - echo experimental > COLLECTION
+    tags:
+        - linux
+    image: "graphviz/graphviz:ubuntu-20.10"
+
+centos7-cmake-build:
+    <<: *rpm_build_definition
+    before_script:
+        - export build_system="cmake"
+        # fail on any compiler warnings
+        - export CFLAGS=-Werror
+        - export CXXFLAGS=-Werror
+        - echo experimental > COLLECTION
+    tags:
+        - linux
+    image: "graphviz/graphviz:centos7"
+
+fedora31-cmake-build:
+    <<: *rpm_build_definition
+    before_script:
+        - export build_system="cmake"
+        # fail on any compiler warnings
+        - export CFLAGS=-Werror
+        - export CXXFLAGS=-Werror
+        - echo experimental > COLLECTION
+    tags:
+        - linux
+    image: "graphviz/graphviz:fedora31"
+
+macos-cmake-build:
+    <<: *macos_build_definition
+    before_script:
+        - export build_system="cmake"
+        # fail on any compiler warnings
+        - export CFLAGS=-Werror
+        - export CXXFLAGS=-Werror
+    tags:
+        - macos
+
+windows-cmake-Win32-release-build:
+    <<: *windows_build_definition
+    before_script:
+        - $Env:generator = "Visual Studio 16 2019"
+        - $Env:project_platform = "Win32"
+        - $Env:configuration = "Release"
+        - $Env:build_system = "cmake"
+
+windows-cmake-Win32-debug-build:
+    <<: *windows_build_definition
+    before_script:
+        - $Env:generator = "Visual Studio 16 2019"
+        - $Env:project_platform = "Win32"
+        - $Env:configuration = "Debug"
+        - $Env:build_system = "cmake"
+
+windows-cmake-x64-release-build:
+    <<: *windows_build_definition
+    before_script:
+        - $Env:generator = "Visual Studio 16 2019"
+        - $Env:project_platform = "x64"
+        - $Env:configuration = "Release"
+        - $Env:build_system = "cmake"
+
+windows-cmake-x64-debug-build:
+    <<: *windows_build_definition
+    before_script:
+        - $Env:generator = "Visual Studio 16 2019"
+        - $Env:project_platform = "x64"
+        - $Env:configuration = "Debug"
+        - $Env:build_system = "cmake"
+
+windows-msbuild-Win32-release-build:
+    <<: *windows_build_definition
+    before_script:
+        - $Env:project_platform = "Win32"
+        - $Env:configuration = "Release"
+        - $Env:build_system = "msbuild"
+
+windows-msbuild-Win32-debug-build:
+    <<: *windows_build_definition
+    before_script:
+        - $Env:project_platform = "Win32"
+        - $Env:configuration = "Debug"
+        - $Env:build_system = "msbuild"
 
 meta-data:
     stage: test
@@ -148,6 +388,8 @@ meta-data:
 
 ubuntu18-04-test:
     <<: *test_definition
+    before_script:
+        - export build_system="autotools"
     needs:
         - job: portable-source
           artifacts: true
@@ -159,6 +401,8 @@ ubuntu18-04-test:
 
 ubuntu19-10-test:
     <<: *test_definition
+    before_script:
+        - export build_system="autotools"
     needs:
         - job: portable-source
           artifacts: true
@@ -170,6 +414,8 @@ ubuntu19-10-test:
 
 ubuntu20-04-test:
     <<: *test_definition
+    before_script:
+        - export build_system="autotools"
     needs:
         - job: portable-source
           artifacts: true
@@ -179,8 +425,23 @@ ubuntu20-04-test:
         - linux
     image: "graphviz/graphviz:ubuntu-20.04"
 
+ubuntu20-10-test:
+    <<: *test_definition
+    before_script:
+        - export build_system="autotools"
+    needs:
+        - job: portable-source
+          artifacts: true
+        - job: "ubuntu20-10-build"
+          artifacts: true
+    tags:
+        - linux
+    image: "graphviz/graphviz:ubuntu-20.10"
+
 centos6-test:
     <<: *test_definition
+    before_script:
+        - export build_system="autotools"
     needs:
         - job: portable-source
           artifacts: true
@@ -192,6 +453,8 @@ centos6-test:
 
 centos7-test:
     <<: *test_definition
+    before_script:
+        - export build_system="autotools"
     needs:
         - job: portable-source
           artifacts: true
@@ -203,6 +466,8 @@ centos7-test:
 
 centos8-test:
     <<: *test_definition
+    before_script:
+        - export build_system="autotools"
     needs:
         - job: portable-source
           artifacts: true
@@ -212,30 +477,10 @@ centos8-test:
         - linux
     image: "graphviz/graphviz:centos8"
 
-fedora29-test:
-    <<: *test_definition
-    needs:
-        - job: portable-source
-          artifacts: true
-        - job: "fedora29-build"
-          artifacts: true
-    tags:
-        - linux
-    image: "graphviz/graphviz:fedora29"
-
-fedora30-test:
-    <<: *test_definition
-    needs:
-        - job: portable-source
-          artifacts: true
-        - job: "fedora30-build"
-          artifacts: true
-    tags:
-        - linux
-    image: "graphviz/graphviz:fedora30"
-
 fedora31-test:
     <<: *test_definition
+    before_script:
+        - export build_system="autotools"
     needs:
         - job: portable-source
           artifacts: true
@@ -247,6 +492,8 @@ fedora31-test:
 
 fedora32-test:
     <<: *test_definition
+    before_script:
+        - export build_system="autotools"
     needs:
         - job: portable-source
           artifacts: true
@@ -258,6 +505,8 @@ fedora32-test:
 
 fedora33-test:
     <<: *test_definition
+    before_script:
+        - export build_system="autotools"
     needs:
         - job: portable-source
           artifacts: true
@@ -267,28 +516,103 @@ fedora33-test:
         - linux
     image: "graphviz/graphviz:fedora33"
 
+macos-autotools-test:
+    <<: *test_definition
+    before_script:
+        - pip3 install pytest
+        - export build_system="autotools"
+        - echo experimental > COLLECTION
+    needs:
+        - job: portable-source
+          artifacts: true
+        - job: "macos-autotools-build"
+          artifacts: true
+    tags:
+        - macos
+
+ubuntu18-04-cmake-test:
+    <<: *test_definition
+    before_script:
+        - export build_system="cmake"
+        - echo experimental > COLLECTION
+    needs:
+        - job: portable-source
+          artifacts: true
+        - job: "ubuntu18-04-cmake-build"
+          artifacts: true
+    tags:
+        - linux
+    image: "graphviz/graphviz:ubuntu-18.04"
+
+ubuntu20-10-cmake-test:
+    <<: *test_definition
+    before_script:
+        - export build_system="cmake"
+        - echo experimental > COLLECTION
+    needs:
+        - job: portable-source
+          artifacts: true
+        - job: "ubuntu20-10-cmake-build"
+          artifacts: true
+    tags:
+        - linux
+    image: "graphviz/graphviz:ubuntu-20.10"
+
+centos7-cmake-test:
+    <<: *test_definition
+    before_script:
+        - export build_system="cmake"
+        - echo experimental > COLLECTION
+        # Graphviz libs are installed in /usr/lib, but Centos 7 doesn't look there by default
+        - export LD_LIBRARY_PATH=/usr/lib
+    needs:
+        - job: portable-source
+          artifacts: true
+        - job: "centos7-cmake-build"
+          artifacts: true
+    tags:
+        - linux
+    image: "graphviz/graphviz:centos7"
+
+fedora31-cmake-test:
+    <<: *test_definition
+    before_script:
+        - export build_system="cmake"
+        - echo experimental > COLLECTION
+    needs:
+        - job: portable-source
+          artifacts: true
+        - job: "fedora31-cmake-build"
+          artifacts: true
+    tags:
+        - linux
+    image: "graphviz/graphviz:fedora31"
+
+macos-cmake-test:
+    <<: *test_definition
+    before_script:
+        - pip3 install pytest
+        - export build_system="cmake"
+        - echo experimental > COLLECTION
+    needs:
+        - job: portable-source
+          artifacts: true
+        - job: "macos-cmake-build"
+          artifacts: true
+    tags:
+        - macos
+
 deployment:
     stage: deploy
+    image: registry.gitlab.com/gitlab-org/release-cli:latest
+    # do not re-run this job for new Git tags of previously seen commits
+    except:
+        - tags
+    before_script:
+        - apk add --update-cache curl
+        - apk add --update-cache python3
     script:
-        - GV_VERSION=$( cat VERSION )
-        - COLLECTION=$( cat COLLECTION )
-        - eval $(ssh-agent -s)
-        - cat "$DEPLOY_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
-        - mkdir -p ~/.ssh
-        - chmod 700 ~/.ssh
-        - ssh-keyscan "$DEPLOY_HOST" >> ~/.ssh/known_hosts
-        - chmod 644 ~/.ssh/known_hosts
-        - chmod -R o-rwx Packages
-        - chmod -R g-wx Packages
-        - chmod -R g+X Packages
-        - ssh "$DEPLOY_USER"@"$DEPLOY_HOST" 'rm -rf Packages/'"$COLLECTION"'/{fedora,centos,ubuntu}'
-        - scp -r Packages/* "$DEPLOY_USER"@"$DEPLOY_HOST"':'Packages/
-        - ssh "$DEPLOY_USER"@"$DEPLOY_HOST" 'for i in Packages/'"$COLLECTION"'/{fedora,centos}/*/{source,os/*,debug/*}; do createrepo $i; done'
-        - scp graphviz-fedora.repo graphviz-centos.repo "$DEPLOY_USER"@"$DEPLOY_HOST"':'Packages/
-        - ssh "$DEPLOY_USER"@"$DEPLOY_HOST" mkdir -p Packages/"$COLLECTION"/portable_source
-        - md5sum graphviz-"$GV_VERSION".tar.gz >graphviz-"$GV_VERSION".tar.gz.md5
-        - scp graphviz-"$GV_VERSION".tar.gz graphviz-"$GV_VERSION".tar.gz.md5 "$DEPLOY_USER"@"$DEPLOY_HOST"':'Packages/"$COLLECTION"/portable_source/
+        - python3 ci/deploy.py --verbose
+    # do not run this job for MRs, developer’s forks, etc.
     only:
         - master@graphviz/graphviz
-    tags:
-        - graphviz,deploy

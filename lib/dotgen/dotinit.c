@@ -13,9 +13,9 @@
 
 
 #include <time.h>
-#include "dot.h"
-#include "pack.h"
-#include "aspect.h"
+#include <dotgen/dot.h>
+#include <pack/pack.h>
+#include <dotgen/aspect.h>
 
 static void
 dot_init_subg(graph_t * g, graph_t* droot)
@@ -85,19 +85,6 @@ dot_init_node_edge(graph_t * g)
     }
 }
 
-#if 0				/* not used */
-static void free_edge_list(elist L)
-{
-    edge_t *e;
-    int i;
-
-    for (i = 0; i < L.size; i++) {
-	e = L.list[i];
-	free(e);
-    }
-}
-#endif
-
 static void 
 dot_cleanup_node(node_t * n)
 {
@@ -158,8 +145,8 @@ dot_cleanup_graph(graph_t * g)
 	dot_cleanup_graph(subg);
     }
     if (! agbindrec(g, "Agraphinfo_t", 0, TRUE)) return;
-    if (GD_clust(g)) free (GD_clust(g));
-    if (GD_rankleader(g)) free (GD_rankleader(g));
+    free (GD_clust(g));
+    free (GD_rankleader(g));
 
     free_list(GD_comp(g));
     if (GD_rank(g)) {
@@ -456,7 +443,7 @@ static void doDot (Agraph_t* g)
     pack_mode mode = getPackModeInfo (g, l_undef, &pinfo);
     getPackInfo(g, l_node, CL_OFFSET, &pinfo);
 
-    if ((mode == l_undef) && (Pack < 0)) {
+    if (mode == l_undef && Pack < 0) {
 	/* No pack information; use old dot with components
          * handled during layout
          */

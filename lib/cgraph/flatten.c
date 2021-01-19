@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include "cghdr.h"
+#include <cgraph/cghdr.h>
 
 static void agflatten_elist(Dict_t * d, Dtlink_t ** lptr, int flag)
 {
@@ -51,10 +51,4 @@ void agflatten(Agraph_t * g, int flag)
 	    g->desc.flatlock = FALSE;
 	}
     }
-}
-
-void agnotflat(Agraph_t * g)
-{
-    if (g->desc.flatlock)
-	agerr(AGERR, "flat lock broken");
 }

@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include <cghdr.h>
+#include <cgraph/cghdr.h>
 
 #define IN_SET FALSE
 #define OUT_SET TRUE
@@ -176,6 +176,7 @@ static void ins(Dict_t * d, Dtlink_t ** set, Agedge_t * e)
 static void del(Dict_t * d, Dtlink_t ** set, Agedge_t * e)
 {
     void *x;
+    NOTUSED(x);
     dtrestore(d, *set);
     x = dtdelete(d, e);
     assert(x);
@@ -386,14 +387,8 @@ Agedge_t *agsubedge(Agraph_t * g, Agedge_t * e, int cflag)
     if (t && h) {
 	rv = agfindedge_by_key(g, t, h, AGTAG(e));
 	if (cflag && (rv == NILedge)) {
-#ifdef OLD_OBSOLETE
-	    rv = agfindedge_by_id(g, t, h, AGID(e));
-	    if (!rv)
-		rv = newedge(g, t, h, AGID(e));
-#else
 	installedge(g, e);
 	rv = e;
-#endif
 	}
 	if (rv && (AGTYPE(rv) != AGTYPE(e)))
 	    rv = AGOPP(rv);

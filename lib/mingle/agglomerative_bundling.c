@@ -8,20 +8,21 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include "types.h"
-#include "globals.h"
-#include "general.h"
-#include "time.h"
-#include "SparseMatrix.h"
-#include "vector.h"
-#include "edge_bundling.h"
-#include "ink.h"
-#include "agglomerative_bundling.h"
-#include "nearest_neighbor_graph.h"
+#include <common/types.h>
+#include <common/globals.h>
+#include <sparse/general.h>
+#include <math.h>
+#include <time.h>
+#include <sparse/SparseMatrix.h>
+#include <sparse/vector.h>
+#include <mingle/edge_bundling.h>
+#include <mingle/ink.h>
+#include <mingle/agglomerative_bundling.h>
+#include <mingle/nearest_neighbor_graph.h>
 #include <string.h>
 
 #if OPENGL
-#include "gl.h"
+#include <gl.h>
 extern pedge *edges_global;
 extern int nedges_global;
 #endif
@@ -276,7 +277,7 @@ static Agglomerative_Ink_Bundling Agglomerative_Ink_Bundling_establish(Agglomera
 
     if (Verbose > 1) fprintf(stderr,"level %d->%d, edges %d -> %d, ink %f->%f , gain = %f, or %f\n", grid->level, cgrid->level, grid->n, 
 			 cgrid->n, grid->total_ink, grand_total_ink, grid->total_ink - grand_total_ink, grand_total_gain);	 
-    assert(ABS(grid->total_ink - cgrid->total_ink - grand_total_gain) <= 0.0001*grid->total_ink);
+    assert(fabs(grid->total_ink - cgrid->total_ink - grand_total_gain) <= 0.0001*grid->total_ink);
 
     cgrid = Agglomerative_Ink_Bundling_establish(cgrid, pick, angle_param, angle);
     grid->next = cgrid;
@@ -524,7 +525,7 @@ static Agglomerative_Ink_Bundling Agglomerative_Ink_Bundling_aggressive_establis
 
     if (Verbose > 1) fprintf(stderr,"level %d->%d, edges %d -> %d, ink %f->%f , gain = %f, or %f\n", grid->level, cgrid->level, grid->n, 
 			 cgrid->n, grid->total_ink, grand_total_ink, grid->total_ink - grand_total_ink, grand_total_gain);	 
-    assert(ABS(grid->total_ink - cgrid->total_ink - grand_total_gain) <= 0.0001*grid->total_ink);
+    assert(fabs(grid->total_ink - cgrid->total_ink - grand_total_gain) <= 0.0001*grid->total_ink);
 
     cgrid = Agglomerative_Ink_Bundling_aggressive_establish(cgrid, pick, angle_param, angle);
     grid->next = cgrid;
@@ -623,7 +624,8 @@ static pedge* agglomerative_ink_bundling_internal(int dim, SparseMatrix A, pedge
 	if (Verbose && DEBUG) fprintf(stderr,"calling ink2...\n");
 	ink1 = ink(edges, ia[i+1]-ia[i], pick, &ink0, &meet1, &meet2, angle_param, angle);
 	if (Verbose && DEBUG) fprintf(stderr,"finish calling ink2...\n");
-	assert(ABS(ink1 - cgrid->inks[i])<=MAX(TOL, TOL*ink1) && ink1 - ink0 <= TOL);
+	assert(fabs(ink1 - cgrid->inks[i])<=MAX(TOL, TOL*ink1) && ink1 - ink0 <= TOL);
+	assert(ink1 < 1000 * ink0); /* assert that points were found */
 	wgt_all = 0.;
 	if (ia[i+1]-ia[i] > 1){
 	  for (j = ia[i]; j < ia[i+1]; j++){
@@ -682,7 +684,8 @@ static pedge* agglomerative_ink_bundling_internal(int dim, SparseMatrix A, pedge
       if (Verbose && DEBUG) fprintf(stderr,"calling ink3...\n");
       ink1 = ink(edges, ia[i+1]-ia[i], pick, &ink0, &meet1, &meet2, angle_param, angle);
       if (Verbose && DEBUG) fprintf(stderr,"done calling ink3...\n");
-      assert(ABS(ink1 - cgrid->inks[i])<=MAX(TOL, TOL*ink1) && ink1 - ink0 <= TOL);
+      assert(fabs(ink1 - cgrid->inks[i])<=MAX(TOL, TOL*ink1) && ink1 - ink0 <= TOL);
+      assert(ink1 < 1000 * ink0); /* assert that points were found */
       xx[i*4 + 0] = meet1.x;
       xx[i*4 + 1] = meet1.y;
       xx[i*4 + 2] = meet2.x;
@@ -707,7 +710,7 @@ static pedge* agglomerative_ink_bundling_internal(int dim, SparseMatrix A, pedge
 	jj = ja[j];
 	e = edges[jj] = pedge_wgts_realloc(edges[jj], npp);
 
-	assert(e->npoints = 2);
+	assert(e->npoints == 2);
 	for (l = 0; l < dim; l++){/* move the second point to the last */
 	  e->x[(npp - 1)*dim+l] = e->x[1*dim+l];
 	}

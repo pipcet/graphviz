@@ -11,14 +11,14 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 
 /*	Push back one byte to a given SF_READ stream
 **
 **	Written by Kiem-Phong Vo.
 */
-static int _uexcept(reg Sfio_t * f, reg int type, void * val,
-		    reg Sfdisc_t * disc)
+static int _uexcept(Sfio_t * f, int type, void * val,
+		    Sfdisc_t * disc)
 {
     NOTUSED(val);
 
@@ -37,9 +37,9 @@ static int _uexcept(reg Sfio_t * f, reg int type, void * val,
  * @param f push back one byte to this stream
  * @param c the value to be pushed back
  */
-int sfungetc(reg Sfio_t * f, reg int c)
+int sfungetc(Sfio_t * f, int c)
 {
-    reg Sfio_t *uf;
+    Sfio_t *uf;
 
     SFMTXSTART(f, -1)
 
@@ -69,16 +69,16 @@ int sfungetc(reg Sfio_t * f, reg int c)
 
     /* space for data */
     if (f->next == f->data) {
-	reg uchar *data;
+	uchar *data;
 	if (f->size < 0)
 	    f->size = 0;
-	if (!(data = (uchar *) malloc(f->size + 16))) {
+	if (!(data = malloc(f->size + 16))) {
 	    c = -1;
 	    goto done;
 	}
 	f->flags |= SF_MALLOC;
 	if (f->data)
-	    memcpy((char *) (data + 16), (char *) f->data, f->size);
+	    memcpy(data + 16, f->data, f->size);
 	f->size += 16;
 	f->data = data;
 	f->next = data + 16;

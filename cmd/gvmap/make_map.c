@@ -12,18 +12,17 @@
  *************************************************************************/
 
 #define STANDALONE
-#include "SparseMatrix.h"
-#include "general.h"
-#include "QuadTree.h"
-#include "string.h"
-/* #include "types.h" */
-#include <cgraph.h>
+#include <sparse/SparseMatrix.h>
+#include <sparse/general.h>
+#include <math.h>
+#include <sparse/QuadTree.h>
+#include <string.h>
+#include <cgraph/cgraph.h>
 #include "make_map.h"
-/* #include "ps.h" */
-#include "stress_model.h"
+#include <sfdpgen/stress_model.h>
 #include "country_graph_coloring.h"
-#include "colorutil.h"
-#include "delaunay.h"
+#include <sparse/colorutil.h>
+#include <neatogen/delaunay.h>
 
 #ifdef SINGLE
 #define REAL float
@@ -32,8 +31,8 @@
 #endif /* not SINGLE */
 /* #include "triangle.h" */
 
-#include "lab.h"
-#include "node_distinct_coloring.h"
+#include <edgepaint/lab.h>
+#include <edgepaint/node_distinct_coloring.h>
 
 void map_palette_optimal_coloring(char *color_scheme, char *lightness, SparseMatrix A0, real accuracy, int seed, 
 				  float **rgb_r, float **rgb_g, float **rgb_b){
@@ -766,13 +765,13 @@ void plot_dot_polygons(char **sbuff, int *len, int *len_max, real line_width, ch
   yp = MALLOC(sizeof(float)*maxlen);
 
   if (Verbose) fprintf(stderr,"npolys = %d\n",npolys);
-  first = ABS(a[0]); ipoly = first + 1;
+  first = abs(a[0]); ipoly = first + 1;
   for (i = 0; i < npolys; i++){
     np = 0;
     for (j = ia[i]; j < ia[i+1]; j++){
       assert(ja[j] < nverts && ja[j] >= 0);
-      if (ABS(a[j]) != ipoly){/* the first poly, or a hole */
-	ipoly = ABS(a[j]);
+      if (abs(a[j]) != ipoly){/* the first poly, or a hole */
+	ipoly = abs(a[j]);
 	is_river = (a[j] < 0);
 	if (r && g && b) {
 	  rgb2hex(r[polys_groups[i]], g[polys_groups[i]], b[polys_groups[i]], cstring, opacity);
@@ -810,13 +809,13 @@ void plot_processing_polygons(FILE *f, real line_width, SparseMatrix polys, real
   yp = MALLOC(sizeof(float)*maxlen);
 
   if (Verbose) fprintf(stderr,"npolys = %d\n",npolys);
-  first = ABS(a[0]); ipoly = first + 1;
+  first = abs(a[0]); ipoly = first + 1;
   for (i = 0; i < npolys; i++){
     np = 0;
     for (j = ia[i]; j < ia[i+1]; j++){
       assert(ja[j] < nverts && ja[j] >= 0);
-      if (ABS(a[j]) != ipoly){/* the first poly, or a hole */
-	ipoly = ABS(a[j]);
+      if (abs(a[j]) != ipoly){/* the first poly, or a hole */
+	ipoly = abs(a[j]);
 	is_river = (a[j] < 0);
 	if (r && g && b) {
 	  rr = r[polys_groups[i]]; gg = g[polys_groups[i]]; bb = b[polys_groups[i]];

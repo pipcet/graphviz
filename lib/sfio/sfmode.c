@@ -11,7 +11,8 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
+#include <stdint.h>
 static char *Version = "\n@(#)sfio (AT&T Labs - kpv) 2001-02-01\0\n";
 
 /*	Functions to set a given stream to some desired mode
@@ -41,10 +42,10 @@ static int _Sfsigp = 0;		/* # of streams needing SIGPIPE protection */
 /* done at exiting time */
 static void _sfcleanup(void)
 {
-    reg Sfpool_t *p;
-    reg Sfio_t *f;
-    reg int n;
-    reg int pool;
+    Sfpool_t *p;
+    Sfio_t *f;
+    int n;
+    int pool;
 
     f = (Sfio_t *) Version;	/* shut compiler warning */
 
@@ -59,7 +60,6 @@ static void _sfcleanup(void)
 		continue;
 
 	    SFLOCK(f, 0);
-	    SFMTXLOCK(f);
 
 	    /* let application know that we are leaving */
 	    (void) SFRAISE(f, SF_ATEXIT, NIL(void *));
@@ -77,7 +77,6 @@ static void _sfcleanup(void)
 		(void) SFSETBUF(f, NIL(void *), 0);
 	    f->mode |= pool;
 
-	    SFMTXUNLOCK(f);
 	    SFOPEN(f, 0);
 	}
     }
@@ -86,9 +85,9 @@ static void _sfcleanup(void)
 /* put into discrete pool */
 int _sfsetpool(Sfio_t * f)
 {
-    reg Sfpool_t *p;
-    reg Sfio_t **array;
-    reg int n, rv;
+    Sfpool_t *p;
+    Sfio_t **array;
+    int n, rv;
 
     if (!_Sfcleanup) {
 	_Sfcleanup = _sfcleanup;
@@ -98,8 +97,6 @@ int _sfsetpool(Sfio_t * f)
     if (!(p = f->pool))
 	p = f->pool = &_Sfpool;
 
-    POOLMTXSTART(p);
-
     rv = -1;
 
     if (p->n_sf >= p->s_sf) {
@@ -108,14 +105,13 @@ int _sfsetpool(Sfio_t * f)
 	    p->sf = p->array;
 	} else {		/* allocate a larger array */
 	    n = (p->sf != p->array ? p->s_sf : (p->s_sf / 4 + 1) * 4) + 4;
-	    if (!(array = (Sfio_t **) malloc(n * sizeof(Sfio_t *))))
+	    if (!(array = malloc(n * sizeof(Sfio_t *))))
 		goto done;
 
 	    /* move old array to new one */
-	    memcpy((void *) array, (void *) p->sf,
-		   p->n_sf * sizeof(Sfio_t *));
+	    memcpy(array, p->sf, p->n_sf * sizeof(Sfio_t *));
 	    if (p->sf != p->array)
-		free((void *) p->sf);
+		free(p->sf);
 
 	    p->sf = array;
 	    p->s_sf = n;
@@ -129,18 +125,18 @@ int _sfsetpool(Sfio_t * f)
     rv = 0;
 
   done:
-    POOLMTXRETURN(p, rv);
+    return rv;
 }
 
-/* create an auxiliary buffer for sfgetr/sfreserve/sfputr */
-Sfrsrv_t *_sfrsrv(reg Sfio_t * f, reg ssize_t size)
+/* create an auxiliary buffer for sfputr */
+Sfrsrv_t *_sfrsrv(Sfio_t * f, ssize_t size)
 {
     Sfrsrv_t *rsrv, *rs;
 
     /* make buffer if nothing yet */
     size = ((size + SF_GRAIN - 1) / SF_GRAIN) * SF_GRAIN;
     if (!(rsrv = f->rsrv) || size > rsrv->size) {
-	if (!(rs = (Sfrsrv_t *) malloc(size + sizeof(Sfrsrv_t))))
+	if (!(rs = malloc(size + sizeof(Sfrsrv_t))))
 	    size = -1;
 	else {
 	    if (rsrv) {
@@ -173,14 +169,14 @@ static void ignoresig(int sig)
  * @param pid
  * @param stdio stdio popen() does not reset SIGPIPE handler
  */
-int _sfpopen(reg Sfio_t * f, int fd, int pid, int stdio)
+int _sfpopen(Sfio_t * f, int fd, int pid, int stdio)
 {
-    reg Sfproc_t *p;
+    Sfproc_t *p;
 
     if (f->proc)
 	return 0;
 
-    if (!(p = f->proc = (Sfproc_t *) malloc(sizeof(Sfproc_t))))
+    if (!(p = f->proc = malloc(sizeof(Sfproc_t))))
 	return -1;
 
     p->pid = pid;
@@ -193,12 +189,10 @@ int _sfpopen(reg Sfio_t * f, int fd, int pid, int stdio)
     if (p->sigp) {
 	Sfsignal_f handler;
 
-	vtmtxlock(_Sfmutex);
 	if ((handler = signal(SIGPIPE, ignoresig)) != SIG_DFL &&
 	    handler != ignoresig)
 	    signal(SIGPIPE, handler);	/* honor user handler */
 	_Sfsigp += 1;
-	vtmtxunlock(_Sfmutex);
     }
 #endif
 
@@ -208,7 +202,7 @@ int _sfpopen(reg Sfio_t * f, int fd, int pid, int stdio)
 /**
  * @param f stream to close
  */
-int _sfpclose(reg Sfio_t * f)
+int _sfpclose(Sfio_t * f)
 {
     Sfproc_t *p;
     int pid, status;
@@ -217,8 +211,7 @@ int _sfpclose(reg Sfio_t * f)
 	return -1;
     f->proc = NIL(Sfproc_t *);
 
-    if (p->rdata)
-	free(p->rdata);
+    free(p->rdata);
 
     if (p->pid < 0)
 	status = 0;
@@ -235,7 +228,6 @@ int _sfpclose(reg Sfio_t * f)
 	    status = -1;
 
 #ifdef SIGPIPE
-	vtmtxlock(_Sfmutex);
 	if (p->sigp && (_Sfsigp -= 1) <= 0) {
 	    Sfsignal_f handler;
 	    if ((handler = signal(SIGPIPE, SIG_DFL)) != SIG_DFL &&
@@ -243,7 +235,6 @@ int _sfpclose(reg Sfio_t * f)
 		signal(SIGPIPE, handler);	/* honor user handler */
 	    _Sfsigp = 0;
 	}
-	vtmtxunlock(_Sfmutex);
 #endif
     }
 
@@ -261,9 +252,8 @@ static int _sfpmode(Sfio_t * f, int type)
     if (type == SF_WRITE) {	/* save unread data */
 	p->ndata = f->endb - f->next;
 	if (p->ndata > p->size) {
-	    if (p->rdata)
-		free((char *) p->rdata);
-	    if ((p->rdata = (uchar *) malloc(p->ndata)))
+	    free(p->rdata);
+	    if ((p->rdata = malloc(p->ndata)))
 		p->size = p->ndata;
 	    else {
 		p->size = 0;
@@ -271,13 +261,13 @@ static int _sfpmode(Sfio_t * f, int type)
 	    }
 	}
 	if (p->ndata > 0)
-	    memcpy((void *) p->rdata, (void *) f->next, p->ndata);
+	    memcpy(p->rdata, f->next, p->ndata);
 	f->endb = f->data;
     } else {			/* restore read data */
 	if (p->ndata > f->size)	/* may lose data!!! */
 	    p->ndata = f->size;
 	if (p->ndata > 0) {
-	    memcpy((void *) f->data, (void *) p->rdata, p->ndata);
+	    memcpy(f->data, p->rdata, p->ndata);
 	    f->endb = f->data + p->ndata;
 	    p->ndata = 0;
 	}
@@ -298,13 +288,10 @@ static int _sfpmode(Sfio_t * f, int type)
  * @param wanted desired mode
  * @param local a local call
  */
-int _sfmode(reg Sfio_t * f, reg int wanted, reg int local)
+int _sfmode(Sfio_t * f, int wanted, int local)
 {
-    reg int n;
     Sfoff_t addr;
-    reg int rv = 0;
-
-    SFONCE();			/* initialize mutexes */
+    int rv = 0;
 
     if ((!local && SFFROZEN(f))
 	|| (!(f->flags & SF_STRING) && f->file < 0)) {
@@ -381,7 +368,7 @@ int _sfmode(reg Sfio_t * f, reg int wanted, reg int local)
 	    else
 		f->endw = f->endb;
 	} else {
-	    n = f->flags;
+	    unsigned short n = f->flags;
 	    (void) SFSETBUF(f, f->data, f->size);
 	    f->flags |= (n & SF_MALLOC);
 	}
@@ -458,7 +445,7 @@ int _sfmode(reg Sfio_t * f, reg int wanted, reg int local)
 
 	/* reset buffer and seek pointer */
 	if (!(f->mode & SF_SYNCED)) {
-	    n = f->endb - f->next;
+	    intptr_t n = (intptr_t)(f->endb - f->next);
 	    if (f->extent >= 0 && (n > 0 || (f->data && (f->bits & SF_MMAP)))) {	/* reset file pointer */
 		addr = f->here - n;
 		if (SFSK(f, addr, SEEK_SET, f->disc) < 0)

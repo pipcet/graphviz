@@ -25,7 +25,7 @@ extern "C" {
 #ifndef _EXPR_H
 #define _EXPR_H
 
-#include <ast.h>
+#include <ast/ast.h>
 #include <inttypes.h>
 
 #undef	RS	/* hp.pa <signal.h> grabs this!! */
@@ -37,25 +37,12 @@ extern "C" {
 #define extern		extern __IMPORT__
 #endif
 
-/*
- * bison -pPREFIX misses YYSTYPE
- */
-
-#if defined(YYSTYPE) || defined(YYBISON)
-#define EXSTYPE		YYSTYPE
-#else
-#include <exparse.h>
-#if defined(YYSTYPE) || defined(yystype)
-#define EXSTYPE		YYSTYPE
-#endif
-#endif
-
-#include "exparse.h"
+#include <expr/exparse.h>
 
 #undef	extern
 
 #include <cdt.h>
-#include <vmalloc.h>
+#include <vmalloc/vmalloc.h>
 
 #define EX_VERSION	20000101L
 

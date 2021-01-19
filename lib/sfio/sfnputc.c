@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 #include <string.h>
 
 /*	Write out a character n times
@@ -24,12 +24,12 @@
  * @param c char to be written
  * @param number of time to repeat
  */
-ssize_t sfnputc(reg Sfio_t * f, reg int c, reg size_t n)
+ssize_t sfnputc(Sfio_t * f, int c, size_t n)
 {
-    reg uchar *ps;
-    reg ssize_t p, w;
+    uchar *ps;
+    ssize_t p, w;
     uchar buf[128];
-    reg int local;
+    int local;
 
     SFMTXSTART(f, -1);
 

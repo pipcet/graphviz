@@ -18,10 +18,9 @@ extern "C" {
 #ifndef AST_H
 #define AST_H
 
-#include <sfio.h>
+#include <sfio/sfio.h>
 #include <stdlib.h>
 #include <stddef.h>
-#include <align.h>
 #ifdef sun
 #include <string.h>
 #endif

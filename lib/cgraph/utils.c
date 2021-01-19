@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include <cghdr.h>
+#include <cgraph/cghdr.h>
 
 static Agraph_t *Ag_dictop_G;
 
@@ -64,16 +64,10 @@ Dict_t *agdtopen(Agraph_t * g, Dtdisc_t * disc, Dtmethod_t * method)
     return d;
 }
 
-long agdtdelete(Agraph_t * g, Dict_t * dict, void *obj)
+int agdtdelete(Agraph_t * g, Dict_t * dict, void *obj)
 {
     Ag_dictop_G = g;
-    return (long) dtdelete(dict, obj);
-}
-
-int agobjfinalize(void * obj)
-{
-    agfree(Ag_dictop_G, obj);
-    return 0;
+    return dtdelete(dict, obj) != NULL;
 }
 
 int agdtclose(Agraph_t * g, Dict_t * dict)

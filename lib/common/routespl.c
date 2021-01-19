@@ -13,16 +13,11 @@
 
 #include "config.h"
 
-#include "render.h"
-#include "pathplan.h"
+#include <common/render.h>
+#include <math.h>
+#include <pathplan/pathplan.h>
 #include <setjmp.h>
-
-#ifdef UNUSED
-static box *bs = NULL;
-static int bn;
-static int maxbn = 0;
-#define BINC 300
-#endif
+#include <stdlib.h>
 
 #define PINC 300
 
@@ -288,7 +283,7 @@ int
 routesplinesinit()
 {
     if (++routeinit > 1) return 0;
-    if (!(ps = N_GNEW(PINC, pointf))) {
+    if (!(ps = calloc(PINC, sizeof(pointf)))) {
 	agerr(AGERR, "routesplinesinit: cannot allocate ps\n");
 	return 1;
     }
@@ -314,9 +309,6 @@ void routesplinesterm()
 {
     if (--routeinit > 0) return;
     free(ps);
-#ifdef UNUSED
-    free(bs), bs = NULL /*, maxbn = bn = 0 */ ;
-#endif
     if (Verbose)
 	fprintf(stderr,
 		"routesplines: %d edges, %d boxes %.2f sec\n",
@@ -694,9 +686,9 @@ static int checkpath(int boxn, boxf* boxes, path* thepath)
     /* remove degenerate boxes. */
     i = 0;
     for (bi = 0; bi < boxn; bi++) {
-	if (ABS(boxes[bi].LL.y - boxes[bi].UR.y) < .01)
+	if (fabs(boxes[bi].LL.y - boxes[bi].UR.y) < .01)
 	    continue;
-	if (ABS(boxes[bi].LL.x - boxes[bi].UR.x) < .01)
+	if (fabs(boxes[bi].LL.x - boxes[bi].UR.x) < .01)
 	    continue;
 	if (i != bi)
 	    boxes[i] = boxes[bi];
@@ -846,7 +838,7 @@ static int mkspacep(int size)
 {
     if (size > maxpn) {
 	int newmax = maxpn + (size / PINC + 1) * PINC;
-	ps = RALLOC(newmax, ps, pointf);
+	ps = realloc(ps, newmax * sizeof(pointf));
 	if (!ps) {
 	    agerr(AGERR, "cannot re-allocate ps\n");
 	    return 1;
@@ -914,29 +906,14 @@ typedef struct _tag_vec
 
 static vec* vec_new(void)
 {
-    vec* pvec = (vec*)malloc(sizeof(vec));
+    vec* pvec = malloc(sizeof(vec));
     pvec->_capelems = 10;
     pvec->_elems = 0;
-    pvec->_mem = (void**)malloc(pvec->_capelems * sizeof(void*));
+    pvec->_mem = malloc(pvec->_capelems * sizeof(void*));
     return pvec;
 }
 
-static void vec_delete(vec* pvec)
-{
-    free(pvec->_mem);
-    free(pvec);
-}
-
-static void vec_push_back(vec* pvec, void* data)
-{
-    if (pvec->_elems == pvec->_capelems) {
-		pvec->_capelems += 10;
-		pvec->_mem = (void**)realloc(pvec->_mem, pvec->_capelems * sizeof(void*));
-	}
-    pvec->_mem[pvec->_elems++] = data;  
-}
-
-static size_t vec_length(vec* pvec)
+static size_t vec_length(const vec* pvec)
 {
     return pvec->_elems;
 }
@@ -945,6 +922,25 @@ static void* vec_get(vec* pvec, size_t index)
 {
     assert(index < pvec->_elems);
     return pvec->_mem[index];
+}
+
+static void vec_delete(vec* pvec)
+{
+    size_t i;
+    for (i = 0; i < vec_length(pvec); ++i) {
+      vec_delete(vec_get(pvec, i));
+    }
+    free(pvec->_mem);
+    free(pvec);
+}
+
+static void vec_push_back(vec* pvec, void* data)
+{
+    if (pvec->_elems == pvec->_capelems) {
+		pvec->_capelems += 10;
+		pvec->_mem = realloc(pvec->_mem, pvec->_capelems * sizeof(void*));
+	}
+    pvec->_mem[pvec->_elems++] = data;  
 }
 
 static void* vec_pop(vec* pvec)
@@ -968,10 +964,10 @@ static boolean vec_contains(vec* pvec, void* item)
 
 static vec* vec_copy(vec* pvec)
 {
-    vec* nvec = (vec*)malloc(sizeof(vec));
+    vec* nvec = malloc(sizeof(vec));
     nvec->_capelems = pvec->_capelems;
     nvec->_elems = pvec->_elems;
-    nvec->_mem = (void**)malloc(pvec->_capelems * sizeof(void*));
+    nvec->_mem = malloc(pvec->_capelems * sizeof(void*));
 	memcpy(nvec->_mem, pvec->_mem, pvec->_elems * sizeof(void*));
     return nvec;
 }
@@ -1111,10 +1107,6 @@ static pointf get_cycle_centroid(graph_t *g, edge_t* edge)
 	if (cycles == 0 || ref_g != g) {
 		//free the memory we're using to hold the previous cycles
 		if (cycles != 0) {
-			size_t i;
-			for (i=0; i < vec_length(cycles); ++i) {
-				vec_delete(vec_get(cycles, i));
-			}
 			vec_delete(cycles);
 		}
 		cycles = find_all_cycles(g);

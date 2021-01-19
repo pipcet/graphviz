@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <sys/stat.h>
 
-#include "gvplugin_loadimage.h"
+#include <gvc/gvplugin_loadimage.h>
 
 #ifdef HAVE_GS
 #ifdef HAVE_PANGOCAIRO
@@ -41,12 +41,6 @@
 
 #ifndef e_invalidid
 #define e_invalidid gs_error_invalidid
-#endif
-
-#ifdef _WIN32
-#define NUL_FILE "nul"
-#else
-#define NUL_FILE "/dev/null"
 #endif
 
 typedef enum {
@@ -187,7 +181,7 @@ static cairo_pattern_t* gvloadimage_gs_load(GVJ_t * job, usershape_t *us)
 	}
     }
     if (!gs) {
-	gs = (gs_t *)malloc(sizeof(gs_t));
+	gs = malloc(sizeof(gs_t));
 	if (!gs) {
 	    job->common->errorfn("malloc() failure\n");
 	    return NULL;

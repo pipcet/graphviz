@@ -29,8 +29,8 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "cgraph.h"
-#include "ingraphs.h"
+#include <cgraph/cgraph.h>
+#include <ingraphs/ingraphs.h>
 
 #include <getopt.h>
 
@@ -89,7 +89,7 @@ typedef struct {
 
 static void initStack(Stack * sp, int sz)
 {
-    sp->data = (Agnode_t **) malloc(sz * sizeof(Agnode_t *));
+    sp->data = malloc(sz * sizeof(Agnode_t *));
     sp->ptr = sp->data;
 }
 
@@ -339,7 +339,7 @@ static void scanArgs(int argc, char **argv)
 
     CmdName = argv[0];
     opterr = 0;
-    while ((c = getopt(argc, argv, ":o:sdvS")) != EOF) {
+    while ((c = getopt(argc, argv, ":o:sdvS?")) != EOF) {
 	switch (c) {
 	case 's':
 	    StatsOnly = 1;
@@ -348,6 +348,8 @@ static void scanArgs(int argc, char **argv)
 	    wantDegenerateComp = 1;
 	    break;
 	case 'o':
+	    if (outfp != NULL)
+		fclose(outfp);
 	    outfp = openFile(optarg, "w");
 	    break;
 	case 'v':
@@ -361,11 +363,13 @@ static void scanArgs(int argc, char **argv)
 	    fprintf(stderr, "%s: option -%c missing argument - ignored\n", CmdName, optopt);
 	    break;
 	case '?':
-	    if (optopt == '?')
+	    if (optopt == '\0' || optopt == '?')
 		usage(0);
-	    else
-		fprintf(stderr, "%s: option -%c unrecognized - ignored\n",
+	    else {
+		fprintf(stderr, "%s: option -%c unrecognized\n",
 			CmdName, optopt);
+		usage(1);
+	    }
 	    break;
 	}
     }

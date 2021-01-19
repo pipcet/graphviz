@@ -17,7 +17,7 @@
 #include <map>
 #include <vector>
 
-#include "types.h"
+#include <common/types.h>
 
 #include "VisioGraphic.h"
 #include "VisioText.h"
@@ -34,7 +34,6 @@ namespace Visio
 	{
 	public:
 		Render();
-		~Render();
 		
 		/* render hierarchy */
 		void BeginGraph(GVJ_t* job);

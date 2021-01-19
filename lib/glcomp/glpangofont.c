@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include "glpangofont.h"
+#include <glcomp/glpangofont.h>
 
 #define DEFAULT_FONT_FAMILY "Arial"
 #define DEFAULT_FONT_SIZE 32
@@ -40,8 +40,7 @@ static PangoLayout *get_pango_layout(char *markup_text,
     PangoAttrList *attr_list;
     cairo_font_options_t *options;
     fontmap = pango_cairo_font_map_get_default();
-    context =
-	pango_cairo_font_map_create_context(PANGO_CAIRO_FONT_MAP(fontmap));
+    context = pango_font_map_create_context(fontmap);
     options = cairo_font_options_create();
 
     cairo_font_options_set_antialias(options, CAIRO_ANTIALIAS_GRAY);
@@ -127,7 +126,7 @@ int glCompCreateFontFile(char *fontdescription, int fs, char *fontfile,
     for (c = 0; c < 256; c++) {
 	counter++;
 	if ((c != 38) && (c != 60) && (c != 128) && (c < 129))
-	    buf[0] = c;
+	    buf[0] = (char)c;
 	else
 	    buf[0] = ' ';
 	cairo_move_to(cr, X, Y);

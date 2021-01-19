@@ -14,16 +14,16 @@
     <ProjectGuid>{A334BA89-79FC-40E4-8D42-4852ECD2505B}</ProjectGuid>
     <RootNamespace>dot</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -51,7 +51,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\gvc;$(SolutionDir)lib\pathplan;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)lib;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\gvc;$(SolutionDir)lib\pathplan;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;WIN32_DLL;DEMAND_LOADING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -70,10 +70,20 @@
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalDependencies>cgraph.lib;gvc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>$(OutDir)dot -c
+copy /B /Y $(OutDir)dot.exe $(OutDir)circo.exe
+copy /B /Y $(OutDir)dot.exe $(OutDir)fdp.exe
+copy /B /Y $(OutDir)dot.exe $(OutDir)neato.exe
+copy /B /Y $(OutDir)dot.exe $(OutDir)osage.exe
+copy /B /Y $(OutDir)dot.exe $(OutDir)patchwork.exe
+copy /B /Y $(OutDir)dot.exe $(OutDir)sfdp.exe
+copy /B /Y $(OutDir)dot.exe $(OutDir)twopi.exe</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\gvc;$(SolutionDir)lib\pathplan;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)lib;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\gvc;$(SolutionDir)lib\pathplan;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;WIN32_DLL;DEMAND_LOADING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
@@ -90,6 +100,16 @@
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalDependencies>cgraph.lib;gvc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>$(OutDir)dot -c
+copy /B /Y $(OutDir)dot.exe $(OutDir)circo.exe
+copy /B /Y $(OutDir)dot.exe $(OutDir)fdp.exe
+copy /B /Y $(OutDir)dot.exe $(OutDir)neato.exe
+copy /B /Y $(OutDir)dot.exe $(OutDir)osage.exe
+copy /B /Y $(OutDir)dot.exe $(OutDir)patchwork.exe
+copy /B /Y $(OutDir)dot.exe $(OutDir)sfdp.exe
+copy /B /Y $(OutDir)dot.exe $(OutDir)twopi.exe</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dot.c" />
@@ -151,6 +171,12 @@
     <ProjectReference Include="..\..\plugin\dot_layout\gvplugin_dot_layout.vcxproj">
       <Project>{189e64e3-8a67-4477-8b18-3b174c03f6b9}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\plugin\gdiplus\gvplugin_gdiplus.vcxproj">
+      <Project>{0f4d5d8f-f4d6-4a5d-97e0-9b482257f493}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\plugin\gd\gvplugin_gd.vcxproj">
+      <Project>{2fddc7c5-66e5-4520-b735-fd1a065aa9ba}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\plugin\neato_layout\gvplugin_neato_layout.vcxproj">
       <Project>{92ea9398-9244-4daa-8e7d-2f6bec338cab}</Project>

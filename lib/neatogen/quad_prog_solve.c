@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include "digcola.h"
+#include <neatogen/digcola.h>
 #ifdef DIGCOLA
 #include <math.h>
 #include <stdlib.h>
@@ -19,9 +19,9 @@
 #include <stdio.h>
 #include <float.h>
 #include <assert.h>
-#include "matrix_ops.h"
-#include "kkutils.h"
-#include "quad_prog_solver.h"
+#include <neatogen/matrix_ops.h>
+#include <neatogen/kkutils.h>
+#include <neatogen/quad_prog_solver.h>
 
 #define quad_prog_tol 1e-2
 
@@ -407,9 +407,9 @@ constrained_majorization_new(CMajEnv * e, float *b, float **coords,
 static float *place;
 static int compare_incr(const void *a, const void *b)
 {
-    if (place[*(int *) a] > place[*(int *) b]) {
+    if (place[*(const int *) a] > place[*(const int *) b]) {
 	return 1;
-    } else if (place[*(int *) a] < place[*(int *) b]) {
+    } else if (place[*(const int *) a] < place[*(const int *) b]) {
 	return -1;
     }
     return 0;

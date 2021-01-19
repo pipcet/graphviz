@@ -11,11 +11,11 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include "glcomplabel.h"
-#include "glcompfont.h"
-#include "glcompset.h"
-#include "glutils.h"
-#include "memory.h"
+#include <glcomp/glcomplabel.h>
+#include <glcomp/glcompfont.h>
+#include <glcomp/glcompset.h>
+#include <glcomp/glutils.h>
+#include <common/memory.h>
 
 glCompLabel *glCompLabelNew(glCompObj * par, GLfloat x, GLfloat y,
 			    char *text)
@@ -67,8 +67,7 @@ static void update_font(glCompLabel * p,char* text,char* desc,int fs)
     p->common.font=glNewFont (p->common.compset,text,&p->common.color,temp->type,desc,fs,temp->is2D);
     if(temp)
 	glDeleteFont(temp);
-    if(p->text)
-	free(p->text);
+    free(p->text);
     p->text = strdup(text);
 
 

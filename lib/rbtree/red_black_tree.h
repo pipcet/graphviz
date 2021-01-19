@@ -12,8 +12,7 @@
 extern "C" {
 #endif
 
-#include "misc.h"
-#include "stack.h"
+#include <rbtree/stack.h>
 
 /*  CONVENTIONS:  All data structures for red-black trees have the prefix */
 /*                "rb_" to prevent name conflicts. */
@@ -29,10 +28,6 @@ extern "C" {
 /*                name.  For example, int newLongInt.  Global variables have */
 /*                names beginning with "g".  An example of a global */
 /*                variable name is gNewtonsConstant. */
-
-/* comment out the line below to remove all the debugging assertion */
-/* checks from the compiled code.  */
-/* #define DEBUG_ASSERT 1 */
 
 typedef struct rb_red_blk_node {
   void* key;

@@ -5,17 +5,11 @@ pdfdir = $(pkgdatadir)/doc/pdf
 
 AM_CPPFLAGS = \
 	-DSMYRNA_PATH=\""$(pkgdatadir)/smyrna"\" \
-        -I$(top_srcdir) \
+        -I$(top_srcdir)/lib \
         -I$(top_srcdir)/lib/cgraph \
         -I$(top_srcdir)/lib/cdt \
-        -I$(top_srcdir)/lib/glcomp \
         -I$(top_srcdir)/lib/utilities \
         -I$(top_srcdir)/lib/xdot \
-        -I$(top_srcdir)/lib/glcomp \
-        -I$(top_srcdir)/lib/ast \
-        -I$(top_srcdir)/lib/sfio \
-        -I$(top_srcdir)/lib/neatogen \
-        -I$(top_srcdir)/lib/topfish \
         -I$(top_srcdir)/lib/gvpr \
         -I$(top_srcdir)/lib/common \
         -I$(top_srcdir)/cmd/smyrna/gui \
@@ -32,7 +26,19 @@ if ENABLE_STATIC
 bin_PROGRAMS += smyrna_static
 endif
 man_MANS += smyrna.1
+if ENABLE_MAN_PDFS
 pdf_DATA += smyrna.1.pdf
+endif
+endif
+
+if ENABLE_MAN_PDFS
+if HAVE_PS2PDF
+pdf = smyrna.1.pdf
+else
+pdf = ERROR_NO_PS2PDF
+endif
+else
+pdf =
 endif
 
 noinst_HEADERS = arcball.h draw.h glexpose.h \
@@ -80,13 +86,17 @@ smyrna_static_LDADD = $(top_builddir)/lib/cgraph/libcgraph_C.la \
 		$(top_builddir)/lib/neatogen/libneatogen_C.la \
 		$(GTK_LIBS) $(GLUT_LIBS) $(GTKGLEXT_LIBS) $(GLADE_LIBS) $(X_LIBS) $(EXPAT_LIBS) $(GTS_LIBS) $(MATH_LIBS)
 
+if ENABLE_MAN_PDFS
+if HAVE_PS2PDF
 smyrna.1.pdf: smyrna.1.ps
-	@PS2PDF@ $< $@
+	@PS2PDF@ $<
 
 smyrna.1.ps: $(srcdir)/smyrna.1
 	@GROFF@ -Tps -man $< >$@
+endif
+endif
 
-EXTRA_DIST = smyrna.vcxproj* $(man_MANS) $(pdf_DATA) smyrna.1
+EXTRA_DIST = smyrna.vcxproj* $(man_MANS) $(pdf) smyrna.1
 
-DISTCLEANFILES = $(pdf_DATA) smyrna.1.ps
+DISTCLEANFILES = $(pdf) smyrna.1.ps
 

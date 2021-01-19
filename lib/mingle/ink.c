@@ -10,12 +10,12 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include "types.h"
-#include "globals.h"
-#include "general.h"
-#include "SparseMatrix.h"
-#include "edge_bundling.h"
-#include "ink.h"
+#include <common/types.h>
+#include <common/globals.h>
+#include <sparse/general.h>
+#include <sparse/SparseMatrix.h>
+#include <mingle/edge_bundling.h>
+#include <mingle/ink.h>
 
 double ink_count;
 
@@ -314,7 +314,6 @@ double ink(pedge* edges, int numEdges, int *pick, double *ink0, point_t *meet1, 
       /* no point can be found that satisfies the angular constraints, so we give up and set ink to a large value */
       if (Verbose && 0) fprintf(stderr,"no point satisfying any angle constraints can be found. cbeg=%f cend=%f\n",cbegin,cend);
       inkUsed = 1000*(*ink0);
-      *meet1 = *meet2 = mid;
       free (sources);
       free (targets);
       return inkUsed;

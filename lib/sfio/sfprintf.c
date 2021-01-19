@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 
 /*	Print data with a given format
 **
@@ -21,7 +21,7 @@
 int sfprintf(Sfio_t * f, const char *form, ...)
 {
     va_list args;
-    reg int rv;
+    int rv;
 
     va_start(args, form);
     rv = sfvprintf(f, form, args);
@@ -33,15 +33,14 @@ int sfprintf(Sfio_t * f, const char *form, ...)
 int sfvsprintf(char *s, int n, const char *form, va_list args)
 {
     Sfio_t f;
-    reg int rv;
+    int rv;
 
     if (!s || n <= 0)
 	return -1;
 
     /* make a fake stream */
-    SFCLEAR(&f, NIL(Vtmutex_t *));
+    SFCLEAR(&f);
     f.flags = SF_STRING | SF_WRITE;
-    f.bits = SF_PRIVATE;
     f.mode = SF_WRITE;
     f.size = n - 1;
     f.data = f.next = f.endr = (uchar *) s;
@@ -57,7 +56,7 @@ int sfvsprintf(char *s, int n, const char *form, va_list args)
 int sfsprintf(char *s, int n, const char *form, ...)
 {
     va_list args;
-    reg int rv;
+    int rv;
     va_start(args, form);
     rv = sfvsprintf(s, n, form, args);
     va_end(args);

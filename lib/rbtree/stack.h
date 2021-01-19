@@ -16,8 +16,6 @@ extern "C" {
 #include "config.h"
 #include <stdint.h>
 
-#include "misc.h"
-
 /*  CONVENTIONS:  All data structures for stacks have the prefix */
 /*                "stk_" to prevent name conflicts. */
 /*                                                                      */
@@ -55,9 +53,24 @@ typedef struct stk_stack {
 /*  I didn't think additional comments would be useful */
 stk_stack * StackJoin(stk_stack * stack1, stk_stack * stack2);
 stk_stack * StackCreate(void);
-void StackPush(stk_stack * theStack, DATA_TYPE newInfoPointer);
+
+/** push an item onto the stack
+ *
+ * @param theStack Stack to operate on
+ * @param newInfoPointer Item to push onto the top
+ * @return 0 on success
+ */
+int StackPush(stk_stack * theStack, DATA_TYPE newInfoPointer);
+
 void * StackPop(stk_stack * theStack);
 intptr_t StackNotEmpty(stk_stack *);
+
+/** deallocate a previously created stack
+ *
+ * @param theStack Stack to operate on
+ * @param DestFunc Destructor to run on each item remaining on the stack
+ */
+void StackDestroy(stk_stack * theStack,void DestFunc(void * a));
 
 #ifdef __cplusplus
 }

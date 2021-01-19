@@ -19,12 +19,12 @@
  * the length of the converted s is returned (may have imbedded \0's)
  */
 
-#include <ast.h>
+#include <ast/ast.h>
 
-int stresc(register char *s)
+int stresc(char *s)
 {
-    register char *t;
-    register int c;
+    char *t;
+    int c;
     char *b;
     char *p;
 

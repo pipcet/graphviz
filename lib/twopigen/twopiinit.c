@@ -17,10 +17,10 @@
  * Derived from Graham Wills' algorithm described in GD'97.
  */
 
-#include    "circle.h"
-#include    "adjust.h"
-#include    "pack.h"
-#include    "neatoprocs.h"
+#include    <twopigen/circle.h>
+#include    <neatogen/adjust.h>
+#include    <pack/pack.h>
+#include    <neatogen/neatoprocs.h>
 
 static void twopi_init_edge(edge_t * e)
 {
@@ -79,7 +79,6 @@ void twopi_layout(Agraph_t * g)
     int setRoot = 0;
     int setLocalRoot = 0;
     pointf sc;
-    int doScale = 0;
     int r;
     Agsym_t* rootattr;
 
@@ -106,7 +105,6 @@ void twopi_layout(Agraph_t * g)
     if ((s = agget(g, "scale")) && *s) {
 	if ((r = sscanf (s, "%lf,%lf",&sc.x,&sc.y))) {
 	    if (r == 1) sc.y = sc.x;
-	    doScale = 1;
 	}
     }
 

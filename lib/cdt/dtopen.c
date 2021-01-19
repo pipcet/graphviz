@@ -1,5 +1,4 @@
-#include	"dthdr.h"
-static char*     Version = "\n@(#)$Id$\0\n";
+#include	<cdt/dthdr.h>
 
 /* 	Make a new dictionary
 **
@@ -8,15 +7,15 @@ static char*     Version = "\n@(#)$Id$\0\n";
 
 Dt_t* dtopen(Dtdisc_t* disc, Dtmethod_t* meth)
 {
-	Dt_t*		dt = (Dt_t*)Version;	/* shut-up unuse warning */
-	reg int		e;
+	Dt_t*		dt;
+	int		e;
 	Dtdata_t*	data;
 
 	if(!disc || !meth)
 		return NIL(Dt_t*);
 
 	/* allocate space for dictionary */
-	if(!(dt = (Dt_t*) malloc(sizeof(Dt_t))))
+	if(!(dt = malloc(sizeof(Dt_t))))
 		return NIL(Dt_t*);
 
 	/* initialize all absolutely private data */
@@ -44,7 +43,7 @@ Dt_t* dtopen(Dtdisc_t* disc, Dtmethod_t* meth)
 			if(!disc->memoryf)
 				goto err_open;
 
-			free((void*)dt);
+			free(dt);
 			if(!(dt = (*disc->memoryf)(0, 0, sizeof(Dt_t), disc)) )
 				return NIL(Dt_t*);
 			dt->searchf = NIL(Dtsearch_f);
@@ -60,7 +59,7 @@ Dt_t* dtopen(Dtdisc_t* disc, Dtmethod_t* meth)
 	/* allocate sharable data */
 	if(!(data = (Dtdata_t*)(dt->memoryf)(dt,NIL(void*),sizeof(Dtdata_t),disc)) )
 	{ err_open:
-		free((void*)dt);
+		free(dt);
 		return NIL(Dt_t*);
 	}
 

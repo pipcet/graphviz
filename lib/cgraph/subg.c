@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include <cghdr.h>
+#include <cgraph/cghdr.h>
 
 static Agraph_t *agfindsubg_by_id(Agraph_t * g, IDTYPE id)
 {
@@ -90,7 +90,7 @@ Agraph_t *agparent(Agraph_t * g)
 /* this function is only responsible for deleting the entry
  * in the parent's subg dict.  the rest is done in agclose().
  */
-long agdelsubg(Agraph_t * g, Agraph_t * subg)
+int agdelsubg(Agraph_t * g, Agraph_t * subg)
 {
-    return (long) dtdelete(g->g_dict, subg);
+    return dtdelete(g->g_dict, subg) != NULL;
 }

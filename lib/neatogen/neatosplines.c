@@ -14,17 +14,17 @@
 
 #include "config.h"
 
-#include "neato.h"
-#include "adjust.h"
-#include "pathplan.h"
-#include "vispath.h"
-#include "multispline.h"
+#include <neatogen/neato.h>
+#include <neatogen/adjust.h>
+#include <pathplan/pathplan.h>
+#include <pathplan/vispath.h>
+#include <neatogen/multispline.h>
 #ifndef HAVE_DRAND48
 extern double drand48(void);
 #endif
 
 #ifdef ORTHO
-#include <ortho.h>
+#include <ortho/ortho.h>
 #endif
 
 extern int in_poly(Ppoly_t argpoly, Ppoint_t q);
@@ -273,7 +273,6 @@ Ppoly_t *makeObstacle(node_t * n, expand_t* pmargin, boolean isOrtho)
     boxf b;
     pointf pt;
     field_t *fld;
-    epsf_t *desc;
     int isPoly;
     pointf* verts = NULL;
     pointf vs[4];
@@ -402,7 +401,6 @@ Ppoly_t *makeObstacle(node_t * n, expand_t* pmargin, boolean isOrtho)
 	}
 	break;
     case SH_EPSF:
-	desc = (epsf_t *) (ND_shape_info(n));
 	obs = NEW(Ppoly_t);
 	obs->pn = 4;
 	obs->ps = N_NEW(4, Ppoint_t);

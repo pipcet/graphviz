@@ -25,33 +25,19 @@
  * if path==0 then the space is malloc'd
  */
 
-#include <ast.h>
+#include <ast/ast.h>
 #include <string.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #else
-#include <compat_unistd.h>
+#include <ast/compat_unistd.h>
 #endif
 
-/* #include <option.h> */
-#ifdef HAVE_CRT_EXTERNS_H
-#include <crt_externs.h>
-#endif
-
-#ifdef _WIN32
-#define environ _environ
-#else
-#if defined(HAVE_CRT_EXTERNS_H) && defined(HAVE__NSGETENVIRON)
-#define environ (*_NSGetEnviron())
-#else
-extern char **environ;
-#endif
-#endif
 char **opt_info_argv;
 
-char *pathpath(register char *path, const char *p, const char *a, int mode)
+char *pathpath(char *path, const char *p, const char *a, int mode)
 {
-    register char *s;
+    char *s;
     char *x;
     char buf[PATH_MAX];
 
@@ -60,8 +46,7 @@ char *pathpath(register char *path, const char *p, const char *a, int mode)
     if (!path)
 	path = buf;
     if (!p) {
-	if (cmd)
-	    free(cmd);
+	free(cmd);
 	cmd = a ? strdup(a) : (char *) 0;
 	return 0;
     }
@@ -83,8 +68,8 @@ char *pathpath(register char *path, const char *p, const char *a, int mode)
 	    (strchr(s, '/') ||
 	     (((s = cmd) || (opt_info_argv && (s = *opt_info_argv))) &&
 	      strchr(s, '/') && !strchr(s, '\n') && !access(s, F_OK)) ||
-	     (environ && (s = *environ) && *s++ == '_' &&
-	      *s++ == '=' && strchr(s, '/') && !strneq(s, "/bin/", 5) &&
+	     ((s = getenv("_")) &&
+	      strchr(s, '/') && !strneq(s, "/bin/", 5) &&
 	      !strneq(s, "/usr/bin/", 9)) ||
 	     (*x && !access(x, F_OK) && (s = getenv("PWD")) && *s == '/')
 	    )

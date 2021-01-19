@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 
 /*	Put out a null-terminated string
 **
@@ -22,10 +22,10 @@
  * @param s string to write
  * @param rc record separator
  */
-ssize_t sfputr(reg Sfio_t * f, const char *s, reg int rc)
+ssize_t sfputr(Sfio_t * f, const char *s, int rc)
 {
-    reg ssize_t p, n, w;
-    reg uchar *ps;
+    ssize_t p, n, w;
+    uchar *ps;
 
     SFMTXSTART(f, -1);
 

@@ -12,7 +12,8 @@
  *************************************************************************/
 
 
-#include "render.h"
+#include <common/render.h>
+#include <cgraph/strcasecmp.h>
 
 #define	NONE	0
 #define	NODE	1

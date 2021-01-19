@@ -20,7 +20,7 @@
 
 #include "config.h"
 
-#include "exlib.h"
+#include <expr/exlib.h>
 #include <string.h>
 
 #if !defined(TRACE_lex) && _BLD_DEBUG
@@ -253,7 +253,7 @@ extoken_fn(Expr_t* ex)
 
 #else
 
-#define trace(p,a,b,c)
+#define trace(p,a,b,c) do { } while (0)
 
 #endif
 
@@ -262,9 +262,9 @@ extoken_fn(Expr_t* ex)
  */
 
 static int
-lex(register Expr_t* ex)
+lex(Expr_t* ex)
 {
-	register int	c;
+	int	c;
 
 	for (;;)
 	{
@@ -320,11 +320,11 @@ lex(register Expr_t* ex)
  */
 
 int
-extoken_fn(register Expr_t* ex)
+extoken_fn(Expr_t* ex)
 {
-	register int	c;
-	register char*	s;
-	register int	q;
+	int	c;
+	char*	s;
+	int	q;
 	int		b;
 	char*		e;
 	Dt_t*		v;

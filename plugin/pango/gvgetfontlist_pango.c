@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <cgraph/strcasecmp.h>
 
 /* FIXME - the following declaration should be removed
  * when configure is coordinated with flags passed to the
@@ -50,8 +51,8 @@ char* strcasestr (const char *str, const char *pat)
 
 #endif
 
-#include "agxbuf.h"
-#include "gvplugin_textlayout.h"
+#include <cgraph/agxbuf.h>
+#include <gvc/gvplugin_textlayout.h>
 #include <pango/pangocairo.h>
 #include "gvgetfontlist.h"
 
@@ -244,8 +245,8 @@ typedef struct {
     int faces;
 } availfont_t;
 
-#define NEW(t)          (t*)malloc(sizeof(t))
-#define N_NEW(n,t)      (t*)malloc((n)*sizeof(t))
+#define NEW(t)          malloc(sizeof(t))
+#define N_NEW(n,t)      calloc((n),sizeof(t))
 
 static PostscriptAlias postscript_alias[] = {
 #include "ps_font_equiv.h"
@@ -318,8 +319,7 @@ static char *get_avail_faces(int faces, agxbuf* xb)
     int i;
     for (i = 0; i < FACELIST_SZ; i++) {
 	if (faces & facelist[i].flag) {
-	    agxbput (xb, facelist[i].name);
-	    agxbputc(xb, ' ');
+	    agxbprint (xb, "%s ", facelist[i].name);
 	}
     }
     return agxbuse (xb);
@@ -442,8 +442,7 @@ static char *gv_get_font(availfont_t* gv_af_p,
 	   faces that match what are required by the Graphviz PS font.
 	 */
 	if (gv_af_p[i].faces && strstr(ps_alias->name, gv_af_p[i].gv_ps_fontname)) {
-	    agxbput(xb2, gv_af_p[i].fontname);
-	    agxbput(xb2, ", ");
+	    agxbprint(xb2, "%s, ", gv_af_p[i].fontname);
 	    avail_faces = get_avail_faces(gv_af_p[i].faces, xb);
 	    if (ps_alias->weight) {
 		if (strcasestr(avail_faces, ps_alias->weight)) {
@@ -451,11 +450,9 @@ static char *gv_get_font(availfont_t* gv_af_p,
 		    copyUpper(xb2, ps_alias->weight);
 		}
 	    } else if (strcasestr(avail_faces, "REGULAR")) {
-		agxbputc(xb2, ' ');
-		agxbput(xb2, "REGULAR");
+		agxbput(xb2, " REGULAR");
 	    } else if (strstr(avail_faces, "ROMAN")) {
-		agxbputc(xb2, ' ');
-		agxbput(xb2, "ROMAN");
+		agxbput(xb2, " ROMAN");
 	    }
 	    if (ps_alias->stretch) {
 		if (strcasestr(avail_faces, ps_alias->stretch)) {
@@ -470,17 +467,15 @@ static char *gv_get_font(availfont_t* gv_af_p,
 		} else if (!strcasecmp(ps_alias->style, "ITALIC")) {
                     /* try to use ITALIC in place of OBLIQUE & visa versa */
 		    if (strcasestr(avail_faces, "OBLIQUE")) {
-			agxbputc(xb2, ' ');
-			agxbput(xb2, "OBLIQUE");
+			agxbput(xb2, " OBLIQUE");
 		    }
 		} else if (!strcasecmp(ps_alias->style, "OBLIQUE")) {
 		    if (strcasestr(avail_faces, "ITALIC")) {
-			agxbputc(xb2, ' ');
-			agxbput(xb2, "ITALIC");
+			agxbput(xb2, " ITALIC");
 		    }
 		}
 	    }
-	    return strdup(agxbuse(xb2));
+	    return agxbdisown(xb2);
 	}
     }
     return NULL;

@@ -1,16 +1,3 @@
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${GRAPHVIZ_LIB_DIR}/cdt
-    ${GRAPHVIZ_LIB_DIR}/cgraph
-    ${GRAPHVIZ_LIB_DIR}/common
-    ${GRAPHVIZ_LIB_DIR}/fdpgen
-    ${GRAPHVIZ_LIB_DIR}/gvc
-    ${GRAPHVIZ_LIB_DIR}/neatogen
-    ${GRAPHVIZ_LIB_DIR}/pack
-    ${GRAPHVIZ_LIB_DIR}/pathplan
-    ${GRAPHVIZ_LIB_DIR}/sparse
-)
-
 add_library(patchwork STATIC
     # Header files
     patchwork.h
@@ -20,4 +7,14 @@ add_library(patchwork STATIC
     patchwork.c
     patchworkinit.c
     tree_map.c
+)
+
+target_include_directories(patchwork PRIVATE
+    ${GRAPHVIZ_LIB_DIR}
+    ${GRAPHVIZ_LIB_DIR}/cdt
+    ${GRAPHVIZ_LIB_DIR}/cgraph
+    ${GRAPHVIZ_LIB_DIR}/common
+    ${GRAPHVIZ_LIB_DIR}/gvc
+    ${GRAPHVIZ_LIB_DIR}/pack
+    ${GRAPHVIZ_LIB_DIR}/pathplan
 )

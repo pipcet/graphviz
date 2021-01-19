@@ -18,21 +18,18 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "macros.h"
-#include "const.h"
+#include <common/macros.h>
+#include <common/const.h>
 
-#include "gvplugin_render.h"
-#include "gvplugin_device.h"
-#include "gvio.h"
-#include "memory.h"
+#include <gvc/gvplugin_render.h>
+#include <gvc/gvplugin_device.h>
+#include <gvc/gvio.h>
+#include <common/memory.h>
+#include <cgraph/strcasecmp.h>
 
 typedef enum { FORMAT_VML, FORMAT_VMLZ, } format_type;
 
 unsigned int  graphHeight,graphWidth;
-
-#ifndef HAVE_STRCASECMP
-extern int strcasecmp(const char *s1, const char *s2);
-#endif
 
 /*  this is a direct copy fromlib/common/labels.c  */
 static int xml_isentity(char *s)
@@ -445,7 +442,7 @@ static void vml_textspan(GVJ_t * job, pointf p, textspan_t * span)
 
 static void vml_ellipse(GVJ_t * job, pointf * A, int filled)
 {   
-    double dx, dy, left, right, top, bottom;
+    double dx, dy, left, top;
 
     /* A[] contains 2 points: the center and corner. */
     gvputs(job, "  <v:oval style=\"position:absolute;");
@@ -454,9 +451,7 @@ static void vml_ellipse(GVJ_t * job, pointf * A, int filled)
     dy=A[1].y-A[0].y;
 
     top=graphHeight-(A[0].y+dy);
-    bottom=top+dy+dy;
     left=A[0].x - dx;
-    right=A[1].x;
     gvprintf(job, " left: %.2f; top: %.2f;",left, top);
     gvprintf(job, " width: %.2f; height: %.2f\"", 2*dx, 2*dy);
 

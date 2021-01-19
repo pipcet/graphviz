@@ -16,7 +16,8 @@
  *	merge edges with specified samehead/sametail onto the same port
  */
 
-#include	"dot.h"
+#include <math.h>
+#include	<dotgen/dot.h>
 
 
 #define MAXSAME 5		/* max no of same{head,tail} groups on a node */
@@ -119,10 +120,6 @@ static void sameport(node_t * u, elist * l, double arr_len)
     double x = 0, y = 0, x1, y1, x2, y2, r;
     port prt;
     int sflag, eflag;
-#ifdef OLD
-    int ht;
-    port arr_prt;
-#endif
 
     /* Compute the direction vector (x,y) of the average direction. We compute
        with direction vectors instead of angles because else we have to first
@@ -206,11 +203,11 @@ nodes and maintaining equal separation when specified
 	   FIXME: I guess this adds an extra box for all edges in the rank */
 	if (u == l->list[0]->head) {
 	    if (GD_rank(u->graph)[ND_rank(u)].ht2 <
-		(ht = ABS(arr_prt.p.y)))
+		(ht = fabs(arr_prt.p.y)))
 		GD_rank(u->graph)[ND_rank(u)].ht2 = ht;
 	} else {
 	    if (GD_rank(u->graph)[ND_rank(u)].ht1 <
-		(ht = ABS(arr_prt.p.y)))
+		(ht = fabs(arr_prt.p.y)))
 		GD_rank(u->graph)[ND_rank(u)].ht1 = ht;
 	}
     }

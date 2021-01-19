@@ -12,17 +12,17 @@
 
 #include <stdlib.h>
 
-#include "index.h"
+#include <label/index.h>
 #include <stdio.h>
 #include <assert.h>
-#include "logic.h"
-#include "memory.h"
+#include <common/logic.h>
+#include <common/memory.h>
 
 LeafList_t *RTreeNewLeafList(Leaf_t * lp)
 {
     LeafList_t *llp;
 
-    if ((llp = NEW(LeafList_t))) {
+    if ((llp = calloc(1, sizeof(LeafList_t)))) {
 	llp->leaf = lp;
 	llp->next = 0;
     }
@@ -57,7 +57,7 @@ void RTreeLeafListFree(LeafList_t * llp)
  */
 static struct ListNode *RTreeNewListNode(void)
 {
-    return NEW(struct ListNode);
+    return calloc(1, sizeof(struct ListNode));
 }
 
 #if UNUSED
@@ -72,7 +72,7 @@ static void RTreeFreeListNode(struct ListNode *p)
  */
 static int RTreeReInsert(RTree_t * rtp, Node_t * n, struct ListNode **ee)
 {
-    register struct ListNode *l;
+    struct ListNode *l;
 
     if (!(l = RTreeNewListNode()))
 	return -1;
@@ -86,7 +86,7 @@ RTree_t *RTreeOpen()
 {
     RTree_t *rtp;
 
-    if ((rtp = NEW(RTree_t)))
+    if ((rtp = calloc(1, sizeof(RTree_t))))
 	rtp->root = RTreeNewIndex(rtp);
     return rtp;
 }
@@ -188,7 +188,7 @@ void PrintData(Node_t * n)
 */
 LeafList_t *RTreeSearch(RTree_t * rtp, Node_t * n, Rect_t * r)
 {
-    register int i;
+    int i;
     LeafList_t *llp = 0;
 
     assert(n);
@@ -237,8 +237,8 @@ int
 RTreeInsert(RTree_t * rtp, Rect_t * r, void *data, Node_t ** n, int level)
 {
     /* RTreeInsert(RTree_t*rtp, Rect_t*r, int data, Node_t**n, int level) { */
-    register int i;
-    register Node_t *newroot;
+    int i;
+    Node_t *newroot;
     Node_t *newnode=0;
     Branch_t b;
     int result = 0;
@@ -304,7 +304,7 @@ RTreeInsert2(RTree_t * rtp, Rect_t * r, void *data,
     /* RTreeInsert2(RTree_t*rtp, Rect_t*r,
        int data, Node_t*n, Node_t**new, int level) {
      */
-    register int i=0;
+    int i=0;
     Branch_t b;
     Node_t *n2=0;
 
@@ -343,7 +343,7 @@ RTreeInsert2(RTree_t * rtp, Rect_t * r, void *data,
     }
 }
 
-static void FreeListNode(register struct ListNode *p)
+static void FreeListNode(struct ListNode *p)
 {
     free(p);
 }
@@ -361,10 +361,10 @@ int RTreeDelete(RTree_t * rtp, Rect_t * r, void *data, Node_t ** nn)
 {
     /* int */
     /* RTreeDelete(RTree_t*rtp, Rect_t*r, int data, Node_t**nn) { */
-    register int i;
-    register Node_t *t;
+    int i;
+    Node_t *t;
     struct ListNode *reInsertList = NULL;
-    register struct ListNode *e;
+    struct ListNode *e;
 
     assert(r && nn);
     assert(*nn);
@@ -429,7 +429,7 @@ RTreeDelete2(RTree_t * rtp, Rect_t * r, void *data, Node_t * n,
 /* static int */
 /* RTreeDelete2(RTree_t*rtp, Rect_t*r, int data, Node_t*n, ListNode_t**ee) */
 {
-    register int i;
+    int i;
 
     assert(r && n && ee);
     assert(data);
@@ -468,14 +468,3 @@ RTreeDelete2(RTree_t * rtp, Rect_t * r, void *data, Node_t * n,
 	return 1;
     }
 }
-
-#ifdef UNUSED
-/* Allocate space for a node in the list used in DeletRect to
-** store Nodes that are too empty.
-*/
-struct ListNode *NewListNode()
-{
-    return (struct ListNode *) NEW(sizeof(struct ListNode));
-}
-
-#endif

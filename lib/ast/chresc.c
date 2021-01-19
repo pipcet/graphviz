@@ -20,13 +20,12 @@
  * p is updated to point to the next character in s
  */
 
-#include <ast.h>
-/* #include <ccode.h> */
+#include <ast/ast.h>
 
-int chresc(register const char *s, char **p)
+int chresc(const char *s, char **p)
 {
-    register const char *q;
-    register int c;
+    const char *q;
+    int c;
 
     switch (c = *s++) {
     case 0:

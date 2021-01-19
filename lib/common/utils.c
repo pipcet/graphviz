@@ -11,12 +11,14 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include "render.h"
-#include "agxbuf.h"
-#include "htmltable.h"
-#include "entities.h"
-#include "logic.h"
-#include "gvc.h"
+#include <common/render.h>
+#include <cgraph/agxbuf.h>
+#include <common/htmltable.h>
+#include <common/entities.h>
+#include <common/logic.h>
+#include <math.h>
+#include <gvc/gvc.h>
+#include <cgraph/strcasecmp.h>
 
 #ifdef _WIN32
 #define R_OK 4
@@ -590,7 +592,7 @@ pointf spline_at_y(splines * spl, double y)
 	    t = (low + high) / 2.0;
 	    p = Bezier(c, 3, t, NULL, NULL);
 	    d = p.y - y;
-	    if (ABS(d) <= 1)
+	    if (fabs(d) <= 1)
 		break;
 	    if (d < 0)
 		high = t;
@@ -955,13 +957,8 @@ static node_t *clustNode(node_t * n, graph_t * cg, agxbuf * xb,
 {
     node_t *cn;
     static int idx = 0;
-    char num[100];
 
-    agxbput(xb, "__");
-    sprintf(num, "%d", idx++);
-    agxbput(xb, num);
-    agxbputc(xb, ':');
-    agxbput(xb, agnameof(cg));
+    agxbprint(xb, "__%d:%s", idx++, agnameof(cg));
 
     cn = agnode(agroot(cg), agxbuse(xb), 1);
     agbindrec(cn, "Agnodeinfo_t", sizeof(Agnodeinfo_t), TRUE);
@@ -1342,7 +1339,7 @@ safe_dcl(graph_t * g, int obj_kind, char *name, char *def)
 }
 
 static int comp_entities(const void *e1, const void *e2) {
-  return strcmp(((struct entities_s *)e1)->name, ((struct entities_s *)e2)->name);
+  return strcmp(((const struct entities_s *)e1)->name, ((const struct entities_s *)e2)->name);
 }
 
 #define MAXENTLEN 8
@@ -1368,10 +1365,7 @@ char* scanEntity (char* t, agxbuf* xb)
     res = bsearch(&key, entities, NR_OF_ENTITIES,
         sizeof(entities[0]), comp_entities);
     if (!res) return t;
-    sprintf (buf, "%d", res->value);
-    agxbputc(xb, '#');
-    agxbput(xb, buf);
-    agxbputc(xb, ';');
+    agxbprint(xb, "#%d;", res->value);
     return (endp+1);
 }
 
@@ -1479,7 +1473,6 @@ char* htmlEntityUTF8 (char* s, graph_t* g)
     static boolean warned;
     char*  ns;
     agxbuf xb;
-    unsigned char buf[BUFSIZ];
     unsigned char c;
     unsigned int v;
 
@@ -1491,7 +1484,7 @@ char* htmlEntityUTF8 (char* s, graph_t* g)
 	warned = 0;
     }
 
-    agxbinit(&xb, BUFSIZ, buf);
+    agxbinit(&xb, 0, NULL);
 
     while ((c = *(unsigned char*)s++)) {
         if (c < 0xC0)
@@ -1551,7 +1544,7 @@ char* htmlEntityUTF8 (char* s, graph_t* g)
 	            }
 	    agxbputc(&xb, c);
     }
-    ns = strdup (agxbuse(&xb));
+    ns = agxbdisown(&xb);
     agxbfree(&xb);
     return ns;
 }
@@ -1565,10 +1558,9 @@ char* latin1ToUTF8 (char* s)
 {
     char*  ns;
     agxbuf xb;
-    unsigned char buf[BUFSIZ];
     unsigned int  v;
 
-    agxbinit(&xb, BUFSIZ, buf);
+    agxbinit(&xb, 0, NULL);
 
     /* Values are either a byte (<= 256) or come from htmlEntity, whose
      * values are all less than 0x07FF, so we need at most 3 bytes.
@@ -1590,7 +1582,7 @@ char* latin1ToUTF8 (char* s)
 	    agxbputc(&xb, (v & 0x3F) | 0x80);
 	}
     }
-    ns = strdup (agxbuse(&xb));
+    ns = agxbdisown(&xb);
     agxbfree(&xb);
     return ns;
 }
@@ -1605,11 +1597,10 @@ utf8ToLatin1 (char* s)
 {
     char*  ns;
     agxbuf xb;
-    unsigned char buf[BUFSIZ];
     unsigned char c;
     unsigned char outc;
 
-    agxbinit(&xb, BUFSIZ, buf);
+    agxbinit(&xb, 0, NULL);
 
     while ((c = *(unsigned char*)s++)) {
 	if (c < 0x7F)
@@ -1621,7 +1612,7 @@ utf8ToLatin1 (char* s)
 	    agxbputc(&xb, outc);
 	}
     }
-    ns = strdup (agxbuse(&xb));
+    ns = agxbdisown(&xb);
     agxbfree(&xb);
     return ns;
 }
@@ -1888,53 +1879,6 @@ void get_gradient_points(pointf * A, pointf * G, int n, float angle, int flags)
     }
 }
 
-#ifndef WIN32_STATIC
-#ifndef HAVE_STRCASECMP
-
-
-#include <string.h>
-//#include <ctype.h>
-
-
-int strcasecmp(const char *s1, const char *s2)
-{
-    while ((*s1 != '\0')
-	   && (tolower(*(unsigned char *) s1) ==
-	       tolower(*(unsigned char *) s2))) {
-	s1++;
-	s2++;
-    }
-
-    return tolower(*(unsigned char *) s1) - tolower(*(unsigned char *) s2);
-}
-
-#endif				/* HAVE_STRCASECMP */
-#endif				/* WIN32_STATIC */
-
-#ifndef WIN32_STATIC
-#ifndef HAVE_STRNCASECMP
-#include <string.h>
-//#include <ctype.h>
-
-int strncasecmp(const char *s1, const char *s2, unsigned int n)
-{
-    if (n == 0)
-	return 0;
-
-    while ((n-- != 0)
-	   && (tolower(*(unsigned char *) s1) ==
-	       tolower(*(unsigned char *) s2))) {
-	if (n == 0 || *s1 == '\0' || *s2 == '\0')
-	    return 0;
-	s1++;
-	s2++;
-    }
-
-    return tolower(*(unsigned char *) s1) - tolower(*(unsigned char *) s2);
-}
-
-#endif				/* HAVE_STRNCASECMP */
-#endif                          /* WIN32_STATIC */
 void gv_free_splines(edge_t * e)
 {
     int i;
@@ -1961,7 +1905,7 @@ void gv_cleanup_edge(edge_t * e)
 
 void gv_cleanup_node(node_t * n)
 {
-    if (ND_pos(n)) free(ND_pos(n));
+    free(ND_pos(n));
     if (ND_shape(n))
         ND_shape(n)->fns->freefn(n);
     free_label(ND_label(n));

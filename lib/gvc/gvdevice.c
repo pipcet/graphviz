@@ -29,7 +29,6 @@
 #ifdef _WIN32
 #include <fcntl.h>
 #include <io.h>
-#include "compat.h"
 #endif
 
 #ifdef HAVE_LIBZ
@@ -47,21 +46,22 @@ static unsigned int dfallocated;
 static uint64_t crc;
 #endif /* HAVE_LIBZ */
 
-#include "const.h"
-#include "memory.h"
-#include "gvplugin_device.h"
-#include "gvcjob.h"
-#include "gvcint.h"
-#include "gvcproc.h"
-#include "logic.h"
-#include "gvio.h"
+#include <assert.h>
+#include <common/const.h>
+#include <common/memory.h>
+#include <gvc/gvplugin_device.h>
+#include <gvc/gvcjob.h>
+#include <gvc/gvcint.h>
+#include <gvc/gvcproc.h>
+#include <common/logic.h>
+#include <gvc/gvio.h>
 
 static const int PAGE_ALIGN = 4095;		/* align to a 4K boundary (less one), typical for Linux, Mac OS X and Windows memory allocation */
 
 static size_t gvwrite_no_z (GVJ_t * job, const char *s, size_t len)
 {
     if (job->gvc->write_fn)   /* externally provided write dicipline */
-	return (job->gvc->write_fn)(job, (char*)s, len);
+	return (job->gvc->write_fn)(job, s, len);
     if (job->output_data) {
 	if (len > job->output_data_allocated - (job->output_data_position + 1)) {
 	    /* ensure enough allocation for string = null terminator */
@@ -77,8 +77,10 @@ static size_t gvwrite_no_z (GVJ_t * job, const char *s, size_t len)
 	job->output_data[job->output_data_position] = '\0'; /* keep null termnated */
 	return len;
     }
-    else
-	return fwrite(s, sizeof(char), len, job->output_file);
+    else {
+        assert(job->output_file != NULL);
+        return fwrite(s, sizeof(char), len, job->output_file);
+    }
     return 0;
 }
 
@@ -214,7 +216,7 @@ size_t gvwrite (GVJ_t * job, const char *s, size_t len)
 	    }
 	}
 
-	crc = crc32(crc, (unsigned char*)s, len);
+	crc = crc32(crc, (const unsigned char*)s, len);
 
 	z->next_in = (unsigned char*)s;
 	z->avail_in = len;
@@ -237,6 +239,7 @@ size_t gvwrite (GVJ_t * job, const char *s, size_t len)
 	}
 
 #else
+        NOTUSED(olen);
 	(job->common->errorfn) ("No libz support.\n");
 	exit(1);
 #endif
@@ -275,7 +278,7 @@ int gvputs(GVJ_t * job, const char *s)
     if (gvwrite (job, s, len) != len) {
 	return EOF;
     }
-    return +1;
+    return 1;
 }
 
 int gvputc(GVJ_t * job, int c)
@@ -353,14 +356,14 @@ void gvdevice_finalize(GVJ_t * job)
 	    (job->common->errorfn) ("deflation end problem %d\n", ret);
 	    exit(1);
 	}
-	out[0] = crc;
-	out[1] = crc >> 8;
-	out[2] = crc >> 16;
-	out[3] = crc >> 24;
-	out[4] = z->total_in;
-	out[5] = z->total_in >> 8;
-	out[6] = z->total_in >> 16;
-	out[7] = z->total_in >> 24;
+	out[0] = (unsigned char)crc;
+	out[1] = (unsigned char)(crc >> 8);
+	out[2] = (unsigned char)(crc >> 16);
+	out[3] = (unsigned char)(crc >> 24);
+	out[4] = (unsigned char)z->total_in;
+	out[5] = (unsigned char)(z->total_in >> 8);
+	out[6] = (unsigned char)(z->total_in >> 16);
+	out[7] = (unsigned char)(z->total_in >> 24);
 	gvwrite_no_z(job, (char*)out, sizeof(out));
 #else
 	(job->common->errorfn) ("No libz support\n");
@@ -396,8 +399,14 @@ void gvprintf(GVJ_t * job, const char *format, ...)
 
     va_start(argp, format);
 #ifdef HAVE_VSNPRINTF
-    len = vsnprintf((char *)buf, BUFSIZ, format, argp);
+    {
+	va_list argp2;
+	va_copy(argp2, argp);
+	len = vsnprintf((char *)buf, BUFSIZ, format, argp2);
+	va_end(argp2);
+    }
     if (len < 0) {
+	va_end(argp);
 	agerr (AGERR, "gvprintf: %s\n", strerror(errno));
 	return;
     }
@@ -406,8 +415,6 @@ void gvprintf(GVJ_t * job, const char *format, ...)
      * to write the string without truncation. 
      */
 	bp = gmalloc(len + 1);
-	va_end(argp);
-	va_start(argp, format);
 	len = vsprintf(bp, format, argp);
     }
 #else
@@ -477,11 +484,11 @@ static char * gvprintnum (size_t *len, double number)
     showzeros = FALSE;			/* don't print trailing zeros */
     for (i = DECPLACES; N || i > 0; i--) {  /* non zero remainder,
 						or still in fractional part */
-        digit = N % 10;			/* next least-significant digit */
+        digit = (int)(N % 10L);			/* next least-significant digit */
         N /= 10;
         if (digit || showzeros) {	/* if digit is non-zero,
 						or if we are printing zeros */
-            *--result = digit | '0';	/* convert digit to ascii */
+            *--result = (char)digit | '0';	/* convert digit to ascii */
             showzeros = TRUE;		/* from now on we must print zeros */
         }
         if (i == 1) {			/* if completed fractional part */
@@ -529,9 +536,8 @@ int main (int argc, char *argv[])
 
 /* gv_trim_zeros
 * Trailing zeros are removed and decimal point, if possible.
-* Add trailing space if addSpace is non-zero.
 */
-static void gv_trim_zeros(char* buf, int addSpace)
+static void gv_trim_zeros(char* buf)
 {
     char* dotp;
     char* p;
@@ -546,13 +552,6 @@ static void gv_trim_zeros(char* buf, int addSpace)
         else
             p++;
     }
-    else if (addSpace)
-        p = buf + strlen(buf);
-
-    if (addSpace) { /* p points to null byte */
-        *p++ = ' ';
-        *p = '\0';
-    }
 }
 
 void gvprintdouble(GVJ_t * job, double num)
@@ -560,13 +559,14 @@ void gvprintdouble(GVJ_t * job, double num)
     // Prevents values like -0
     if (num > -0.00000001 && num < 0.00000001)
     {
-        num = 0;
+        gvwrite(job, "0", 1);
+        return;
     }
 
     char buf[50];
 
     snprintf(buf, 50, "%.02f", num);
-    gv_trim_zeros(buf, 0);
+    gv_trim_zeros(buf);
 
     gvwrite(job, buf, strlen(buf));
 }

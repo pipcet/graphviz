@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 
 /*	Invoke event handlers for a stream
 **
@@ -25,8 +25,8 @@
  */
 int sfraise(Sfio_t * f, int type, void * data)
 {
-    reg Sfdisc_t *disc, *next, *d;
-    reg int local, rv;
+    Sfdisc_t *disc, *next, *d;
+    int local, rv;
 
     SFMTXSTART(f, -1);
 

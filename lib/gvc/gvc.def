@@ -114,7 +114,9 @@ G_selectedfillcolor
 G_selectedpencolor    
 G_visitedfillcolor    
 G_visitedpencolor    
+gcalloc
 getdouble    
+pack_graph
 getPack    
 getPackMode    
 getsplinepoints    
@@ -304,8 +306,6 @@ xml_url_string
 Y_invert    
 zmalloc    
 zrealloc    
-strcasecmp
-strncasecmp
 colorxlate
 fix_fc
 gvContextPlugins

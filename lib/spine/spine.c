@@ -1,16 +1,16 @@
 /* vim:set shiftwidth=4 ts=4: */
 
-#include <spinehdr.h>
-#include <subset.h>
-#include <quad.h>
-#include "union_find.h"
-#include "assert.h"
+#include <spine/spinehdr.h>
+#include <spine/subset.h>
+#include <spine/quad.h>
+#include <spine/union_find.h>
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #ifdef MAIN
 #include <getopt.h>
-#include "ingraphs.h"
+#include <ingraphs/ingraphs.h>
 
 typedef struct {
 	FILE *outfp;
@@ -610,7 +610,7 @@ static void doOpts(int argc, char *argv[], opts_t * op)
 	op->sparse_ratio = 0.5;
 
 	opterr = 0;
-	while ((c = getopt(argc, argv, "o:r:v::")) != -1) {
+	while ((c = getopt(argc, argv, "o:r:v::?")) != -1) {
 		switch (c) {
 		case 'o':
 			op->outfp = openFile(cmd, optarg, "w");
@@ -632,11 +632,13 @@ static void doOpts(int argc, char *argv[], opts_t * op)
 			}
 			break;
 		case '?':
-			if (optopt == '?')
+			if (optopt == '\0')
 				usage(cmd, 0);
-			else
-				fprintf(stderr, "%s: option -%c unrecognized - ignored\n",
+			else {
+				fprintf(stderr, "%s: option -%c unrecognized\n",
 						cmd, optopt);
+				usage(cmd, 1);
+			}
 			break;
 		default:
 			break;

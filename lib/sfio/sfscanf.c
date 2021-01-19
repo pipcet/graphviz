@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 
 /*	Read formatted data from a stream
 **
@@ -21,7 +21,7 @@
 int sfscanf(Sfio_t * f, const char *form, ...)
 {
     va_list args;
-    reg int rv;
+    int rv;
     va_start(args, form);
     rv = (f && form) ? sfvscanf(f, form, args) : -1;
     va_end(args);
@@ -36,11 +36,10 @@ int sfvsscanf(const char *s, const char *form, va_list args)
 	return -1;
 
     /* make a fake stream */
-    SFCLEAR(&f, NIL(Vtmutex_t *));
+    SFCLEAR(&f);
     f.flags = SF_STRING | SF_READ;
-    f.bits = SF_PRIVATE;
     f.mode = SF_READ;
-    f.size = strlen((char *) s);
+    f.size = strlen(s);
     f.data = f.next = f.endw = (uchar *) s;
     f.endb = f.endr = f.data + f.size;
 
@@ -50,7 +49,7 @@ int sfvsscanf(const char *s, const char *form, va_list args)
 int sfsscanf(const char *s, const char *form, ...)
 {
     va_list args;
-    reg int rv;
+    int rv;
     va_start(args, form);
     rv = (s && form) ? sfvsscanf(s, form, args) : -1;
     va_end(args);

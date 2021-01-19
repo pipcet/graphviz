@@ -12,9 +12,9 @@
  *************************************************************************/
 
 #include <assert.h>
-#include "render.h"
-#include "neatoprocs.h"
-#include "pack.h"
+#include <common/render.h>
+#include <neatogen/neatoprocs.h>
+#include <pack/pack.h>
 
 /* Test driver for libpack library.
  * Input consists of graphs in dot format.
@@ -86,9 +86,11 @@ static void init(int argc, char *argv[])
 	case '?':
 	    if (optopt == '?')
 		usage(0);
-	    else
+	    else {
 		fprintf(stderr,
-			"ptest: option -%c unrecognized - ignored\n", c);
+			"ptest: option -%c unrecognized\n", c);
+		usage(1);
+	    }
 	    break;
 	}
     }
@@ -258,7 +260,6 @@ static void ptest_initGraph(graph_t * g)
 static void dumpG(graph_t * g)
 {
     node_t *n;
-    /* point  p; */
     edge_t *e;
 
     for (n = agfstnode(g); n; n = agnxtnode(g, n)) {
@@ -267,13 +268,6 @@ static void dumpG(graph_t * g)
 	for (e = agfstout(g, n); e; e = agnxtout(g, e)) {
 	    fprintf(stderr, " %s - %s \n", e->tail->name, e->head->name);
 	}
-#ifdef OLD
-	p = coord(n);
-	fprintf(stderr, " %s pos (%f,%f) (%d,%d)\n",
-		n->name, ND_pos(n)[0], ND_pos(n)[1], p.x, p.y);
-	fprintf(stderr, "   width %f height %f xsize %d ysize %d\n",
-		ND_width(n), ND_height(n), ND_xsize(n), ND_ysize(n));
-#endif
     }
 }
 

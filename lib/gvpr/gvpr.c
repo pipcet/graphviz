@@ -23,19 +23,19 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #else
-#include "compat_unistd.h"
+#include <ast/compat_unistd.h>
 #endif
 #include "builddate.h"
-#include "gprstate.h"
-#include "cgraph.h"
-#include "globals.h"
-#include "ingraphs.h"
-#include "compile.h"
-#include "queue.h"
-#include "gvpr.h"
-#include "actions.h"
-#include "sfstr.h"
-#include <error.h>
+#include <gvpr/gprstate.h>
+#include <cgraph/cgraph.h>
+#include <common/globals.h>
+#include <ingraphs/ingraphs.h>
+#include <gvpr/compile.h>
+#include <gvpr/queue.h>
+#include <gvpr/gvpr.h>
+#include <gvpr/actions.h>
+#include <ast/sfstr.h>
+#include <ast/error.h>
 #include <string.h>
 #include <ctype.h>
 #include <setjmp.h>
@@ -903,13 +903,13 @@ gvexitf (Expr_t *handle, Exdisc_t *discipline, int v)
 }
 
 static int 
-gverrorf (Expr_t *handle, Exdisc_t *discipline, int level, ...)
+gverrorf (Expr_t *handle, Exdisc_t *discipline, int level, const char *fmt, ...)
 {
     va_list ap;
 
-    va_start(ap, level);
+    va_start(ap, fmt);
     errorv((discipline
-	    && handle) ? *((char **) handle) : (char *) handle, level, ap);
+	    && handle) ? *((char **) handle) : (char *) handle, level, fmt, ap);
     va_end(ap);
 
     if (level >= ERROR_ERROR) {
@@ -971,7 +971,7 @@ int gvpr (int argc, char *argv[], gvpropts * uopts)
     info.outFile = opts->outFile;
     info.argc = opts->argc;
     info.argv = opts->argv;
-    info.errf = (Exerror_f)gverrorf;
+    info.errf = gverrorf;
     if (uopts) 
 	info.flags = uopts->flags; 
     else

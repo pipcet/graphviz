@@ -123,7 +123,7 @@ if test -z "$LIBPOSTFIX"; then
   case "${host_os}" in
     *linux* )
       case "${host_cpu}" in
-        aarch64 | powerpc64 | powerpc64le | s390x | x86_64 | sparc64 | mips64* | riscv64 )
+        aarch64 | powerpc64 | powerpc64le | s390x | x86_64 | sparc64 | mips64* | riscv64 | e2k )
           LIBPOSTFIX="64"
           INTGOSIZE=64
           ;;
@@ -209,7 +209,7 @@ DEFAULT_DPI=96
 AC_DEFINE_UNQUOTED(DEFAULT_DPI,$DEFAULT_DPI,Default DPI.)
 AC_DEFINE_UNQUOTED(BROWSER,"$BROWSER",[Command to open a browser on a URL])
 
-AM_INIT_AUTOMAKE([no-define subdir-objects])
+AM_INIT_AUTOMAKE([no-define subdir-objects tar-ustar])
 
 # Suppress verbose compile lines
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -232,9 +232,6 @@ if test "x${prefix}" != "x/usr"; then
 	PKG_CONFIG_PATH="$prefix/lib/pkgconfig$PATHSEPARATOR$PKG_CONFIG_PATH"
 	export PKG_CONFIG_PATH
 fi
-
-# Set of all available languages
-# ALL_LINGUAS=""
 
 dnl -----------------------------------
 # Static/Shared binaries
@@ -284,8 +281,14 @@ AC_CHECK_PROGS(SORT,gsort sort,false)
 
 AC_CHECK_PROG(EGREP,egrep,egrep,false)
 AC_CHECK_PROG(GROFF,groff,groff,false)
-AC_CHECK_PROG(PS2PDF,ps2pdf,ps2pdf,false)
-AC_CHECK_PROG(PS2PDF,pstopdf,pstopdf,false)
+AC_CHECK_PROGS(PS2PDF,ps2pdf pstopdf,false)
+AM_CONDITIONAL(HAVE_PS2PDF,[test "x$PS2PDF" != xfalse])
+
+AC_ARG_ENABLE([man-pdfs],
+  AS_HELP_STRING([--enable-man-pdfs],[Generate PDFs of man pages (default: auto)]),
+  [enable_man_pdfs=$enableval],
+  [enable_man_pdfs=$HAVE_PS2PDF])
+AM_CONDITIONAL(ENABLE_MAN_PDFS,[test "x$enable_man_pdfs" = "xyes"])
 
 PKG_PROG_PKG_CONFIG
 
@@ -363,8 +366,6 @@ else
 	    CFLAGS=`echo ${CFLAGS} | sed 's/ -pipe//'`
 	    # icc doesn't like -ffast-math
 	    CFLAGS=`echo ${CFLAGS} | sed 's/ -ffast-math//'`
-	    # icc doesn't like -O2
-	    CFLAGS=`echo ${CFLAGS} | sed 's/ -O2/ -O0/'`
 	    ;;
 	* )
 	    case "${build}" in
@@ -382,17 +383,6 @@ else
 	        CFLAGS="${CFLAGS} -Wstrict-prototypes -Wpointer-arith -Wall -ffast-math"
 		    ;;
 	    * )
-	    # -Wno-unused-parameter only needed for bug in gcc3
-	    # this test from: http://cvs.auriga.wearlab.de/cgi-bin/cvsweb.cgi/dillo/configure.in?rev=1.90;content-type=text%2Fplain;cvsroot=dillo
-			if test "`$CC -v 2>&1 | $EGREP 'version 3'`" != ""; then
-		        CFLAGS="${CFLAGS} -Wno-unused-parameter"
-				# bug 1199
-				case "${host_cpu}" in
-				sparc* )
-		        	CFLAGS="${CFLAGS} -DUSE_MAXFLOAT"
-					;;
-				esac
-		    fi
 	        CFLAGS="${CFLAGS} -Wno-unknown-pragmas -Wstrict-prototypes -Wpointer-arith -Wall -ffast-math"
 	        ;;
 	    esac
@@ -444,12 +434,12 @@ dnl -----------------------------------
 dnl Checks for header files
 
 # AC_HEADER_STDC
-AC_CHECK_HEADERS(malloc.h \
-	fcntl.h search.h termios.h \
+AC_CHECK_HEADERS( \
+	fcntl.h search.h stropts.h termios.h \
 	unistd.h strings.h stat.h vfork.h \
-	sys/time.h sys/types.h sys/select.h \
+	sys/time.h sys/types.h sys/select.h sys/socket.h \
 	sys/stat.h sys/mman.h sys/vfork.h \
-	sys/ioctl.h sys/inotify.h crt_externs.h)
+	sys/ioctl.h sys/inotify.h)
 
 # Internationalization macros
 # AM_GNU_GETTEXT
@@ -471,10 +461,10 @@ LIBS=$save_LIBS
 
 # Checks for library functions
 AC_CHECK_FUNCS([lrand48 drand48 srand48 setmode setenv getenv \
-	cbrt vsnprintf _NSGetEnviron mallopt mallinfo mstats getpagesize \
+	cbrt vsnprintf mallopt mallinfo mstats getpagesize \
   ftruncate lseek64 stat64 vfork unlink waitpid select])
 
-AC_REPLACE_FUNCS([strcasecmp strncasecmp strcasestr])
+AC_REPLACE_FUNCS([strcasestr])
 
 dnl -----------------------------------
 dnl libtool ltdl on-demand plugin loading
@@ -512,33 +502,6 @@ AC_SUBST([INCLTDL])
 AC_SUBST([LIBLTDL])
 AC_SUBST([LIBLTDL_LDFLAGS])
 LIBS="$save_LIBS"
-
-
-# Checks for libraries.
-#AC_CHECK_LIB([ICE], [main])
-#AC_CHECK_LIB([SM], [main])
-#AC_CHECK_LIB([Xaw], [main])
-#AC_CHECK_LIB([Xpm], [main])
-#AC_CHECK_LIB([art_lgpl_2], [main])
-#AC_CHECK_LIB([cairo], [main])
-#AC_CHECK_LIB([dl], [main])
-#AC_CHECK_LIB([fl], [main])
-#AC_CHECK_LIB([intl], [main])
-#AC_CHECK_LIB([m], [main])
-#AC_CHECK_LIB([perl], [main])
-#AC_CHECK_LIB([popt], [main])
-#AC_CHECK_LIB([xml2], [main])
-#AC_CHECK_LIB([z], [main])
-
-dnl -----------------------------------
-dnl ElectricFence support for debugging
-
-AC_ARG_WITH(efence,
-   [AS_HELP_STRING([--with-efence=no],[use efence for debugging memory use])],
-   [],[with_efence=no])
-if test "x$with_efence" = "xyes"; then
-	LIBS="$LIBS -lefence"
-fi
 
 dnl -----------------------------------
 dnl Checks for X header files.
@@ -2856,7 +2819,7 @@ else
     use_ipsepcola="Yes"
     AC_DEFINE_UNQUOTED(IPSEPCOLA,1,[Define if you want IPSEPCOLA])
     IPSEPCOLA_INCLUDES='-I$(top_srcdir)/lib/vpsc'
-    IPSEPCOLA_LIBS='$(top_builddir)/lib/vpsc/libvpsc_C.la -lstdc++'
+    IPSEPCOLA_LIBS='$(top_builddir)/lib/vpsc/libvpsc_C.la'
     AC_SUBST([IPSEPCOLA_INCLUDES])
     AC_SUBST([IPSEPCOLA_LIBS])
   fi

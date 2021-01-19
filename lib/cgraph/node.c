@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include <cghdr.h>
+#include <cgraph/cghdr.h>
 
 Agnode_t *agfindnode_by_id(Agraph_t * g, IDTYPE id)
 {
@@ -88,6 +88,7 @@ static void installnode(Agraph_t * g, Agnode_t * n)
 {
     Agsubnode_t *sn;
     int osize;
+    NOTUSED(osize);
 
     assert(dtsize(g->n_id) == dtsize(g->n_seq));
     osize = dtsize(g->n_id);

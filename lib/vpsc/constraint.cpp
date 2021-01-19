@@ -16,7 +16,7 @@
  * Adaptagrams repository.
  */
 
-#include "constraint.h"
+#include <vpsc/constraint.h>
 #include <cassert>
 Constraint::Constraint(Variable *left, Variable *right, double gap, bool equality)
 : left(left),
@@ -43,10 +43,6 @@ Constraint::~Constraint() {
 }
 std::ostream& operator <<(std::ostream &os, const Constraint &c)
 {
-	if(&c==NULL) {
-		os<<"NULL";
-	} else {
-		os<<*c.left<<"+"<<c.gap<<"<="<<*c.right<<"("<<c.slack()<<")"<<(c.active?"-active":"");
-	}
+	os<<*c.left<<"+"<<c.gap<<"<="<<*c.right<<"("<<c.slack()<<")"<<(c.active?"-active":"");
 	return os;
 }

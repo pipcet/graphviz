@@ -4,11 +4,7 @@
 pdfdir = $(pkgdatadir)/doc/pdf
 
 AM_CPPFLAGS = \
-	-I$(top_srcdir) \
-	-I$(top_srcdir)/lib/sparse \
-	-I$(top_srcdir)/lib/sfdpgen \
-	-I$(top_srcdir)/lib/mingle \
-	-I$(top_srcdir)/lib/ingraphs \
+	-I$(top_srcdir)/lib \
 	-I$(top_srcdir)/lib/common \
 	-I$(top_srcdir)/lib/cgraph \
 	-I$(top_srcdir)/lib/cdt
@@ -18,7 +14,17 @@ bin_PROGRAMS = mingle
 endif
 
 man_MANS = mingle.1
+if ENABLE_MAN_PDFS
 pdf_DATA = mingle.1.pdf
+
+if HAVE_PS2PDF
+pdf = $(pdf_DATA)
+else
+pdf = ERROR_NO_PS2PDF
+endif
+else
+pdf =
+endif
 
 mingle_SOURCES = minglemain.c
 mingle_CPPFLAGS = $(AM_CPPFLAGS)
@@ -32,14 +38,22 @@ mingle_LDADD = \
 	$(top_builddir)/lib/common/libcommon_C.la \
 	$(top_builddir)/lib/cgraph/libcgraph.la \
 	$(top_builddir)/lib/cdt/libcdt.la \
-	$(ANN_LIBS) -lstdc++ -lm 
+	$(ANN_LIBS) -lm
 
+# add a non-existent C++ source to force the C++ compiler to be used for
+# linking, so the C++ standard library is included for our C++ dependencies
+nodist_EXTRA_mingle_SOURCES = fake.cxx
+
+if ENABLE_MAN_PDFS
+if HAVE_PS2PDF
 mingle.1.pdf: mingle.1.ps
-	@PS2PDF@ $< $@
+	@PS2PDF@ $<
 
 mingle.1.ps: $(srcdir)/mingle.1
 	@GROFF@ -e -Tps -man -t $< >$@
+endif
+endif
 
-EXTRA_DIST = $(man_MANS) $(pdf_DATA) mingle.vcxproj*
+EXTRA_DIST = $(man_MANS) $(pdf) mingle.vcxproj*
 
-DISTCLEANFILES = $(pdf_DATA) mingle.1.ps
+DISTCLEANFILES = $(pdf) mingle.1.ps

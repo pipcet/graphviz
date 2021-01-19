@@ -28,7 +28,7 @@
 #include "globals.h"
 #include "logic.h"
 #include "arith.h"
-#include "memory.h"
+#include <common/memory.h>
 #endif  /* STANDALONE */
 
 #define real double
@@ -41,11 +41,10 @@
 #define MALLOC malloc
 #define REALLOC realloc
 
-#define N_NEW(n,t)   (t*)malloc((n)*sizeof(t))
+#define N_NEW(n,t)   (t*)calloc((n),sizeof(t))
 #define NEW(t)       (t*)malloc(sizeof(t))
 #define MAX(a,b) ((a)>(b)?(a):b)
 #define MIN(a,b) ((a)<(b)?(a):b)
-#define ABS(a) (((a)>0)?(a):(-(a)))
 
 #ifdef TRUE
 #undef TRUE

@@ -11,11 +11,19 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
+%require "3.0"
+
+  /* By default, Bison emits a parser using symbols prefixed with "yy". Graphviz
+   * contains multiple Bison-generated parsers, so we alter this prefix to avoid
+   * symbol clashes.
+   */
+%define api.prefix {aag}
+
 %{
 
 #include <stdio.h>  /* SAFE */
 #include <cghdr.h>	/* SAFE */
-extern void yyerror(char *);	/* gets mapped to aagerror, see below */
+extern void aagerror(char *);
 
 #ifdef _WIN32
 #define gettxt(a,b)	(b)
@@ -544,7 +552,7 @@ static void startgraph(char *name, int directed, int strict)
 	static Agdesc_t	req;	/* get rid of warnings */
 
 	if (G == NILgraph) {
-    SubgraphDepth = 0;
+		SubgraphDepth = 0;
 		req.directed = directed;
 		req.strict = strict;
 		req.maingraph = TRUE;
@@ -566,9 +574,7 @@ static void endgraph()
 static void opensubg(char *name)
 {
   if (++SubgraphDepth >= YYMAXDEPTH/2) {
-    char buf[128];
-    sprintf(buf,"subgraphs nested more than %d deep",YYMAXDEPTH);
-    agerr(AGERR,buf);
+    agerr(AGERR,"subgraphs nested more than %d deep",YYMAXDEPTH);
   }
 	S = push(S,agsubg(S->g,name,TRUE));
 	agstrfree(G,name);
@@ -593,15 +599,15 @@ static void freestack()
 	}
 }
 
-extern FILE *yyin;
+extern FILE *aagin;
 Agraph_t *agconcat(Agraph_t *g, void *chan, Agdisc_t *disc)
 {
-	yyin = chan;
+	aagin = chan;
 	G = g;
 	Ag_G_global = NILgraph;
 	Disc = (disc? disc :  &AgDefaultDisc);
 	aglexinit(Disc, chan);
-	yyparse();
+	aagparse();
 	if (Ag_G_global == NILgraph) aglexbad();
 	return Ag_G_global;
 }

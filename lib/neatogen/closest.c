@@ -12,8 +12,8 @@
  *************************************************************************/
 
 
-#include "kkutils.h"
-#include "closest.h"
+#include <neatogen/kkutils.h>
+#include <neatogen/closest.h>
 #include <stdlib.h>
 
 /*****************************************
@@ -63,7 +63,7 @@ static void freeStack(PairStack * s)
 #define push(s,x) { \
 	if (s->top>=s->max_size) { \
 		s->max_size *= 2; \
-		s->data = (Pair*) realloc(s->data, s->max_size*sizeof(Pair)); \
+		s->data = realloc(s->data, s->max_size*sizeof(Pair)); \
 	} \
 	s->data[s->top++] = x; \
 }
@@ -117,15 +117,6 @@ static void heapify(PairHeap * h, int i)
     }
 }
 
-#ifdef UNUSED
-static void mkHeap(PairHeap * h, int size)
-{
-    h->data = N_GNEW(size, Pair);
-    h->maxSize = size;
-    h->heapSize = 0;
-}
-#endif
-
 static void freeHeap(PairHeap * h)
 {
     free(h->data);
@@ -141,7 +132,7 @@ static void initHeap(PairHeap * h, double *place, int *ordering, int n)
 #ifdef REDO
     if (h->heapSize > h->maxSize) {
 	h->maxSize = h->heapSize;
-	h->data = (Pair *) realloc(h->data, h->maxSize * sizeof(Pair));
+	h->data = realloc(h->data, h->maxSize * sizeof(Pair));
     }
 #else
     h->maxSize = h->heapSize;
@@ -176,7 +167,7 @@ static void insert(PairHeap * h, Pair edge)
     int i = h->heapSize;
     if (h->heapSize == h->maxSize) {
 	h->maxSize *= 2;
-	h->data = (Pair *) realloc(h->data, h->maxSize * sizeof(Pair));
+	h->data = realloc(h->data, h->maxSize * sizeof(Pair));
     }
     h->heapSize++;
     h->data[i] = edge;

@@ -11,7 +11,8 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include <inttypes.h>
+#include	<sfio/sfhdr.h>
 
 /*	The main engine for reading formatted data
 **
@@ -24,9 +25,9 @@
  * @param form format string
  * @param accept accepted characters are set to 1
  */
-static char *setclass(reg char *form, reg char *accept)
+static char *setclass(char *form, char *accept)
 {
-    reg int fmt, c, yes;
+    int fmt, c, yes;
 
     if ((fmt = *form++) == '^') {	/* we want the complement of this set */
 	yes = 0;
@@ -77,10 +78,10 @@ static void _sfbuf(Sfio_t * f, int *rs)
  * @param form scanning format
  * @param args
  */
-int sfvscanf(Sfio_t * f, reg const char *form, va_list args)
+int sfvscanf(Sfio_t * f, const char *form, va_list args)
 {
-    reg uchar *d, *endd, *data;
-    reg int inp, shift, base, width;
+    uchar *d, *endd, *data;
+    int inp, shift, base, width;
     ssize_t size;
     int fmt, flags, dot, n_assign, v, n, n_input;
     char *sp;
@@ -438,7 +439,7 @@ int sfvscanf(Sfio_t * f, reg const char *form, va_list args)
 		    continue;
 		fmstk->ft = ft = argv.ft;
 	    } else {		/* stack a new environment */
-		if (!(fm = (Fmt_t *) malloc(sizeof(Fmt_t))))
+		if (!(fm = malloc(sizeof(Fmt_t))))
 		    goto done;
 
 		if (argv.ft->form) {
@@ -501,8 +502,8 @@ int sfvscanf(Sfio_t * f, reg const char *form, va_list args)
 	    goto done;
 
 	if (_Sftype[fmt] == SFFMT_FLOAT) {
-	    reg char *val;
-	    reg int dot, exponent;
+	    char *val;
+	    int dot, exponent;
 
 	    val = accept;
 	    if (width >= SF_MAXDIGITS)
@@ -650,13 +651,9 @@ int sfvscanf(Sfio_t * f, reg const char *form, va_list args)
 	    if (value) {
 		n_assign += 1;
 
-		if (fmt == 'p')
-#if _more_void_int
-		    *((void **) value) = (void *) ((ulong) argv.lu);
-#else
-		    *((void **) value) = (void *) ((uint) argv.lu);
-#endif
-		else if (sizeof(long) > sizeof(int) &&
+		if (fmt == 'p') {
+		    *((void **) value) = (void *)(uintptr_t)argv.lu;
+		} else if (sizeof(long) > sizeof(int) &&
 			 FMTCMP(size, long, Sflong_t)) {
 		    if (fmt == 'd' || fmt == 'i')
 			*((long *) value) = (long) argv.ll;
@@ -731,10 +728,8 @@ int sfvscanf(Sfio_t * f, reg const char *form, va_list args)
     }
 
   pop_fmt:
-    if (fp) {
-	free(fp);
-	fp = NIL(Fmtpos_t *);
-    }
+    free(fp);
+    fp = NIL(Fmtpos_t *);
     while ((fm = fmstk)) {	/* pop the format stack and continue */
 	if (fm->eventf) {
 	    if (!form || !form[0])
@@ -758,8 +753,7 @@ int sfvscanf(Sfio_t * f, reg const char *form, va_list args)
     }
 
   done:
-    if (fp)
-	free(fp);
+    free(fp);
     while ((fm = fmstk)) {
 	if (fm->eventf)
 	    (*fm->eventf) (f, SF_FINAL, NIL(void *), fm->ft);

@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 
 /*	Fill the buffer of a stream with data.
 **	If n < 0, sffilbuf() attempts to fill the buffer if it's empty.
@@ -27,10 +27,10 @@
  * @param f fill the read buffer of this stream
  * @param n see above
  */
-int _sffilbuf(Sfio_t * f, reg int n)
+int _sffilbuf(Sfio_t * f, int n)
 {
-    reg ssize_t r;
-    reg int first, local, rcrv, rc, justseek;
+    ssize_t r;
+    int first, local, rcrv, rc, justseek;
 
     SFMTXSTART(f, -1);
 
@@ -41,7 +41,7 @@ int _sffilbuf(Sfio_t * f, reg int n)
     rc = f->getr;
 
     justseek = f->bits & SF_JUSTSEEK;
-    f->bits &= ~SF_JUSTSEEK;
+    f->bits &= (unsigned short)~SF_JUSTSEEK;
 
     for (first = 1;; first = 0, (f->mode &= ~SF_LOCK)) {	/* check mode */
 	if (SFMODE(f, local) != SF_READ && _sfmode(f, SF_READ, local) < 0)

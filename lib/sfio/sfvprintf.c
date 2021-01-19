@@ -11,7 +11,8 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include <inttypes.h>
+#include	<sfio/sfhdr.h>
 
 /*	The engine for formatting data
 **
@@ -33,9 +34,9 @@
  */
 int sfvprintf(Sfio_t * f, const char *form, va_list args)
 {
-    reg int v = 0, n_s, base, fmt, flags;
+    int v = 0, n_s, base, fmt, flags;
     Sflong_t lv;
-    reg char *sp, *ssp, *endsp, *ep, *endep;
+    char *sp, *ssp, *endsp, *ep, *endep;
     int dot, width, precis, n, n_output;
     int sign, decpt;
     ssize_t size;
@@ -58,8 +59,8 @@ int sfvprintf(Sfio_t * f, const char *form, va_list args)
     char decimal = 0, thousand = 0;
 
     /* fast io system */
-    reg uchar *d, *endd;
-    reg int w;
+    uchar *d, *endd;
+    int w;
 #define SFBUF(f)	(d = f->next, endd = f->endb)
 #define SFINIT(f)	(SFBUF(f), n_output = 0)
 #define SFEND(f)	((n_output += d - f->next), (f->next = d))
@@ -460,7 +461,7 @@ int sfvprintf(Sfio_t * f, const char *form, va_list args)
 		    continue;
 		fmstk->ft = ft = argv.ft;
 	    } else {		/* stack a new environment */
-		if (!(fm = (Fmt_t *) malloc(sizeof(Fmt_t))))
+		if (!(fm = malloc(sizeof(Fmt_t))))
 		    goto done;
 
 		if (argv.ft->form) {
@@ -576,13 +577,13 @@ int sfvprintf(Sfio_t * f, const char *form, va_list args)
 	    flags =
 		(flags & ~(SFFMT_SIGN | SFFMT_BLANK | SFFMT_ZERO)) |
 		SFFMT_ALTER;
-#if _more_void_int
-	    lv = (Sflong_t) ((Sfulong_t) argv.vp);
-	    goto long_cvt;
-#else
-	    v = (int) ((uint) argv.vp);
-	    goto int_cvt;
-#endif
+	    if (sizeof(void*) > sizeof(int)) {
+		lv = (Sflong_t)(intptr_t)argv.vp;
+		goto long_cvt;
+	    } else {
+		v = (int)(intptr_t)argv.vp;
+		goto int_cvt;
+	    }
 	case 'o':
 	    base = 8;
 	    n_s = 7;
@@ -617,11 +618,12 @@ int sfvprintf(Sfio_t * f, const char *form, va_list args)
 		n_s = base == 10 ? -1 : 0;
 
 	  int_arg:
-#if _more_long_int || _more_void_int
-	    if (FMTCMP(size, Sflong_t, Sflong_t)) {
+	    if ((sizeof(long) > sizeof(int) || sizeof(void*) > sizeof(int))
+	        && FMTCMP(size, Sflong_t, Sflong_t)) {
 		lv = argv.ll;
 		goto long_cvt;
-	    } else if (FMTCMP(size, long, Sflong_t)) {
+	    } else if ((sizeof(long) > sizeof(int) || sizeof(void*) > sizeof(int))
+	               && FMTCMP(size, long, Sflong_t)) {
 		if (fmt == 'd')
 		    lv = (Sflong_t) argv.l;
 		else
@@ -639,7 +641,7 @@ int sfvprintf(Sfio_t * f, const char *form, va_list args)
 			lv = -lv;
 		}
 		if (n_s < 0) {	/* base 10 */
-		    reg Sflong_t nv;
+		    Sflong_t nv;
 		    sfucvt(lv, sp, nv, ssp, Sflong_t, Sfulong_t);
 		} else if (n_s > 0) {	/* base power-of-2 */
 		    do {
@@ -651,7 +653,6 @@ int sfvprintf(Sfio_t * f, const char *form, va_list args)
 		    } while ((lv = ((Sfulong_t) lv) / base));
 		}
 	    } else
-#endif
 	    if (sizeof(short) < sizeof(int)
 		    && FMTCMP(size, short, Sflong_t)) {
 		if (ft && ft->extf && (ft->flags & SFFMT_VALUE)) {
@@ -956,10 +957,8 @@ int sfvprintf(Sfio_t * f, const char *form, va_list args)
     }
 
   pop_fmt:
-    if (fp) {
-	free(fp);
-	fp = NIL(Fmtpos_t *);
-    }
+    free(fp);
+    fp = NIL(Fmtpos_t *);
     while ((fm = fmstk)) {	/* pop the format stack and continue */
 	if (fm->eventf) {
 	    if (!form || !form[0])
@@ -983,8 +982,7 @@ int sfvprintf(Sfio_t * f, const char *form, va_list args)
     }
 
   done:
-    if (fp)
-	free(fp);
+    free(fp);
     while ((fm = fmstk)) {
 	if (fm->eventf)
 	    (*fm->eventf) (f, SF_FINAL, NIL(void *), fm->ft);

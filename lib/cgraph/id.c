@@ -12,12 +12,14 @@
  *************************************************************************/
 
 #include <stdio.h>
-#include <cghdr.h>
+#include <cgraph/cghdr.h>
+#include <inttypes.h>
 
 /* a default ID allocator that works off the shared string lib */
 
 static void *idopen(Agraph_t * g, Agdisc_t* disc)
 {
+    NOTUSED(disc);
     return g;
 }
 
@@ -56,7 +58,7 @@ static void idfree(void *state, int objtype, IDTYPE id)
 {
     NOTUSED(objtype);
     if (id % 2 == 0)
-	agstrfree((Agraph_t *) state, (char *) id);
+	agstrfree(state, (char *) id);
 }
 
 static char *idprint(void *state, int objtype, IDTYPE id)
@@ -66,7 +68,7 @@ static char *idprint(void *state, int objtype, IDTYPE id)
     if (id % 2 == 0)
 	return (char *) id;
     else
-	return NILstr;
+	return NULL;
 }
 
 static void idclose(void *state)
@@ -98,8 +100,8 @@ int agmapnametoid(Agraph_t * g, int objtype, char *str,
 {
     int rv;
 
-    if (str && (str[0] != LOCALNAMEPREFIX)) {
-	rv = AGDISC(g, id)->map(AGCLOS(g, id), objtype, str, result,
+    if (str && str[0] != LOCALNAMEPREFIX) {
+	rv = (int) AGDISC(g, id)->map(AGCLOS(g, id), objtype, str, result,
 				createflag);
 	if (rv)
 	    return rv;
@@ -115,7 +117,7 @@ int agmapnametoid(Agraph_t * g, int objtype, char *str,
 
     if (createflag) {
 	/* get a new anonymous ID, and store in the internal map */
-	rv = AGDISC(g, id)->map(AGCLOS(g, id), objtype, NILstr, result,
+	rv = (int) AGDISC(g, id)->map(AGCLOS(g, id), objtype, NILstr, result,
 				createflag);
 	if (rv && str)
 	    aginternalmapinsert(g, objtype, str, *result);
@@ -125,7 +127,7 @@ int agmapnametoid(Agraph_t * g, int objtype, char *str,
 
 int agallocid(Agraph_t * g, int objtype, IDTYPE request)
 {
-    return AGDISC(g, id)->alloc(AGCLOS(g, id), objtype, request);
+    return (int) AGDISC(g, id)->alloc(AGCLOS(g, id), objtype, request);
 }
 
 void agfreeid(Agraph_t * g, int objtype, IDTYPE id)
@@ -144,7 +146,6 @@ char *agnameof(void *obj)
 {
     Agraph_t *g;
     char *rv;
-    static char buf[32];
 
     /* perform internal lookup first */
     g = agraphof(obj);
@@ -157,7 +158,8 @@ char *agnameof(void *obj)
 	    return rv;
     }
     if (AGTYPE(obj) != AGEDGE) {
-	sprintf(buf, "%c%ld", LOCALNAMEPREFIX, AGID(obj));
+	static char buf[32];
+	snprintf(buf, sizeof(buf), "%c%" PRIu64, LOCALNAMEPREFIX, AGID(obj));
 	rv = buf;
     }
     else

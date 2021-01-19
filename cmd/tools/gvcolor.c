@@ -22,7 +22,7 @@
 /* if NC changes, a bunch of scanf calls below are in trouble */
 #define	NC	3		/* size of HSB color vector */
 
-#include "cgraph.h"
+#include <cgraph/cgraph.h>
 #include <stdlib.h>
 typedef struct Agnodeinfo_t {
     Agrec_t h;
@@ -33,7 +33,7 @@ typedef struct Agnodeinfo_t {
 #define ND_relrank(n) (((Agnodeinfo_t*)((n)->base.data))->relrank)
 #define ND_x(n) (((Agnodeinfo_t*)((n)->base.data))->x)
 
-#include "ingraphs.h"
+#include <ingraphs/ingraphs.h>
 #include <stdio.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -88,14 +88,16 @@ static void init(int argc, char *argv[])
     int c;
 
     opterr = 0;
-    while ((c = getopt(argc, argv, ":")) != -1) {
+    while ((c = getopt(argc, argv, ":?")) != -1) {
 	switch (c) {
 	case '?':
-	    if (optopt == '?')
+	    if (optopt == '\0' || optopt == '?')
 		usage(0);
-	    else
-		fprintf(stderr, "gvcolor: option -%c unrecognized - ignored\n",
+	    else {
+		fprintf(stderr, "gvcolor: option -%c unrecognized\n",
 			optopt);
+		usage(1);
+	    }
 	    break;
 	}
     }
@@ -140,7 +142,7 @@ static void color(Agraph_t * g)
 
     /* assemble the sorted list of nodes and store the initial colors */
     nn = agnnodes(g);
-    nlist = (Agnode_t **) malloc(nn * sizeof(Agnode_t *));
+    nlist = malloc(nn * sizeof(Agnode_t *));
     i = 0;
     for (n = agfstnode(g); n; n = agnxtnode(g, n)) {
 	nlist[i++] = n;

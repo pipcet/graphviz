@@ -25,7 +25,7 @@
 #include <getopt.h>
 
 #include <stdlib.h>
-#include "cgraph.h"
+#include <cgraph/cgraph.h>
 
 typedef struct {
     Agrec_t h;
@@ -50,7 +50,7 @@ typedef struct {
 #define NEXT(e)  (((Agedgeinfo_t*)(e->base.data))->next)
 #define NEXTBLK(g)  (((Agraphinfo_t*)(g->base.data))->next)
 
-#include "ingraphs.h"
+#include <ingraphs/ingraphs.h>
 
 #define min(a,b) ((a) < (b) ? (a) :  (b))
 
@@ -95,9 +95,8 @@ static char *blockName(char *gname, int d)
 
     sz = strlen(gname) + 128;
     if (sz > bufsz) {
-	if (buf)
-	    free(buf);
-	buf = (char *) malloc(sz);
+	free(buf);
+	buf = malloc(sz);
     }
 
     if (*gname == '%') /* anonymous graph */
@@ -124,7 +123,7 @@ static char *getName(int ng, int nb)
     else {
 	if (!buf) {
 	    sz = strlen(outfile) + 100;	/* enough to handle '_<g>_<b>' */
-	    buf = (char *) malloc(sz);
+	    buf = malloc(sz);
 	}
 	if (suffix) {
 	    if (nb < 0)
@@ -322,7 +321,7 @@ static void split(char *name)
     if (sfx) {
 	size = sfx - name;
 	suffix = sfx + 1;
-	path = (char *) malloc(size + 1);
+	path = malloc(size + 1);
 	strncpy(path, name, size);
 	*(path + size) = '\0';
     } else {
@@ -335,7 +334,7 @@ static void init(int argc, char *argv[])
     int c;
 
     opterr = 0;
-    while ((c = getopt(argc, argv, ":o:xstv")) != -1) {
+    while ((c = getopt(argc, argv, ":o:xstv?")) != -1) {
 	switch (c) {
 	case 'o':
 	    outfile = optarg;
@@ -358,11 +357,13 @@ static void init(int argc, char *argv[])
 	    fprintf(stderr, "bcomps: option -%c missing argument - ignored\n", optopt);
 	    break;
 	case '?':
-	    if (optopt == '?')
+	    if (optopt == '\0' || optopt == '?')
 		usage(0);
-	    else
+	    else {
 		fprintf(stderr,
-			"bcomps: option -%c unrecognized - ignored\n", optopt);
+			"bcomps: option -%c unrecognized\n", optopt);
+		usage(1);
+	    }
 	    break;
 	}
     }

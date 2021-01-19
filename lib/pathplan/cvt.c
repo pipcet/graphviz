@@ -13,7 +13,7 @@
 
 
 #include <stdio.h>
-#include "vis.h"
+#include <pathplan/vis.h>
 
 typedef Ppoint_t ilcoord_t;
 
@@ -28,19 +28,6 @@ static void gasp_print_obstacles(vconfig_t * conf);
 static void gasp_print_point(Ppoint_t p);
 static void gasp_print_polyline(Ppolyline_t * route);
 static void gasp_print_bezier(Ppolyline_t * route);
-#endif
-
-#if 0				/* not used */
-static void *myrealloc(void *p, size_t newsize)
-{
-    void *rv;
-
-    if (p == (void *) 0)
-	rv = malloc(newsize);
-    else
-	rv = realloc(p, newsize);
-    return rv;
-}
 #endif
 
 static void *mymalloc(size_t newsize)
@@ -150,10 +137,8 @@ int Pobspath(vconfig_t * config, Ppoint_t p0, int poly0, Ppoint_t p1,
     printDad(dad, config->N + 1);
 #endif
 
-    if (ptvis0)
-	free(ptvis0);
-    if (ptvis1)
-	free(ptvis1);
+    free(ptvis0);
+    free(ptvis1);
 
     output_route->pn = opn;
     output_route->ps = ops;

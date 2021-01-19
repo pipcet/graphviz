@@ -14,16 +14,16 @@
     <ProjectGuid>{1B030847-602F-4095-8FA2-E8B5CF793F60}</ProjectGuid>
     <RootNamespace>ccomps</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -60,7 +60,7 @@
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)windows\getopt;$(SolutionDir);$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\ingraphs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)windows\dependencies\libraries\vcpkg\installed\x86-windows\include;$(SolutionDir);$(SolutionDir)lib;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <EnablePREfast>true</EnablePREfast>
     </ClCompile>
@@ -69,17 +69,19 @@
       <SubSystem>Console</SubSystem>
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)windows\getopt;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)windows\dependencies\libraries\vcpkg\installed\x86-windows\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>ingraphs.lib;getopt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PostBuildEvent />
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)windows\dependencies\libraries\vcpkg\installed\x86-windows\bin\getopt.dll $(OutDir)getopt.dll</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)windows\getopt;$(SolutionDir);$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\ingraphs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)windows\include;$(SolutionDir)windows\dependencies\libraries\vcpkg\installed\x86-windows\include;$(SolutionDir);$(SolutionDir)lib;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <EnablePREfast>true</EnablePREfast>
     </ClCompile>
@@ -90,10 +92,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)windows\getopt;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)windows\dependencies\libraries\vcpkg\installed\x86-windows\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>ingraphs.lib;getopt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PostBuildEvent />
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)windows\dependencies\libraries\vcpkg\installed\x86-windows\bin\getopt.dll $(OutDir)getopt.dll</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ccomps.c" />

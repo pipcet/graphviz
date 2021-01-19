@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 
 /*	Dealing with $ argument addressing stuffs.
 **
@@ -282,7 +282,7 @@ static Fmtpos_t *sffmtpos(Sfio_t * f, const char *form, va_list args,
 
     if (!fp) {			/* constructing position array only */
 	if (!dollar
-	    || !(fp = (Fmtpos_t *) malloc((maxp + 1) * sizeof(Fmtpos_t))))
+	    || !(fp = malloc((maxp + 1) * sizeof(Fmtpos_t))))
 	    return NIL(Fmtpos_t *);
 	for (n = 0; n <= maxp; ++n)
 	    fp[n].ft.fmt = 0;
@@ -385,7 +385,7 @@ static Fmtpos_t *sffmtpos(Sfio_t * f, const char *form, va_list args,
 /* function to initialize conversion tables */
 static int sfcvinit(void)
 {
-    reg int d, l;
+    int d, l;
 
     for (d = 0; d <= SF_MAXCHAR; ++d) {
 	_Sfcv36[d] = SF_RADIX;

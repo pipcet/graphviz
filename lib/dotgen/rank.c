@@ -26,7 +26,7 @@
  *  watch out for interactions between leaves and clusters.
  */
 
-#include	"dot.h"
+#include	<dotgen/dot.h>
 
 static void dot1_rank(graph_t * g, aspect_t* asp);
 static void dot2_rank(graph_t * g, aspect_t* asp);
@@ -81,53 +81,6 @@ cleanup1(graph_t * g)
     GD_comp(g).list = NULL;
     GD_comp(g).size = 0;
 }
-
-/*static void
-cleanup1(graph_t * g)
-{
-    node_t *n;
-    edge_t *e, *f;
-    int c;
-
-    for (c = 0; c < GD_comp(g).size; c++) {
-        GD_nlist(g) = GD_comp(g).list[c];
-        for (n = GD_nlist(g); n; n = ND_next(n)) {
-            renewlist(&ND_in(n));
-            renewlist(&ND_out(n));
-            ND_mark(n) = FALSE;
-        }
-    }
-    for (n = agfstnode(g); n; n = agnxtnode(g, n)) {
-        for (e = agfstout(g, n); e; e = agnxtout(g, e)) {
-            f = ED_to_virt(e);
-            * Null out any other references to f to make sure we don't
-             * handle it a second time. For example, parallel multiedges
-             * share a virtual edge.
-             *
-            if (f && (e == ED_to_orig(f))) {
-                edge_t *e1, *f1;
-                node_t *n1;
-                for (n1 = agfstnode(g); n1; n1 = agnxtnode(g, n1)) {
-                    for (e1 = agfstout(g, n1); e1; e1 = agnxtout(g, e1)) {
-                        if (e != e1) {
-                            f1 = ED_to_virt(e1);
-                            if (f1 && (f == f1)) {
-                                ED_to_virt(e1) = NULL;
-                            }
-                        }
-                    }
-                }
-                free(f->base.data);
-                free(f);
-            }
-            ED_to_virt(e) = NULL;
-        }
-    }
-    free(GD_comp(g).list);
-    GD_comp(g).list = NULL;
-    GD_comp(g).size = 0;
-}
-*/
 
 /* When there are edge labels, extra ranks are reserved here for the virtual
  * nodes of the labels.  This is done by doubling the input edge lengths.
@@ -273,7 +226,7 @@ cluster_leader(graph_t * clust)
     /* find number of ranks and select a leader */
     leader = NULL;
     for (n = GD_nlist(clust); n; n = ND_next(n)) {
-	if ((ND_rank(n) == 0) && (ND_node_type(n) == NORMAL))
+	if (ND_rank(n) == 0 && ND_node_type(n) == NORMAL)
 	    leader = n;
 	if (maxrank < ND_rank(n))
 	    maxrank = ND_rank(n);
@@ -282,7 +235,7 @@ cluster_leader(graph_t * clust)
     GD_leader(clust) = leader;
 
     for (n = agfstnode(clust); n; n = agnxtnode(clust, n)) {
-	assert((ND_UF_size(n) <= 1) || (n == leader));
+	assert(ND_UF_size(n) <= 1 || n == leader);
 	UF_union(n, leader);
 	ND_ranktype(n) = CLUSTER;
     }
@@ -500,73 +453,6 @@ setRanks (graph_t* g, attrsym_t* lsym)
 	    agerr(AGWARN, "no level attribute for node \"%s\"\n", agnameof(n));
 	ND_rank(n) = v;
     }
-}
-#endif
-
-#ifdef UNUSED
-static node_t **virtualEdgeHeadList = NULL;
-static node_t **virtualEdgeTailList = NULL;
-static int nVirtualEdges = 0;
-
-static void
-saveVirtualEdges(graph_t *g)
-{
-    edge_t *e;
-    node_t *n;
-    int cnt = 0;
-    int lc;
-    
-    if (virtualEdgeHeadList != NULL) {
-	free(virtualEdgeHeadList);
-    }
-    if (virtualEdgeTailList != NULL) {
-	free(virtualEdgeTailList);
-    }
-
-  /* allocate memory */
-    for (n = agfstnode(g); n; n = agnxtnode(g, n)) {
-	for (lc = 0; lc < ND_in(n).size; lc++) {
-	    e = ND_in(n).list[lc];
-	    if (ED_edge_type(e) == VIRTUAL) cnt++;
-	}
-    }
-
-    nVirtualEdges = cnt;
-    virtualEdgeHeadList = N_GNEW(cnt, node_t*);
-    virtualEdgeTailList = N_GNEW(cnt, node_t*);
-
-    for (n = agfstnode(g); n; n = agnxtnode(g, n)) {
-	for (lc = 0, cnt = 0; lc < ND_in(n).size; lc++) {
-	    e = ND_in(n).list[lc];
-	    if (ED_edge_type(e) == VIRTUAL) {
-		virtualEdgeHeadList[cnt] = e->head;
-		virtualEdgeTailList[cnt] = e->tail;
-		if (Verbose)
-		    printf("saved virtual edge: %s->%s\n", 
-			virtualEdgeTailList[cnt]->name, 
-			virtualEdgeHeadList[cnt]->name);	    
-		cnt++;
-	    }
-	}
-    }
-}
-
-static void
-restoreVirtualEdges(graph_t *g)
-{
-    int i;
-    edge_t e;
-
-    for (i = 0; i < nVirtualEdges; i++) {
-	if (virtualEdgeTailList[i] && virtualEdgeHeadList[i]) {
-	    if (Verbose)
-		printf("restoring virtual edge: %s->%s\n", 
-		    virtualEdgeTailList[i]->name, virtualEdgeHeadList[i]->name);
-	    virtual_edge(virtualEdgeTailList[i], virtualEdgeHeadList[i], NULL);
-	}
-    }
-    if (Verbose)
-	printf("restored %d virt edges\n", nVirtualEdges);
 }
 #endif
 
@@ -836,13 +722,17 @@ static void compile_samerank(graph_t * ug, graph_t * parent_clust)
 	GD_has_sourcerank(clust) = TRUE;	/* fall through */
     case MINRANK:
 	leader = union_all(ug);
-	GD_minrep(clust) = union_one(leader, GD_minrep(clust));
+	if (clust != NULL) {
+	    GD_minrep(clust) = union_one(leader, GD_minrep(clust));
+	}
 	break;
     case SINKRANK:
 	GD_has_sinkrank(clust) = TRUE;	/* fall through */
     case MAXRANK:
 	leader = union_all(ug);
-	GD_maxrep(clust) = union_one(leader, GD_maxrep(clust));
+	if (clust != NULL) {
+	    GD_maxrep(clust) = union_one(leader, GD_maxrep(clust));
+	}
 	break;
     case SAMERANK:
 	leader = union_all(ug);
@@ -990,9 +880,11 @@ static void compile_edges(graph_t * ug, graph_t * Xg)
 	    hc = ND_clust(aghead(e));
 
 	    if (is_internal_to_cluster(e)) {
+		graph_t *clust_tail = ND_clust(agtail(e));
+		graph_t *clust_head = ND_clust(aghead(e));
 		/* determine if graph requires reversed edge */
-		if ((find(agtail(e)) == GD_maxrep(ND_clust(agtail(e))))
-		    || (find(aghead(e)) == GD_minrep(ND_clust(aghead(e))))) {
+		if ((clust_tail != NULL && find(agtail(e)) == GD_maxrep(clust_tail))
+		    || (clust_head != NULL && find(aghead(e)) == GD_minrep(clust_head))) {
 		    node_t *temp = Xt;
 		    Xt = Xh;
 		    Xh = temp;
@@ -1223,11 +1115,11 @@ static void add_fast_edges (graph_t * g)
 }
 
 static void my_init_graph(Agraph_t *g, Agobj_t *graph, void *arg)
-{ int *sz = arg; agbindrec(graph,"level graph rec",sz[0],TRUE); }
+{ int *sz = arg; (void)g; agbindrec(graph,"level graph rec",sz[0],TRUE); }
 static void my_init_node(Agraph_t *g, Agobj_t *node, void *arg)
-{ int *sz = arg; agbindrec(node,"level node rec",sz[1],TRUE); }
+{ int *sz = arg; (void)g; agbindrec(node,"level node rec",sz[1],TRUE); }
 static void my_init_edge(Agraph_t *g, Agobj_t *edge, void *arg)
-{ int *sz = arg; agbindrec(edge,"level edge rec",sz[2],TRUE); }
+{ int *sz = arg; (void)g; agbindrec(edge,"level edge rec",sz[2],TRUE); }
 static Agcbdisc_t mydisc = { {my_init_graph,0,0}, {my_init_node,0,0}, {my_init_edge,0,0} };
 
 int infosizes[] = {

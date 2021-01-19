@@ -4,7 +4,7 @@
 pdfdir = $(pkgdatadir)/doc/pdf
 
 AM_CPPFLAGS = \
-	-I$(top_srcdir) \
+	-I$(top_srcdir)/lib \
 	-I$(top_srcdir)/lib/common \
 	-I$(top_srcdir)/lib/pathplan \
 	-I$(top_srcdir)/lib/gvc \
@@ -25,13 +25,27 @@ endif
 endif
 
 man_MANS = vimdot.1
+if ENABLE_MAN_PDFS
 pdf_DATA = vimdot.1.pdf
 
+if HAVE_PS2PDF
+pdf = $(pdf_DATA)
+else
+pdf = ERROR_NO_PS2PDF
+endif
+else
+pdf =
+endif
+
+if ENABLE_MAN_PDFS
+if HAVE_PS2PDF
 vimdot.1.pdf: vimdot.1.ps
-	@PS2PDF@ $< $@
+	@PS2PDF@ $<
 
 vimdot.1.ps: $(srcdir)/vimdot.1
 	@GROFF@ -Tps -man $< >$@
+endif
+endif
 
 libgvplugin_xlib_C_la_SOURCES = \
 	gvplugin_xlib.c \
@@ -53,6 +67,6 @@ vimdot: $(top_srcdir)/plugin/xlib/vimdot.sh
 	cp $(top_srcdir)/plugin/xlib/vimdot.sh vimdot
 	chmod +x vimdot
 
-EXTRA_DIST = vimdot.sh vimdot.1 vimdot.1.pdf
+EXTRA_DIST = vimdot.sh vimdot.1 $(pdf)
 
-DISTCLEANFILES = vimdot vimdot.1.pdf vimdot.1.ps
+DISTCLEANFILES = vimdot $(pdf) vimdot.1.ps

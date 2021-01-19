@@ -19,11 +19,11 @@
  */
 
 #include "config.h"
-#include <ast.h>
+#include <ast/ast.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #else
-#include <compat_unistd.h>
+#include <ast/compat_unistd.h>
 #endif
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
@@ -41,26 +41,6 @@ static struct {			/* directory list state           */
 } state;
 
 /*
- * append dir to pathfind() include list
- */
-
-int pathinclude(const char *dir)
-{
-    register Dir_t *dp;
-
-    if (dir && *dir && !streq(dir, ".")) {
-	if (!(dp = oldof(0, Dir_t, 1, strlen(dir))))
-	    return -1;
-	strcpy(dp->dir, dir);
-	if (state.tail)
-	    state.tail = state.tail->next = dp;
-	else
-	    state.head = state.tail = dp;
-    }
-    return 0;
-}
-
-/*
  * return path to name using pathinclude() list
  * path placed in <buf,size>
  * if lib!=0 then pathpath() attempted after include search
@@ -71,8 +51,8 @@ int pathinclude(const char *dir)
 char *pathfind(const char *name, const char *lib, const char *type,
 	       char *buf, size_t size)
 {
-    register Dir_t *dp;
-    register char *s;
+    Dir_t *dp;
+    char *s;
     char tmp[PATH_MAX];
 
     if (access(name, R_OK) >= 0)
@@ -97,7 +77,7 @@ char *pathfind(const char *name, const char *lib, const char *type,
 	    }
 	}
 	if (lib) {
-	    if ((s = strrchr((char *) lib, ':')))
+	    if ((s = strrchr(lib, ':')))
 		lib = (const char *) s + 1;
 	    sfsprintf(tmp, sizeof(tmp), "lib/%s/%s", lib, name);
 	    if (pathpath(buf, tmp, "", PATH_REGULAR))

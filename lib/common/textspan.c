@@ -14,8 +14,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "cdt.h"
-#include "render.h"
+#include <cdt/cdt.h>
+#include <common/render.h>
+#include <cgraph/strcasecmp.h>
 
 static double timesFontWidth[] = {
     0.2500, 0.2500, 0.2500, 0.2500, 0.2500, 0.2500, 0.2500, 0.2500,	/*          */
@@ -175,7 +176,7 @@ static PostscriptAlias postscript_alias[] = {
 
 static int fontcmpf(const void *a, const void *b)
 {
-    return (strcasecmp(((PostscriptAlias*)a)->name, ((PostscriptAlias*)b)->name));
+    return (strcasecmp(((const PostscriptAlias*)a)->name, ((const PostscriptAlias*)b)->name));
 }
 
 static PostscriptAlias* translate_postscript_fontname(char* fontname)
@@ -247,8 +248,8 @@ static void textfont_freef(Dt_t* dt, void* obj, Dtdisc_t* disc)
 {
     textfont_t *f = (textfont_t*)obj;
 
-    if (f->name) free(f->name);
-    if (f->color) free(f->color);
+    free(f->name);
+    free(f->color);
     free(f);
 }
 

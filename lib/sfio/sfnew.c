@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 
 /*	Fundamental function to create a new stream.
 **	The argument flags defines the type of stream and the scheme
@@ -30,10 +30,8 @@
 Sfio_t *sfnew(Sfio_t * oldf, void * buf, size_t size, int file,
 	      int flags)
 {
-    reg Sfio_t *f;
-    reg int sflags;
-
-    SFONCE();			/* initialize mutexes */
+    Sfio_t *f;
+    int sflags;
 
     if (!(flags & SF_RDWR))
 	return NIL(Sfio_t *);
@@ -41,9 +39,6 @@ Sfio_t *sfnew(Sfio_t * oldf, void * buf, size_t size, int file,
     sflags = 0;
     if ((f = oldf)) {
 	if (flags & SF_EOF) {
-	    if (f != sfstdin && f != sfstdout && f != sfstderr)
-		f->mutex = NIL(Vtmutex_t *);
-	    SFCLEAR(f, f->mutex);
 	    oldf = NIL(Sfio_t *);
 	} else if (f->mode & SF_AVAIL) {	/* only allow SF_STATIC to be already closed */
 	    if (!(f->flags & SF_STATIC))
@@ -60,11 +55,11 @@ Sfio_t *sfnew(Sfio_t * oldf, void * buf, size_t size, int file,
 	    if (f->data
 		&& ((flags & SF_STRING) || size != (size_t) SF_UNBOUND)) {
 		if (sflags & SF_MALLOC)
-		    free((void *) f->data);
+		    free(f->data);
 		f->data = NIL(uchar *);
 	    }
 	    if (!f->data)
-		sflags &= ~SF_MALLOC;
+		sflags &= (unsigned short)~SF_MALLOC;
 	}
     }
 
@@ -74,22 +69,21 @@ Sfio_t *sfnew(Sfio_t * oldf, void * buf, size_t size, int file,
 	    if (f) {
 		if (f->mode & SF_AVAIL) {
 		    sflags = f->flags;
-		    SFCLEAR(f, f->mutex);
 		} else
 		    f = NIL(Sfio_t *);
 	    }
 	}
 
 	if (!f) {
-	    if (!(f = (Sfio_t *) malloc(sizeof(Sfio_t))))
+	    if (!(f = malloc(sizeof(Sfio_t))))
 		return NIL(Sfio_t *);
-	    SFCLEAR(f, NIL(Vtmutex_t *));
+	    SFCLEAR(f);
 	}
     }
 
     /* stream type */
     f->mode = (flags & SF_READ) ? SF_READ : SF_WRITE;
-    f->flags = (flags & SF_FLAGS) | (sflags & (SF_MALLOC | SF_STATIC));
+    f->flags = (unsigned short)((flags & SF_FLAGS) | (sflags & (SF_MALLOC | SF_STATIC)));
     f->bits = (flags & SF_RDWR) == SF_RDWR ? SF_BOTH : 0;
     f->file = file;
     f->here = f->extent = 0;

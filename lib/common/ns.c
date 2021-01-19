@@ -16,7 +16,7 @@
  * Network Simplex Algorithm for Ranking Nodes of a DAG
  */
 
-#include "render.h"
+#include <common/render.h>
 #include <setjmp.h>
 
 static int init_graph(graph_t *);
@@ -531,12 +531,6 @@ int feasible_tree(void)
   return 0;
 }
 
-/* utility functions for debugging */
-static subtree_t *nd_subtree(Agnode_t *n) {return ND_subtree(n);}
-static int nd_priority(Agnode_t *n) {return ND_priority(n);}
-static int nd_rank(Agnode_t *n) {return ND_rank(n);}
-static int ed_minlen(Agedge_t *e) {return ED_minlen(e);}
-
 /* walk up from v to LCA(v,w), setting new cutvalues. */
 static Agnode_t *treeupdate(Agnode_t * v, Agnode_t * w, int cutvalue, int dir)
 {
@@ -706,7 +700,8 @@ static void TB_balance(void)
     }
     Tree_node.size = ii;
     qsort(Tree_node.list, Tree_node.size, sizeof(Tree_node.list[0]),
-        adj > 1? decreasingrankcmpf : increasingrankcmpf);
+        adj > 1? (int(*)(const void*,const void*))decreasingrankcmpf
+               : (int(*)(const void*,const void*))increasingrankcmpf);
     for (i = 0; i < Tree_node.size; i++) {
         n = Tree_node.list[i];
         if (ND_node_type(n) == NORMAL)

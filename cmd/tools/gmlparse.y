@@ -11,6 +11,14 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
+%require "3.0"
+
+  /* By default, Bison emits a parser using symbols prefixed with "yy". Graphviz
+   * contains multiple Bison-generated parsers, so we alter this prefix to avoid
+   * symbol clashes.
+   */
+%define api.prefix {gml}
+
 %{
 #include <stdlib.h>
 #include <stddef.h>
@@ -21,7 +29,7 @@
 #include <assert.h>
 
 #define NEW(t)       (t*)malloc(sizeof(t))
-#define N_NEW(n,t)   (t*)malloc((n)*sizeof(t))
+#define N_NEW(n,t)   (t*)calloc((n),sizeof(t))
 #define RALLOC(size,ptr,type) ((type*)realloc(ptr,(size)*sizeof(type)))
 
 typedef unsigned short ushort;
@@ -381,7 +389,7 @@ alistitem : NAME INTEGER { $$ = mkAttr ($1, 0, INTEGER, $2, 0); }
           | OUTLINE STRING  { $$ = mkAttr (0, OUTLINE, STRING, $2, 0); }
           | OUTLINESTYLE STRING  { $$ = mkAttr (0, OUTLINESTYLE, STRING, $2, 0); }
           | OUTLINEWIDTH INTEGER  { $$ = mkAttr (0, OUTLINEWIDTH, INTEGER, $2, 0); }
-          | WIDTH REAL  { $$ = mkAttr (0, OUTLINEWIDTH, REAL, $2, 0); }
+          | WIDTH REAL  { $$ = mkAttr (0, WIDTH, REAL, $2, 0); }
           | STYLE STRING  { $$ = mkAttr (0, STYLE, STRING, $2, 0); }
           | STYLE attrlist  { $$ = mkAttr (0, STYLE, LIST, 0, $2); }
           | LINE attrlist  { $$ = mkAttr (0, LINE, LIST, 0, $2); }
@@ -412,20 +420,14 @@ static void
 deparseAttr (gmlattr* ap, agxbuf* xb)
 {
     if (ap->kind == LIST) {
-	agxbput (xb, ap->name);
-	agxbputc (xb, ' ');
+	agxbprint (xb, "%s ", ap->name);
 	deparseList (ap->u.lp, xb);
     }
     else if (ap->kind == STRING) {
-	agxbput (xb, ap->name);
-	agxbput (xb, " \"");
-	agxbput (xb, ap->u.value);
-	agxbput (xb, "\"");
+	agxbprint (xb, "%s \"%s\"", ap->name, ap->u.value);
     }
     else {
-	agxbput (xb, ap->name);
-	agxbputc (xb, ' ');
-	agxbput (xb, ap->u.value);
+	agxbprint (xb, "%s %s", ap->name, ap->u.value);
     }
 }
 
@@ -540,9 +542,7 @@ addEdgeLabelGraphics (Agedge_t* ep, Dt_t* alist, agxbuf* xb, agxbuf* unk)
 	}
     }
 
-    agxbput (xb, x);
-    agxbputc (xb, ',');
-    agxbput (xb, y);
+    agxbprint (xb, "%s,%s", x, y);
     agsafeset (ep, "lp", agxbuse (xb), "");
 
     if (cnt) {
@@ -589,10 +589,10 @@ addNodeGraphics (Agnode_t* np, Dt_t* alist, agxbuf* xb, agxbuf* unk)
 	else if (ap->sort == OUTLINE) {
 	    agsafeset (np, "pencolor", ap->u.value, "");
 	}
-	else if ((ap->sort == WIDTH) && (ap->sort == OUTLINEWIDTH )) {
+	else if ((ap->sort == WIDTH) || (ap->sort == OUTLINEWIDTH )) {
 	    agsafeset (np, "penwidth", ap->u.value, "");
 	}
-	else if ((ap->sort == OUTLINESTYLE) && (ap->sort == OUTLINEWIDTH )) {
+	else if ((ap->sort == STYLE) || (ap->sort == OUTLINESTYLE )) {
 	    agsafeset (np, "style", ap->u.value, "");
 	}
 	else {
@@ -606,9 +606,7 @@ addNodeGraphics (Agnode_t* np, Dt_t* alist, agxbuf* xb, agxbuf* unk)
 	}
     }
 
-    agxbput (xb, x);
-    agxbputc (xb, ',');
-    agxbput (xb, y);
+    agxbprint (xb, "%s,%s", x, y);
     agsafeset (np, "pos", agxbuse (xb), "");
 
     if (cnt) {
@@ -640,9 +638,7 @@ addEdgePoint (Agedge_t* ep, Dt_t* alist, agxbuf* xb)
     }
 
     if (agxblen(xb)) agxbputc (xb, ' ');
-    agxbput (xb, x);
-    agxbputc (xb, ',');
-    agxbput (xb, y);
+    agxbprint (xb, "%s,%s", x, y);
 }
 
 static void

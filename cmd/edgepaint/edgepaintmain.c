@@ -10,18 +10,18 @@
 
 #include "config.h"
 
-#include <cgraph.h>
-#include <agxbuf.h>
-#include <ingraphs.h>
-#include <pointset.h>
+#include <cgraph/cgraph.h>
+#include <cgraph/agxbuf.h>
+#include <ingraphs/ingraphs.h>
+#include <common/pointset.h>
 #include <getopt.h>
 
-#include "general.h"
-#include "SparseMatrix.h"
-#include "DotIO.h"
-#include "node_distinct_coloring.h"
-#include "edge_distinct_coloring.h"
-#include "color_palette.h"
+#include <sparse/general.h>
+#include <sparse/SparseMatrix.h>
+#include <sparse/DotIO.h>
+#include <edgepaint/node_distinct_coloring.h>
+#include <edgepaint/edge_distinct_coloring.h>
+#include <sparse/color_palette.h>
 
 typedef enum {
 	FMT_GV,
@@ -114,7 +114,7 @@ static void init(int argc, char *argv[], real *angle, real *accuracy, char **inf
   *color_scheme = "lab";
   *lightness = NULL;
 
-  while ((c = getopt(argc, argv, ":vc:a:s:r:l:o")) != -1) {
+  while ((c = getopt(argc, argv, ":vc:a:s:r:l:o:?")) != -1) {
     switch (c) {
     case 's':
       *check_edges_with_same_endpoint = 1;
@@ -175,14 +175,18 @@ static void init(int argc, char *argv[], real *angle, real *accuracy, char **inf
       Verbose = TRUE;
       break;
     case 'o':
+      if (outfile != NULL)
+        fclose(outfile);
       outfile = openFile(optarg, "w", CmdName);
       break;
-    default:
-      if (optopt == '?')
+    case '?':
+      if (optopt == '\0' || optopt == '?')
 	usage(cmd, 0);
-      else
-	fprintf(stderr, "option -%c unrecognized - ignored\n",
+      else {
+	fprintf(stderr, "option -%c unrecognized\n",
 		optopt);
+	usage(cmd, 1);
+      }
       break;
     }
   }
@@ -200,7 +204,6 @@ static void init(int argc, char *argv[], real *angle, real *accuracy, char **inf
 
 
 static int clarify(Agraph_t* g, real angle, real accuracy, char *infile, int check_edges_with_same_endpoint, int seed, char *color_scheme, char *lightness){
-  enum {buf_len = 10000};
 
   if (checkG(g)) {
     agerr (AGERR, "Graph %s contains loops or multiedges\n", agnameof(g));

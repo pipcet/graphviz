@@ -24,11 +24,11 @@
 #endif
 #include <string.h>
 
-#define NEW(t)           (t*)malloc(sizeof(t))
-#define N_NEW(n,t)       (t*)malloc((n)*sizeof(t))
+#define NEW(t)           malloc(sizeof(t))
+#define N_NEW(n,t)       calloc((n),sizeof(t))
 
-#include "cgraph.h"
-#include "cghdr.h"
+#include <cgraph/cgraph.h>
+#include <cgraph/cghdr.h>
 typedef struct {
     Agrec_t h;
     int dfs_mark;
@@ -36,7 +36,7 @@ typedef struct {
 
 #define ND_dfs_mark(n) (((Agnodeinfo_t*)(n->base.data))->dfs_mark)
 
-#include "ingraphs.h"
+#include <ingraphs/ingraphs.h>
 
 #include <getopt.h>
 
@@ -89,7 +89,7 @@ static void init(int argc, char *argv[])
     unsigned int c;
 
     opterr = 0;
-    while ((c = getopt(argc, argv, "necCaDUrsv")) != -1) {
+    while ((c = getopt(argc, argv, "necCaDUrsv?")) != -1) {
 	switch (c) {
 	case 'e':
 	    flags |= EDGES;
@@ -123,11 +123,13 @@ static void init(int argc, char *argv[])
 	    gtype = UNDIRECTED;
 	    break;
 	case '?':
-	    if (optopt == '?')
+	    if (optopt == '\0' || optopt == '?')
 		usage(0);
-	    else
-		fprintf(stderr, "gc: option -%c unrecognized - ignored\n",
+	    else {
+		fprintf(stderr, "gc: option -%c unrecognized\n",
 			optopt);
+		usage(1);
+	    }
 	    break;
 	}
     }

@@ -21,10 +21,10 @@
 
 #include <ctype.h>
 #include <stdlib.h>
-#include "cgraph.h"
+#include <cgraph/cgraph.h>
 
-#define N_NEW(n,t)       (t*)malloc((n)*sizeof(t))
-#define NEW(t)           (t*)malloc(sizeof(t))
+#define N_NEW(n,t)       calloc((n),sizeof(t))
+#define NEW(t)           malloc(sizeof(t))
 
 typedef struct {
     Agrec_t h;
@@ -50,7 +50,7 @@ typedef struct {
 #include <unistd.h>
 #endif
 #include <string.h>
-#include "ingraphs.h"
+#include <ingraphs/ingraphs.h>
 
   /* internals of libgraph */
 #define TAG_NODE            1
@@ -113,7 +113,7 @@ static void split(char *name)
     if (sfx) {
 	suffix = sfx + 1;
 	size = sfx - name;
-	path = (char *) malloc(size + 1);
+	path = malloc(size + 1);
 	strncpy(path, name, size);
 	*(path + size) = '\0';
     } else {
@@ -136,7 +136,7 @@ static void init(int argc, char *argv[])
 
     Cmd = argv[0];
     opterr = 0;
-    while ((c = getopt(argc, argv, ":zo:xCX:nesv")) != -1) {
+    while ((c = getopt(argc, argv, ":zo:xCX:nesv?")) != -1) {
 	switch (c) {
 	case 'o':
 	    outfile = optarg;
@@ -205,11 +205,13 @@ static void init(int argc, char *argv[])
 		"ccomps: option -%c missing argument - ignored\n", optopt);
 	    break;
 	case '?':
-	    if (optopt == '?')
+	    if (optopt == '\0' || optopt == '?')
 		usage(0);
-	    else
+	    else {
 		fprintf(stderr,
-			"ccomps: option -%c unrecognized - ignored\n", optopt);
+			"ccomps: option -%c unrecognized\n", optopt);
+                usage(1);
+	    }
 	    break;
 	}
     }
@@ -351,7 +353,7 @@ static char *getName(void)
 	name = outfile;
     else {
 	if (!buf)
-	    buf = (char *) malloc(strlen(outfile) + 20);	/* enough to handle '_number' */
+	    buf = malloc(strlen(outfile) + 20);	/* enough to handle '_number' */
 	if (suffix)
 	    sprintf(buf, "%s_%d.%s", path, sufcnt, suffix);
 	else
@@ -396,9 +398,9 @@ static char *getBuf(int n)
     if (n > len) {
 	sz = n + 100;
 	if (len == 0)
-	    buf = (char *) malloc(sz);
+	    buf = malloc(sz);
 	else
-	    buf = (char *) realloc(buf, sz);
+	    buf = realloc(buf, sz);
 	len = sz;
     }
     return buf;

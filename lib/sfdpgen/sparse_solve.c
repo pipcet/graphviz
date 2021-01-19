@@ -13,14 +13,14 @@
 
 #include <assert.h>
 #include <string.h>
-#include "sparse_solve.h"
-#include "sfdpinternal.h"
-#include "memory.h"
-#include "logic.h"
-#include "math.h"
-#include "arith.h"
-#include "types.h"
-#include "globals.h"
+#include <sfdpgen/sparse_solve.h>
+#include <sfdpgen/sfdpinternal.h>
+#include <common/memory.h>
+#include <common/logic.h>
+#include <math.h>
+#include <common/arith.h>
+#include <common/types.h>
+#include <common/globals.h>
 
 /* #define DEBUG_PRINT */
 
@@ -116,7 +116,7 @@ Operator Operator_uniform_stress_diag_precon_new(SparseMatrix A, real alpha){
   for (i = 0; i < m; i++){
     diag[i] = 1./(m-1);
     for (j = ia[i]; j < ia[i+1]; j++){
-      if (i == ja[j] && ABS(a[j]) > 0) diag[i] = 1./((m-1)*alpha+a[j]);
+      if (i == ja[j] && fabs(a[j]) > 0) diag[i] = 1./((m-1)*alpha+a[j]);
     }
   }
 
@@ -145,7 +145,7 @@ static Operator Operator_diag_precon_new(SparseMatrix A){
   for (i = 0; i < m; i++){
     diag[i] = 1.;
     for (j = ia[i]; j < ia[i+1]; j++){
-      if (i == ja[j] && ABS(a[j]) > 0) diag[i] = 1./a[j];
+      if (i == ja[j] && fabs(a[j]) > 0) diag[i] = 1./a[j];
     }
   }
 

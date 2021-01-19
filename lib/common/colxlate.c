@@ -18,24 +18,18 @@
 #ifdef _WIN32
 #include <string.h>
 #include <ctype.h>
-#include "compat.h"
 #endif
 #include <string.h>
 #include <ctype.h>
 
-#include "arith.h"
-#include "color.h"
-#include "colorprocs.h"
-#include "colortbl.h"
-#include "memory.h"
+#include <common/arith.h>
+#include <common/color.h>
+#include <common/colorprocs.h>
+#include <common/colortbl.h>
+#include <common/memory.h>
+#include <cgraph/strcasecmp.h>
 
 static char* colorscheme;
-
-#ifdef _MSC_VER
-extern int strcasecmp(const char *s1, const char *s2);
-extern int strncasecmp(const char *s1, const char *s2, unsigned int n);
-#endif
-
 
 static void hsv2rgb(double h, double s, double v,
 			double *r, double *g, double *b)
@@ -139,7 +133,7 @@ static void rgb2cmyk(double r, double g, double b, double *c, double *m,
 
 static int colorcmpf(const void *p0, const void *p1)
 {
-    return strcasecmp(((hsvrgbacolor_t *) p0)->name, ((hsvrgbacolor_t *) p1)->name);
+    return strcasecmp(((const hsvrgbacolor_t *) p0)->name, ((const hsvrgbacolor_t *) p1)->name);
 }
 
 char *canontoken(char *str)

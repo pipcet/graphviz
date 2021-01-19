@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 
 /*
 **	Any required functions for process exiting.
@@ -44,8 +44,6 @@ waitpid(int pid, int *status, int options)
     if (options != 0)
 	return -1;
 
-    vtmtxlock(_Sfmutex);
-
     for (w = Wait, last = NIL(Waitpid_t *); w; last = w, w = w->next) {
 	if (pid > 0 && pid != w->pid)
 	    continue;
@@ -59,7 +57,6 @@ waitpid(int pid, int *status, int options)
 	pid = w->pid;
 	free(w);
 
-	vtmtxunlock(_Sfmutex);
 	return pid;
     }
 
@@ -68,11 +65,10 @@ waitpid(int pid, int *status, int options)
 	    if (status)
 		*status = ps;
 
-	    vtmtxunlock(_Sfmutex);
 	    return pid;
 	}
 
-	if (!(w = (Waitpid_t *) malloc(sizeof(Waitpid_t))))
+	if (!(w = malloc(sizeof(Waitpid_t))))
 	    continue;
 
 	w->pid = id;
@@ -81,7 +77,6 @@ waitpid(int pid, int *status, int options)
 	Wait = w;
     }
 
-    vtmtxunlock(_Sfmutex);
     return -1;
 }
 

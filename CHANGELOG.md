@@ -6,11 +6,91 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.46.0] - 2021-01-18
+
+### Added
+- Cgraph's agxbuf API gained a new function agxbdisown(), for dissociating
+  backing memory from the managed buffer
+- Build system support for the Elbrus 2000 CPU, thanks to Michael Shigorin
+
+### Changed
+- Cgraph's agheap() API has been removed
+- Autotools build system support for eFence has been removed
+- Building Graphviz with ICC defaults to -O2 instead of -O0
+- Build system work arounds for GCC 3 have been removed
+- Incomplete support for running the test suite under CMake has been removed
+- Portable source tarballs now use the “ustar” POSIX format
+- Minimum version of Flex required to build Graphviz is now 2.5.2
+- Minimum version of Bison required to build Graphviz is now 3.0
+- Minimum version of CMake required to build Graphviz using CMake is now 3.1
+
+### Fixed
+- gvpr: line numbers in gvpr errors/warnings are incorrect #1594
+- URL typo in patchwork man page
+- Escaped backslashes are not correctly handled when producing xdot with dot #165
+- heap-over-flow(off-by-null) in lib/common/shapes.c #1700
+- Windows MSBuild executables have the wrong version #1745
+- Cast Overflow at pango_textlayout #1314
+- x11 back end segfaults if display is unavailable #1776
+- typo in cmd/gvpr/lib/clustg #1781
+- Segfault in dot #1783
+- Incorrect 'Arrow type "s" unknown' error #1444
+- segfault on reading 0x10 #1724
+- Null-dereference READ (144736912) #1676
+- "Warning! PATH too long installer unable to modify PATH!" using CMake Windows installer and PATH length > 1024 #1770
+- gvedit -? gives "option - unrecognized - ignored" instead of showing usage #1813
+- lefty is not built for Windows (fixed for MSBuild builds only) #1818
+- a failure to detect OpenGL glGenTextures() errors has been corrected
+- sfio does compile time benchmarknig #1422
+- iffe "lib" check always succeeds when compiler optimises #1521
+- syntax error near text who is not present #1411
+- Explicitly links with libstdc++; should allow libc++ if appropriate #163
+- A macOS file that was erroneously excluded from portable source tarballs has
+  been restored
+- Add option -? for usage to diffimg
+- Add option -? for usage to dotty
+- Add option -? for usage to lneato
+- Add option -? for usage to vimdot
+- Fix smyrna -? to actually print usage instead of error
+- Fix edgepaint -? to actually print usage instead of error
+- Remove '"' from usage text in non-Windows version of dotty
+- Correct misspelled 'smyrna' in usage
+- Fix edgepaint -o option
+- Correct shebang of gvmap.sh to use ksh
+- Fix gvmap.sh -? option to exit with zero exit status
+- Graphviz doesn't build on MacOS with the latest libc++ #1785
+- make fails if ps2pdf is not installed (using autotools) #1763
+- multiple graphs to file output causes a segfault #1845
+- lefty PTY functionality relies on file descriptor implementation details #1823
+- buffer overflow in fdpgen
+- Crashes by VRML output when current directory is not writable #793
+- Segmentation fault when newrank=true #1221
+- sfdp craches #236
+- fdp segmentation fault with GK=0 #1290
+- fdp crash #1865
+- Graphviz always crash with this simple dot file #167
+- Seg fault in dot #1771
+- gml2gv doesn't handle some attributes correctly #1869
+- Add missing circo, fdp, neato, osage, patchwork, sfdp & twopi tools to Windows builds (copies of dot)
+- Add gv2gml tool to CMake (copy of gml2gv on Windows, symlink to gml2gv otherwise)
+- Regression: fdp generates internal names in the output #1876
+- Regression: fdp assertion error on cluster in edge #1877
+- Regression in id / &lt;title&gt; in svg for twopi #1907
+
+## [2.44.1] - 2020-06-29
+
 ### Added
 - applied RH patches (from graphviz-2.42.2-8.fc32.src.rpm)
   - graphviz-2.42.2-coverity-scan-fixes.patch
   - graphviz-2.42.2-dotty-menu-fix.patch
   - graphviz-2.42.2-ocaml-allow-const-cast.patch
+- some allocation failures that could previously allow memory corruption now exit
+- lab_gamut.3.pdf is no longer included in release archives
+
+### Changed
+- Windows binaries available at https://www2.graphviz.org/Packages/ instead of
+  https://ci.appveyor.com/project/ellson/graphviz-pl238
+- Retarget Windows builds to Visual Studio 2019 and toolset v142
 
 ### Fixed
 - Released Ubuntu packages does not contain language bindings for Python3 #1737
@@ -1229,7 +1309,9 @@ March 13, 2000: Use AM_PROG_LIBTOOL instead of AC_PROG_LIBTOOL
    in configure.in.  John Ellson <ellson@graphviz.org>
 ```
 
-[Unreleased]: https://gitlab.com/graphviz/graphviz/compare/2.44.0...master
+[Unreleased]: https://gitlab.com/graphviz/graphviz/compare/2.46.0...master
+[2.46.0]: https://gitlab.com/graphviz/graphviz/compare/2.44.1...2.46.0
+[2.44.1]: https://gitlab.com/graphviz/graphviz/compare/2.44.0...2.44.1
 [2.44.0]: https://gitlab.com/graphviz/graphviz/compare/2.42.4...2.44.0
 [2.42.4]: https://gitlab.com/graphviz/graphviz/compare/2.42.3...2.42.4
 [2.42.3]: https://gitlab.com/graphviz/graphviz/compare/2.42.2...2.42.3

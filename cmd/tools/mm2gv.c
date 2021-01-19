@@ -14,16 +14,15 @@
 #include "config.h"
 
 #define STANDALONE
-#include "cgraph.h"
-/* #include "arith.h" */
+#include <cgraph/cgraph.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <assert.h>
 #include "mmio.h"
-#include "agxbuf.h"
-#include "SparseMatrix.h"
+#include <cgraph/agxbuf.h>
+#include <sparse/SparseMatrix.h>
 #include "matrix_market.h"
 #include <getopt.h>
 
@@ -260,14 +259,7 @@ static Agraph_t *makeDotGraph(SparseMatrix A, char *name, int dim,
     }
     agxbinit (&xb, BUFS, string);
     if (with_label) {
-	agxbput (&xb, name);
-	agxbput (&xb, ". ");
-	sprintf(buf, "%d", A->m);
-	agxbput (&xb, buf);
-	agxbput (&xb, " nodes, ");
-	sprintf(buf, "%d", A->nz);
-	agxbput (&xb, buf);
-	agxbput (&xb, " edges.");
+	agxbprint (&xb, "%s. %d nodes, %d edges.", name, A->m, A->nz);
 	agattr(g, AGRAPH, "label", agxbuse (&xb));
     }
 
@@ -305,7 +297,7 @@ static Agraph_t *makeDotGraph(SparseMatrix A, char *name, int dim,
 		}
 	    } else {
 		for (j = ia[i]; j < ia[i + 1]; j++) {
-		    if (val) color[j] = ABS(val[j]);
+		    if (val) color[j] = fabs(val[j]);
 		    else color[j] = 1;
 		    if (i != ja[j]) {
 			if (first) {
@@ -399,7 +391,7 @@ static void init(int argc, char **argv, parms_t * p)
 
     cmd = argv[0];
     opterr = 0;
-    while ((c = getopt(argc, argv, ":o:uvclU:")) != -1) {
+    while ((c = getopt(argc, argv, ":o:uvclU:?")) != -1) {
 	switch (c) {
 	case 'o':
 	    p->outf = openF(optarg, "w");
@@ -429,12 +421,14 @@ static void init(int argc, char **argv, parms_t * p)
 	    fprintf(stderr, "%s: option -%c missing argument - ignored\n", cmd, optopt);
 	    break;
  	case '?':
-	    if (optopt == '?')
+	    if (optopt == '\0' || optopt == '?')
 		usage(0);
-	    else
+	    else {
 		fprintf(stderr,
-			"%s: option -%c unrecognized - ignored\n", cmd,
+			"%s: option -%c unrecognized\n", cmd,
 			optopt);
+		usage(1);
+	    }
 	    break;
 	}
     }

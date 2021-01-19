@@ -18,13 +18,13 @@
  * expression library
  */
 
-#include "exlib.h"
+#include <expr/exlib.h>
 #include <string.h>
 
 int
 exrewind(Expr_t* ex)
 {
-	register int	n;
+	int	n;
 
 	if (ex->linewrap)
 	{

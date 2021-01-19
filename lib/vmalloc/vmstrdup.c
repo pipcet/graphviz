@@ -12,15 +12,16 @@
  *************************************************************************/
 
 
-#include	"vmhdr.h"
+#include <string.h>
+#include	<vmalloc/vmhdr.h>
 /*
  * return a copy of s using vmalloc
  */
 
-char *vmstrdup(Vmalloc_t * v, register const char *s)
+char *vmstrdup(Vmalloc_t * v, const char *s)
 {
-    register char *t;
-    register int n;
+    char *t;
+    int n;
 
     return ((t =
 	     vmalloc(v, n =

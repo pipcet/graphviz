@@ -11,7 +11,7 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 
 /*	Swap two streams. If the second argument is NULL,
 **	a new stream will be created. Always return the second argument
@@ -21,10 +21,11 @@
 **	Written by Kiem-Phong Vo.
 */
 
-Sfio_t *sfswap(reg Sfio_t * f1, reg Sfio_t * f2)
+Sfio_t *sfswap(Sfio_t * f1, Sfio_t * f2)
 {
     Sfio_t tmp;
-    int f1pool, f2pool, f1mode, f2mode, f1flags, f2flags;
+    int f1pool, f2pool, f1mode, f1flags, f2flags;
+    unsigned f2mode;
 
     if (!f1 || (f1->mode & SF_AVAIL)
 	|| (SFFROZEN(f1) && (f1->mode & SF_PUSH)))
@@ -47,13 +48,13 @@ Sfio_t *sfswap(reg Sfio_t * f1, reg Sfio_t * f2)
 	    f1->file == 1 ? sfstdout :
 	    f1->file == 2 ? sfstderr : NIL(Sfio_t *);
 	if ((!f2 || !(f2->mode & SF_AVAIL))) {
-	    if (!(f2 = (Sfio_t *) malloc(sizeof(Sfio_t)))) {
+	    if (!(f2 = malloc(sizeof(Sfio_t)))) {
 		f1->mode = f1mode;
 		SFOPEN(f1, 0);
 		return NIL(Sfio_t *);
 	    }
 
-	    SFCLEAR(f2, NIL(Vtmutex_t *));
+	    SFCLEAR(f2);
 	}
 	f2->mode = SF_AVAIL | SF_LOCK;
 	f2mode = SF_AVAIL;
@@ -76,9 +77,9 @@ Sfio_t *sfswap(reg Sfio_t * f1, reg Sfio_t * f2)
     f2flags = f2->flags;
 
     /* swap image and pool entries */
-    memcpy((void *) (&tmp), (void *) f1, sizeof(Sfio_t));
-    memcpy((void *) f1, (void *) f2, sizeof(Sfio_t));
-    memcpy((void *) f2, (void *) (&tmp), sizeof(Sfio_t));
+    tmp = *f1;
+    *f1 = *f2;
+    *f2 = tmp;
     if (f2pool >= 0)
 	f1->pool->sf[f2pool] = f1;
     if (f1pool >= 0)
@@ -87,12 +88,12 @@ Sfio_t *sfswap(reg Sfio_t * f1, reg Sfio_t * f2)
     if (f2flags & SF_STATIC)
 	f2->flags |= SF_STATIC;
     else
-	f2->flags &= ~SF_STATIC;
+	f2->flags &= (unsigned short)~SF_STATIC;
 
     if (f1flags & SF_STATIC)
 	f1->flags |= SF_STATIC;
     else
-	f1->flags &= ~SF_STATIC;
+	f1->flags &= (unsigned short)~SF_STATIC;
 
     if (f2mode & SF_AVAIL) {	/* swapping to a closed stream */
 	if (!(f1->flags & SF_STATIC))

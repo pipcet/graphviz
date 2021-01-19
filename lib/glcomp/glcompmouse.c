@@ -11,10 +11,10 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include "glcompmouse.h"
-#include "glcompfont.h"
-#include "glcompset.h"
-#include "glutils.h"
+#include <glcomp/glcompmouse.h>
+#include <glcomp/glcompfont.h>
+#include <glcomp/glcompset.h>
+#include <glcomp/glutils.h>
 
 void glCompMouseInit(glCompMouse * m)
 {
@@ -45,39 +45,60 @@ void glCompMouseInit(glCompMouse * m)
 extern void glCompClick(glCompObj * o, GLfloat x, GLfloat y,
 			glMouseButtonType t)
 {
-
+    (void)o;
+    (void)x;
+    (void)y;
+    (void)t;
 }
 extern void glCompDoubleClick(glCompObj * obj, GLfloat x, GLfloat y,
 			      glMouseButtonType t)
 {
-
+    (void)obj;
+    (void)x;
+    (void)y;
+    (void)t;
 }
 
 extern void glCompMouseDown(glCompObj * obj, GLfloat x, GLfloat y,
 			    glMouseButtonType t)
 {
-
+    (void)obj;
+    (void)x;
+    (void)y;
+    (void)t;
 }
 
 extern void glCompMouseIn(glCompObj * obj, GLfloat x, GLfloat y)
 {
-
+    (void)obj;
+    (void)x;
+    (void)y;
 }
 extern void glCompMouseOut(glCompObj * obj, GLfloat x, GLfloat y)
 {
-
+    (void)obj;
+    (void)x;
+    (void)y;
 }
 extern void glCompMouseOver(glCompObj * obj, GLfloat x, GLfloat y)
 {
-
+    (void)obj;
+    (void)x;
+    (void)y;
 }
 extern void glCompMouseUp(glCompObj * obj, GLfloat x, GLfloat y,
 			  glMouseButtonType t)
 {
-
+    (void)obj;
+    (void)x;
+    (void)y;
+    (void)t;
 }
 extern void glCompMouseDrag(glCompObj * obj, GLfloat dx, GLfloat dy,
 			    glMouseButtonType t)
 {
-
+    (void)obj;
+    (void)dx;
+    (void)dy;
+    (void)t;
 }

@@ -53,20 +53,20 @@
 
 #include <ctype.h>
 
-#include "sfhdr.h"
+#include <sfio/sfhdr.h>
 
 #define QL		01
 #define QU		02
 
 long strton(const char *a, char **e, char *basep, int m)
 {
-    register unsigned char *s = (unsigned char *) a;
-    register long n;
-    register int c;
-    register int base;
-    register int shift;
-    register unsigned char *p;
-    register unsigned char *cv;
+    unsigned char *s = (unsigned char *) a;
+    long n;
+    int c;
+    int base;
+    int shift;
+    unsigned char *p;
+    unsigned char *cv;
     int negative;
 
     if (!basep || (base = *basep) < 0 || base > 64)

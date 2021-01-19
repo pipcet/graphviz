@@ -20,12 +20,12 @@
 #include <string.h>
 #include <ctype.h>
 #include <locale.h>
-#include "render.h"
-#include "agxbuf.h"
-#include "htmltable.h"
-#include "gvc.h"
-#include "cdt.h"
-#include "xdot.h"
+#include <common/render.h>
+#include <cgraph/agxbuf.h>
+#include <common/htmltable.h>
+#include <gvc/gvc.h>
+#include <cdt/cdt.h>
+#include <xdot/xdot.h>
 
 #ifdef _WIN32
 #define strtok_r strtok_s
@@ -180,14 +180,11 @@ initMapData (GVJ_t* job, char* lbl, char* url, char* tooltip, char* target, char
 static void
 layerPagePrefix (GVJ_t* job, agxbuf* xb)
 {
-    char buf[128]; /* large enough for 2 decimal 64-bit ints and "page_," */
     if (job->layerNum > 1 && (job->flags & GVDEVICE_DOES_LAYERS)) {
-	agxbput (xb, job->gvc->layerIDs[job->layerNum]);
-	agxbputc (xb, '_');
+	agxbprint (xb, "%s_", job->gvc->layerIDs[job->layerNum]);
     }
     if ((job->pagesArrayElem.x > 0) || (job->pagesArrayElem.y > 0)) {
-	sprintf (buf, "page%d,%d_", job->pagesArrayElem.x, job->pagesArrayElem.y);
-	agxbput (xb, buf);
+	agxbprint (xb, "page%d,%d_", job->pagesArrayElem.x, job->pagesArrayElem.y);
     }
 }
 
@@ -202,7 +199,6 @@ getObjId (GVJ_t* job, void* obj, agxbuf* xb)
     char* gid = GD_drawing(root)->id;
     long idnum = 0;
     char* pfx = NULL;
-    char buf[64]; /* large enough for a decimal 64-bit int */
 
     layerPagePrefix (job, xb);
 
@@ -213,8 +209,7 @@ getObjId (GVJ_t* job, void* obj, agxbuf* xb)
     }
 
     if ((obj != root) && gid) {
-	agxbput (xb, gid);
-	agxbputc (xb, '_');
+	agxbprint (xb, "%s_", gid);
     }
 
     switch (agobjkind(obj)) {
@@ -235,9 +230,7 @@ getObjId (GVJ_t* job, void* obj, agxbuf* xb)
 	break;
     }
 
-    agxbput (xb, pfx);
-    sprintf (buf, "%ld", idnum);
-    agxbput (xb, buf);
+    agxbprint (xb, "%s%ld", pfx, idnum);
 
     return agxbuse(xb);
 }
@@ -1201,18 +1194,12 @@ static void init_layering(GVC_t * gvc, graph_t * g)
     char *str;
 
     /* free layer strings and pointers from previous graph */
-    if (gvc->layers) {
-	free(gvc->layers);
-	gvc->layers = NULL;
-    }
-    if (gvc->layerIDs) {
-	free(gvc->layerIDs);
-	gvc->layerIDs = NULL;
-    }
-    if (gvc->layerlist) {
-	free(gvc->layerlist);
-	gvc->layerlist = NULL;
-    }
+    free(gvc->layers);
+    gvc->layers = NULL;
+    free(gvc->layerIDs);
+    gvc->layerIDs = NULL;
+    free(gvc->layerlist);
+    gvc->layerlist = NULL;
     if ((str = agget(g, "layers")) != 0) {
 	gvc->numLayers = parse_layers(gvc, g, str);
  	if (((str = agget(g, "layerselect")) != 0) && *str) {
@@ -2752,7 +2739,7 @@ emit_edge_label(GVJ_t* job, textlabel_t* lbl, emit_state_t lkind, int explicit,
 	}
 	gvrender_end_anchor(job);
     }
-    if (newid) free (newid);
+    free (newid);
     job->obj->emit_state = old_emit_state;
 }
 

@@ -16,7 +16,8 @@
  * an edge, starting from a list of control points.
  */
 
-#include "render.h"
+#include <math.h>
+#include <common/render.h>
 
 #ifdef DEBUG
 static int debugleveln(edge_t* e, int i)
@@ -140,7 +141,7 @@ void bezier_clip(inside_t * inside_context,
 	    found = TRUE;
 	    *odir = t;
 	}
-    } while (ABS(opt.x - pt.x) > .5 || ABS(opt.y - pt.y) > .5);
+    } while (fabs(opt.x - pt.x) > .5 || fabs(opt.y - pt.y) > .5);
     if (found)
 	for (i = 0; i < 4; i++)
 	    sp[i] = best[i];
@@ -825,7 +826,7 @@ static void selfBottom (edge_t* edges[], int ind, int cnt,
     node_t *n;
     edge_t *e;
     int i, sgn, point_pair;
-    double hy, ty, stepx, dx, dy, width, height; 
+    double hy, ty, stepx, dx, dy, height;
     pointf points[1000];
     int pointn;
 
@@ -869,10 +870,8 @@ static void selfBottom (edge_t* edges[], int ind, int cnt,
         points[pointn++] = hp;
         if (ED_label(e)) {
 	if (GD_flip(agraphof(agtail(e)))) {
-    	    width = ED_label(e)->dimen.y;
     	    height = ED_label(e)->dimen.x;
     	} else {
-    	    width = ED_label(e)->dimen.x;
     	    height = ED_label(e)->dimen.y;
     	}
     	ED_label(e)->pos.y = ND_coord(n).y - dy - height / 2.0;
@@ -895,7 +894,7 @@ selfTop (edge_t* edges[], int ind, int cnt, double sizex, double stepy,
            splineInfo* sinfo) 
 {
     int i, sgn, point_pair;
-    double hy, ty,  stepx, dx, dy, width, height; 
+    double hy, ty,  stepx, dx, dy, height;
     pointf tp, hp, np;
     node_t *n;
     edge_t *e;
@@ -976,10 +975,8 @@ selfTop (edge_t* edges[], int ind, int cnt, double sizex, double stepy,
         points[pointn++] = hp;
         if (ED_label(e)) {
 	    if (GD_flip(agraphof(agtail(e)))) {
-		width = ED_label(e)->dimen.y;
 		height = ED_label(e)->dimen.x;
 	    } else {
-		width = ED_label(e)->dimen.x;
 		height = ED_label(e)->dimen.y;
 	    }
 	    ED_label(e)->pos.y = ND_coord(n).y + dy + height / 2.0;
@@ -1002,7 +999,7 @@ selfRight (edge_t* edges[], int ind, int cnt, double stepx, double sizey,
            splineInfo* sinfo) 
 {
     int i, sgn, point_pair;
-    double hx, tx, stepy, dx, dy, width, height; 
+    double hx, tx, stepy, dx, dy, width;
     pointf tp, hp, np;
     node_t *n;
     edge_t *e;
@@ -1052,10 +1049,8 @@ selfRight (edge_t* edges[], int ind, int cnt, double stepx, double sizey,
         if (ED_label(e)) {
 	    if (GD_flip(agraphof(agtail(e)))) {
 		width = ED_label(e)->dimen.y;
-		height = ED_label(e)->dimen.x;
 	    } else {
 		width = ED_label(e)->dimen.x;
-		height = ED_label(e)->dimen.y;
 	    }
 	    ED_label(e)->pos.x = ND_coord(n).x + dx + width / 2.0;
 	    ED_label(e)->pos.y = ND_coord(n).y;
@@ -1077,7 +1072,7 @@ selfLeft (edge_t* edges[], int ind, int cnt, double stepx, double sizey,
           splineInfo* sinfo) 
 {
     int i, sgn,point_pair;
-    double hx, tx, stepy, dx, dy, width, height; 
+    double hx, tx, stepy, dx, dy, width;
     pointf tp, hp, np;
     node_t *n;
     edge_t *e;
@@ -1131,10 +1126,8 @@ selfLeft (edge_t* edges[], int ind, int cnt, double stepx, double sizey,
         if (ED_label(e)) {
     	if (GD_flip(agraphof(agtail(e)))) {
     	    width = ED_label(e)->dimen.y;
-    	    height = ED_label(e)->dimen.x;
     	} else {
     	    width = ED_label(e)->dimen.x;
-    	    height = ED_label(e)->dimen.y;
     	}
     	ED_label(e)->pos.x = ND_coord(n).x - dx - width / 2.0;
     	ED_label(e)->pos.y = ND_coord(n).y;

@@ -23,8 +23,8 @@
 #include "mainwindow.h"
 
 #include <getopt.h>
-#include "gvc.h"
-#include "globals.h"
+#include <gvc/gvc.h>
+#include <common/globals.h>
 
 
 #ifdef _WIN32
@@ -66,11 +66,13 @@ static char **parseArgs(int argc, char *argv[])
 	    Verbose = 1;
 	    break;
 	case '?':
-	    if (optopt == '?')
+	    if (optopt == '\0')
 		usage(0);
-	    else
+	    else {
 		errout << cmd << " : option -" << ((char) optopt) <<
-		    " unrecognized - ignored\n" << flush;
+		    " unrecognized\n" << flush;
+		usage(1);
+	    }
 	    break;
 	}
     }
@@ -89,8 +91,8 @@ int main(int argc, char *argv[])
     Q_INIT_RESOURCE(mdi);
     int ret;
 
-    QApplication app(argc, argv);
     char **files = parseArgs(argc, argv);
+    QApplication app(argc, argv);
     CMainWindow mainWin(&files);
     mainWin.show();
     ret = app.exec();

@@ -11,12 +11,12 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include "glcompfont.h"
-#include "glcompset.h"
-#include "glpangofont.h"
-#include "glcomptexture.h"
-#include "glutils.h"
-#include "memory.h"
+#include <glcomp/glcompfont.h>
+#include <glcomp/glcompset.h>
+#include <glcomp/glpangofont.h>
+#include <glcomp/glcomptexture.h>
+#include <glcomp/glutils.h>
+#include <common/memory.h>
 #include <GL/glut.h>
 
 static void print_bitmap_string(void *font, char *s)
@@ -86,7 +86,7 @@ void restore_gl_vars(glCompFont * f)
 void glprintfglut(void *font, GLfloat xpos, GLfloat ypos, GLfloat zpos,
 		  char *bf)
 {
-    glRasterPos3f(xpos, ypos, zpos + 0.001);
+    glRasterPos3f(xpos, ypos, zpos + 0.001f);
     print_bitmap_string(font, bf);
 
 
@@ -184,8 +184,7 @@ static glCompFont *glut_font_init(void)
 #endif
 void glDeleteFont(glCompFont * f)
 {
-    if (f->fontdesc)
-	free(f->fontdesc);
+    free(f->fontdesc);
     if (f->tex)
 	glCompDeleteTexture(f->tex);
     free(f);
@@ -194,7 +193,7 @@ void glDeleteFont(glCompFont * f)
 
 glCompFont *glNewFont (glCompSet * s, char *text, glCompColor * c,glCompFontType type, char *fontdesc, int fs,int is2D)
 {
-    glCompFont *font = (glCompFont*) malloc(sizeof(glCompFont));
+    glCompFont *font = malloc(sizeof(glCompFont));
     font->reference = 0;
     font->color.R = c->R;
     font->color.G = c->G;
@@ -425,15 +424,12 @@ void glCompDrawText(glCompFont * f,GLfloat x,GLfloat y)
 void glCompRenderText(glCompFont * f, glCompObj * parentObj)
 {
     static glCompCommon ref;
-    GLfloat x, y, z, w, h;
+    GLfloat x, y;
     if (!f->tex)
 	return;
     x = 0;
     y = 0;
-    w = f->tex->width;
-    h = f->tex->height;
     ref = parentObj->common;
-    z = ref.pos.z;
     switch (f->justify.HJustify) 
     {
     case glFontHJustifyNone:
@@ -459,7 +455,6 @@ void glCompRenderText(glCompFont * f, glCompObj * parentObj)
 	y = ref.refPos.y + (ref.height - f->tex->height) / (GLfloat) 2.0;
 	break;
     }
-	z=ref.refPos.z;
 
     glCompSetColor(&f->color);
 		glCompDrawText(f,x,y);

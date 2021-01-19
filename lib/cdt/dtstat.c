@@ -1,4 +1,4 @@
-#include	"dthdr.h"
+#include	<cdt/dthdr.h>
 
 /*	Get statistics of a dictionary
 **
@@ -17,10 +17,10 @@ static void dttstat(Dtstat_t* ds, Dtlink_t* root, int depth, int* level)
 		level[depth] += 1;
 }
 
-static void dthstat(reg Dtdata_t* data, Dtstat_t* ds, reg int* count)
+static void dthstat(Dtdata_t* data, Dtstat_t* ds, int* count)
 {
-	reg Dtlink_t*	t;
-	reg int		n, h;
+	Dtlink_t*	t;
+	int		n, h;
 
 	for(h = data->ntab-1; h >= 0; --h)
 	{	n = 0;
@@ -36,9 +36,9 @@ static void dthstat(reg Dtdata_t* data, Dtstat_t* ds, reg int* count)
 	}
 }
 
-int dtstat(reg Dt_t* dt, Dtstat_t* ds, int all)
+int dtstat(Dt_t* dt, Dtstat_t* ds, int all)
 {
-	reg int		i;
+	int		i;
 	static int	*Count, Size;
 
 	UNFLATTEN(dt);
@@ -56,7 +56,7 @@ int dtstat(reg Dt_t* dt, Dtstat_t* ds, int all)
 		if(ds->dt_max+1 > Size)
 		{	if(Size > 0)
 				free(Count);
-			if(!(Count = (int*)malloc((ds->dt_max+1)*sizeof(int))) )
+			if(!(Count = malloc((ds->dt_max+1)*sizeof(int))) )
 				return -1;
 			Size = ds->dt_max+1;
 		}
@@ -70,7 +70,7 @@ int dtstat(reg Dt_t* dt, Dtstat_t* ds, int all)
 			if(ds->dt_n+1 > Size)
 			{	if(Size > 0)
 					free(Count);
-				if(!(Count = (int*)malloc((ds->dt_n+1)*sizeof(int))) )
+				if(!(Count = malloc((ds->dt_n+1)*sizeof(int))) )
 					return -1;
 				Size = ds->dt_n+1;
 			}

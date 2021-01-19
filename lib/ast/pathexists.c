@@ -22,16 +22,14 @@
  * in half by checking ENOTDIR vs. ENOENT
  */
 
-#include <ast.h>
-#include <error.h>
+#include <ast/ast.h>
+#include <ast/error.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifdef _WIN32
-#include <compat_unistd.h>
+#include <ast/compat_unistd.h>
 #endif
-/* #include "lclib.h" */
-/* #include <ls.h> */
 
 typedef struct Tree_s {
     struct Tree_s *next;
@@ -42,11 +40,11 @@ typedef struct Tree_s {
 
 int pathexists(char *path, int mode)
 {
-    register char *s;
-    register char *e;
-    register Tree_t *p;
-    register Tree_t *t;
-    register int c;
+    char *s;
+    char *e;
+    Tree_t *p;
+    Tree_t *t;
+    int c;
     char *ee;
     int cc = 0;
     int x;

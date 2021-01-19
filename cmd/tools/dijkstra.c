@@ -16,8 +16,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "cgraph.h"
-#include "ingraphs.h"
+#include <cgraph/cgraph.h>
+#include <ingraphs/ingraphs.h>
 #include <getopt.h>
 
 #ifndef HUGE
@@ -249,7 +249,7 @@ static void init(int argc, char *argv[])
 
     CmdName = argv[0];
     opterr = 0;
-    while ((c = getopt(argc, argv, "adp")) != -1) {
+    while ((c = getopt(argc, argv, "adp?")) != -1) {
 	switch (c) {
 	case 'a':
 	    setall = 1;
@@ -261,11 +261,13 @@ static void init(int argc, char *argv[])
 	    doPath = 1;
 	    break;
 	case '?':
-	    if (optopt == '?')
+	    if (optopt == '\0' || optopt == '?')
 		usage(0);
-	    else
-		fprintf(stderr, "%s: option -%c unrecognized - ignored\n",
+	    else {
+		fprintf(stderr, "%s: option -%c unrecognized\n",
 			CmdName, optopt);
+		usage(1);
+	    }
 	    break;
 	}
     }

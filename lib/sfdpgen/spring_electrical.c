@@ -13,18 +13,18 @@
 
 #include "config.h"
 
-#include "SparseMatrix.h"
-#include "spring_electrical.h"
-#include "QuadTree.h"
-#include "Multilevel.h"
-#include "post_process.h"
-#include "overlap.h"
-#include "types.h"
-#include "memory.h"
-#include "arith.h"
-#include "logic.h"
-#include "math.h"
-#include "globals.h"
+#include <sparse/SparseMatrix.h>
+#include <sfdpgen/spring_electrical.h>
+#include <sparse/QuadTree.h>
+#include <sfdpgen/Multilevel.h>
+#include <sfdpgen/post_process.h>
+#include <neatogen/overlap.h>
+#include <common/types.h>
+#include <common/memory.h>
+#include <common/arith.h>
+#include <common/logic.h>
+#include <math.h>
+#include <common/globals.h>
 #include <string.h>
 #include <time.h>
 
@@ -339,7 +339,7 @@ static real get_angle(real *x, int dim, int i, int j){
   for (k = 0; k < 2; k++){
     y[k] = x[j*dim+k] - x[i*dim+k];
   }
-  if (ABS(y[0]) <= ABS(y[1])*eps){
+  if (fabs(y[0]) <= fabs(y[1])*eps){
     if (y[1] > 0) return 0.5*PI;
     return 1.5*PI;
   }
@@ -353,8 +353,8 @@ static real get_angle(real *x, int dim, int i, int j){
 }
 
 static int comp_real(const void *x, const void *y){
-  real *xx = (real*) x;
-  real *yy = (real*) y;
+  const real *xx = (const real*) x;
+  const real *yy = (const real*) y;
 
   if (*xx > *yy){
     return 1;

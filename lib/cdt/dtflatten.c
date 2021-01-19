@@ -1,4 +1,4 @@
-#include	"dthdr.h"
+#include	<cdt/dthdr.h>
 
 /*	Flatten a dictionary into a linked list.
 **	This may be used when many traversals are likely.
@@ -8,7 +8,7 @@
 
 Dtlink_t* dtflatten(Dt_t* dt)
 {
-	reg Dtlink_t	*t, *r, *list, *last, **s, **ends;
+	Dtlink_t	*t, *r, *list, *last, **s, **ends;
 
 	/* already flattened */
 	if(dt->data->type&DT_FLATTEN )

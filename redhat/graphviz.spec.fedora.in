@@ -7,8 +7,8 @@ Version: @VERSION@
 Release: 1%{?dist}
 Group:   Applications/Multimedia
 License: EPL
-URL:     http://www.graphviz.org/
-Source0: http://www.graphviz.org/pub/@GRAPHVIZ_SOURCES@/graphviz-@VERSION@.tar.gz
+URL:     https://graphviz.org/
+Source0: https://gitlab.com/graphviz/graphviz/-/archive/@VERSION@/graphviz-@VERSION@.tar.gz
 
 # Necessary conditionals
 %ifarch %{mono_arches}
@@ -924,7 +924,6 @@ This package contains development files for graphviz-libs.
 %{_mandir}/man3/xdot.3.*
 %{_libdir}/pkgconfig/libxdot.pc
 %{_libdir}/liblab_gamut.so
-%{_mandir}/man3/lab_gamut.3.*
 %{_libdir}/pkgconfig/liblab_gamut.pc
 %{_mandir}/man3/expr.3.*
 %{_mandir}/man3/pack.3.*

@@ -13,9 +13,11 @@
 
 #include <stdio.h>		/* need sprintf() */
 #include <ctype.h>
-#include "cghdr.h"
+#include <cgraph/cghdr.h>
+#include <cgraph/strcasecmp.h>
+#include <inttypes.h>
 
-#define EMPTY(s)		((s == 0) || (s)[0] == '\0')
+#define EMPTY(s)		(((s) == 0) || (s)[0] == '\0')
 #define MAX(a,b)     ((a)>(b)?(a):(b))
 #define CHKRV(v)     {if ((v) == EOF) return EOF;}
 
@@ -42,23 +44,6 @@ static int indent(Agraph_t * g, iochan_t * ofile)
 	CHKRV(ioput(g, ofile, "\t"));
     return 0;
 }
-
-#ifndef HAVE_STRCASECMP
-
-#include <string.h>
-
-static int strcasecmp(const char *s1, const char *s2)
-{
-    while ((*s1 != '\0')
-	   && (tolower(*(unsigned char *) s1) ==
-	       tolower(*(unsigned char *) s2))) {
-	s1++;
-	s2++;
-    }
-
-    return tolower(*(unsigned char *) s1) - tolower(*(unsigned char *) s2);
-}
-#endif
 
     /* alphanumeric, '.', '-', or non-ascii; basically, chars used in unquoted ids */
 #define is_id_char(c) (isalnum(c) || ((c) == '.') || ((c) == '-') || !isascii(c))
@@ -190,10 +175,7 @@ static char *getoutputbuffer(char *str)
 
     req = MAX(2 * strlen(str) + 2, BUFSIZ);
     if (req > len) {
-	if (rv)
-	    rv = realloc(rv, req);
-	else
-	    rv = malloc(req);
+	rv = realloc(rv, req);
 	len = req;
     }
     return rv;
@@ -235,7 +217,18 @@ static int _write_canonstr(Agraph_t * g, iochan_t * ofile, char *str,
 
 static int write_canonstr(Agraph_t * g, iochan_t * ofile, char *str)
 {
-    return _write_canonstr(g, ofile, str, TRUE);
+    char *s;
+    int r;
+
+    /* str may not have been allocated by agstrdup, so we first need to turn it
+     * into a valid refstr
+     */
+    s = agstrdup(g, str);
+
+    r = _write_canonstr(g, ofile, s, TRUE);
+
+    agstrfree(g, s);
+    return r;
 }
 
 static int write_dict(Agraph_t * g, iochan_t * ofile, char *name,
@@ -513,7 +506,7 @@ static int write_nondefault_attrs(void *obj, iochan_t * ofile,
 
 static int write_nodename(Agnode_t * n, iochan_t * ofile)
 {
-    char *name, buf[20];
+    char *name;
     Agraph_t *g;
 
     name = agnameof(n);
@@ -521,7 +514,8 @@ static int write_nodename(Agnode_t * n, iochan_t * ofile)
     if (name) {
 	CHKRV(write_canonstr(g, ofile, name));
     } else {
-	sprintf(buf, "_%ld_SUSPECT", AGID(n));	/* could be deadly wrong */
+	char buf[sizeof("__SUSPECT") + 20];
+	snprintf(buf, sizeof(buf), "_%" PRIu64 "_SUSPECT", AGID(n));	/* could be deadly wrong */
 	CHKRV(ioput(g, ofile, buf));
     }
     return 0;
@@ -529,7 +523,7 @@ static int write_nodename(Agnode_t * n, iochan_t * ofile)
 
 static int attrs_written(void *obj)
 {
-    return (AGATTRWF((Agobj_t *) obj));
+    return AGATTRWF(obj);
 }
 
 static int write_node(Agnode_t * n, iochan_t * ofile, Dict_t * d)
@@ -640,8 +634,7 @@ static int write_body(Agraph_t * g, iochan_t * ofile)
 	    CHKRV(write_node(n, ofile, dd ? dd->dict.n : 0));
 	prev = n;
 	for (e = agfstout(g, n); e; e = agnxtout(g, e)) {
-	    if ((prev != aghead(e))
-		&& write_node_test(g, aghead(e), AGSEQ(n))) {
+	    if (prev != aghead(e) && write_node_test(g, aghead(e), AGSEQ(n))) {
 		CHKRV(write_node(aghead(e), ofile, dd ? dd->dict.n : 0));
 		prev = aghead(e);
 	    }

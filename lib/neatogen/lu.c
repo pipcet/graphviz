@@ -46,7 +46,7 @@
  */
 
 #include <math.h>
-#include <neato.h>
+#include <neatogen/neato.h>
 
 static double *scales;
 static double **lu;
@@ -66,18 +66,16 @@ static int *ps;
 
 int lu_decompose(double **a, int n)
 {
-    register int i, j, k;
+    int i, j, k;
     int pivotindex = 0;
     double pivot, biggest, mult, tempf;
 
     if (lu)
 	free_array(lu);
     lu = new_array(n, n, 0.0);
-    if (ps)
-	free(ps);
+    free(ps);
     ps = N_NEW(n, int);
-    if (scales)
-	free(scales);
+    free(scales);
     scales = N_NEW(n, double);
 
     for (i = 0; i < n; i++) {	/* For each row */
@@ -141,7 +139,7 @@ int lu_decompose(double **a, int n)
 
 void lu_solve(double *x, double *b, int n)
 {
-    register int i, j;
+    int i, j;
     double dot;
 
     /* Vector reduction using U triangular matrix */

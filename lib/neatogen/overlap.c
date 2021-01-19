@@ -12,16 +12,17 @@
  *************************************************************************/
 
 #include "config.h"
+#include <neatogen/overlap.h>
 
 #if ((defined(HAVE_GTS) || defined(HAVE_TRIANGLE)) && defined(SFDP))
 
-#include "SparseMatrix.h"
-#include "overlap.h"
-#include "call_tri.h"
-#include "red_black_tree.h"
-#include "types.h"
-#include "memory.h"
-#include "globals.h"
+#include <sparse/SparseMatrix.h>
+#include <neatogen/call_tri.h>
+#include <rbtree/red_black_tree.h>
+#include <common/types.h>
+#include <math.h>
+#include <common/memory.h>
+#include <common/globals.h>
 #include <time.h>
 
 static void ideal_distance_avoid_overlap(int dim, SparseMatrix A, real *x, real *width, real *ideal_distance, real *tmax, real *tmin){
@@ -43,8 +44,8 @@ static void ideal_distance_avoid_overlap(int dim, SparseMatrix A, real *x, real 
       jj = ja[j];
       if (jj == i) continue;
       dist = distance(x, dim, i, jj);
-      dx = ABS(x[i*dim] - x[jj*dim]);
-      dy = ABS(x[i*dim+1] - x[jj*dim+1]);
+      dx = fabs(x[i*dim] - x[jj*dim]);
+      dy = fabs(x[i*dim+1] - x[jj*dim+1]);
       wx = width[i*dim]+width[jj*dim];
       wy = width[i*dim+1]+width[jj*dim+1];
       if (dx < MACHINEACC*wx && dy < MACHINEACC*wy){
@@ -75,8 +76,6 @@ static void ideal_distance_avoid_overlap(int dim, SparseMatrix A, real *x, real 
   return;
 }
 
-#define collide(i,j) ((ABS(x[(i)*dim] - x[(j)*dim]) < width[(i)*dim]+width[(j)*dim]) || (ABS(x[(i)*dim+1] - x[(j)*dim+1]) < width[(i)*dim+1]+width[(j)*dim+1]))
-
 enum {INTV_OPEN, INTV_CLOSE};
 
 struct scan_point_struct{
@@ -89,8 +88,8 @@ typedef struct scan_point_struct scan_point;
 
 
 static int comp_scan_points(const void *p, const void *q){
-  scan_point *pp = (scan_point *) p;
-  scan_point *qq = (scan_point *) q;
+  const scan_point *pp = (const scan_point *) p;
+  const scan_point *qq = (const scan_point *) q;
   if (pp->x > qq->x){
     return 1;
   } else if (pp->x < qq->x){
@@ -119,9 +118,9 @@ static int NodeComp(const void* a,const void* b) {
 }
 
 static void NodePrint(const void* a) {
-  scan_point *aa;
+  const scan_point *aa;
 
-  aa = (scan_point *) a;
+  aa = (const scan_point *) a;
   fprintf(stderr, "node {%d, %f, %d}\n", aa->node, aa->x, aa->status);
 
 }
@@ -214,7 +213,7 @@ static SparseMatrix get_overlap_graph(int dim, int n, real *x, real *width, int 
 	fprintf(stderr," predecessor is node %d y = %f\n", ((scan_point *)newNode->key)->node, ((scan_point *)newNode->key)->x);
 #endif
 	if (neighbor != k){
-	  if (ABS(0.5*(bsta+bsto) - 0.5*(bbsta+bbsto)) < 0.5*(bsto-bsta) + 0.5*(bbsto-bbsta)){/* if the distance of the centers of the interval is less than sum of width, we have overlap */
+	  if (fabs(0.5*(bsta+bsto) - 0.5*(bbsta+bbsto)) < 0.5*(bsto-bsta) + 0.5*(bbsto-bbsta)){/* if the distance of the centers of the interval is less than sum of width, we have overlap */
 	    A = SparseMatrix_coordinate_form_add_entries(A, 1, &neighbor, &k, &one);
 #ifdef DEBUG_RBTREE
 	    fprintf(stderr,"======================================  %d %d\n",k,neighbor);
@@ -681,11 +680,25 @@ void remove_overlap(int dim, SparseMatrix A, real *x, real *label_sizes, int ntr
 }
 
 #else
-#include "types.h"
-#include "SparseMatrix.h"
-void remove_overlap(int dim, SparseMatrix A, int m, real *x, real *label_sizes, int ntry, real initial_scaling, int do_shrinking, int *flag)
+#include <common/types.h>
+#include <sparse/SparseMatrix.h>
+void remove_overlap(int dim, SparseMatrix A, real *x, real *label_sizes, int ntry, real initial_scaling,
+		    int edge_labeling_scheme, int n_constr_nodes, int *constr_nodes, SparseMatrix A_constr, int do_shrinking, int *flag)
 {
     static int once;
+
+    (void)dim;
+    (void)A;
+    (void)x;
+    (void)label_sizes;
+    (void)ntry;
+    (void)initial_scaling;
+    (void)edge_labeling_scheme;
+    (void)n_constr_nodes;
+    (void)constr_nodes;
+    (void)A_constr;
+    (void)do_shrinking;
+    (void)flag;
 
     if (once == 0) {
 	once = 1;

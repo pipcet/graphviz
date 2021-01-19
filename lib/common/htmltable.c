@@ -32,12 +32,13 @@
  */
 
 #include <assert.h>
-#include "render.h"
-#include "htmltable.h"
-#include "agxbuf.h"
-#include "pointset.h"
-#include "intset.h"
-#include "cdt.h"
+#include <common/render.h>
+#include <common/htmltable.h>
+#include <cgraph/agxbuf.h>
+#include <common/pointset.h>
+#include <common/intset.h>
+#include <cdt/cdt.h>
+#include <cgraph/strcasecmp.h>
 
 #define DEFAULT_BORDER    1
 #define DEFAULT_CELLPADDING  2
@@ -378,7 +379,6 @@ initAnchor(GVJ_t * job, htmlenv_t * env, htmldata_t * data, boxf b,
     static int anchorId;
     int internalId = 0;
     agxbuf xb;
-    char intbuf[30];		/* hold 64-bit decimal integer */
     unsigned char buf[SMALLBUF];
 
     save->url = obj->url;
@@ -393,9 +393,7 @@ initAnchor(GVJ_t * job, htmlenv_t * env, htmldata_t * data, boxf b,
 	    env->objid = strdup(getObjId(job, obj->u.n, &xb));
 	    env->objid_set = 1;
 	}
-	agxbput(&xb, env->objid);
-	sprintf(intbuf, "_%d", anchorId++);
-	agxbput(&xb, intbuf);
+	agxbprint(&xb, "%s_%d", env->objid, anchorId++);
 	id = agxbuse(&xb);
 	internalId = 1;
     }
@@ -815,16 +813,14 @@ void free_html_text(htmltxt_t * t)
     for (i = 0; i < t->nspans; i++) {
 	ti = tl->items;
 	for (j = 0; j < tl->nitems; j++) {
-	    if (ti->str)
-		free(ti->str);
+	    free(ti->str);
 	    if (ti->layout && ti->free_layout)
 		ti->free_layout(ti->layout);
 	    ti++;
 	}
 	tl++;
     }
-    if (t->spans)
-	free(t->spans);
+    free(t->spans);
     free(t);
 }
 

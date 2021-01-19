@@ -11,11 +11,11 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 
 #undef sffileno
 
-int sffileno(reg Sfio_t * f)
+int sffileno(Sfio_t * f)
 {
     return __sf_fileno(f);
 }

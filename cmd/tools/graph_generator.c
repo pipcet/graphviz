@@ -290,21 +290,18 @@ constructSierpinski(int v1, int v2, int v3, int depth, vtx_data* graph)
 
 }
 
-#define NEW(t)           (t*)calloc((1),sizeof(t))
-#define N_NEW(n,t)       (t*)calloc((n),sizeof(t))
+#define NEW(t)           calloc((1),sizeof(t))
+#define N_NEW(n,t)       calloc((n),sizeof(t))
 
 void makeSierpinski(int depth, edgefn ef)
 {
     vtx_data* graph;
     int* edges;
     int n;
-    int nedges;
     int i, j;
 
     depth--;
     n = 3 * (1 + ((int) (pow(3.0, (double) depth) + 0.5) - 1) / 2);
-
-    nedges = (int) (pow(3.0, depth + 1.0) + 0.5);
 
     graph = N_NEW(n + 1, vtx_data);
     edges = N_NEW(4 * n, int);
@@ -385,13 +382,10 @@ void makeTetrix(int depth, edgefn ef)
     vtx_data* graph;
     int* edges;
     int n;
-    int nedges;
     int i, j;
 
     depth--;
     n = 4 + 2 * (((int) (pow(4.0, (double) depth) + 0.5) - 1));
-
-    nedges = 6 * (int) (pow(4.0, depth) + 0.5);
 
     graph = N_NEW(n + 1, vtx_data);
     edges = N_NEW(6 * n, int);

@@ -16,20 +16,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define STANDALONE
-#include "general.h"
-#include "QuadTree.h"
+#include <sparse/general.h>
+#include <sparse/QuadTree.h>
 #include <time.h>
-#include "SparseMatrix.h"
+#include <sparse/SparseMatrix.h>
 #include <getopt.h>
-#include "string.h"
+#include <string.h>
 #include "make_map.h"
-#include "spring_electrical.h"
-#include "post_process.h"
-#include "overlap.h"
-#include "clustering.h"
-#include "ingraphs.h"
-#include "DotIO.h"
-#include "colorutil.h"
+#include <sfdpgen/spring_electrical.h>
+#include <sfdpgen/post_process.h>
+#include <neatogen/overlap.h>
+#include <sparse/clustering.h>
+#include <ingraphs/ingraphs.h>
+#include <sparse/DotIO.h>
+#include <sparse/colorutil.h>
 
 #ifdef _WIN32 /*dependencies*/
     #pragma comment( lib, "cgraph.lib" )
@@ -53,32 +53,6 @@ typedef struct {
   int maxcluster;
   int clustering_method;
 } opts_t;
-
-#if 0
-void *gmalloc(size_t nbytes)
-{
-    char *rv;
-    if (nbytes == 0)
-        return NULL;
-    rv = malloc(nbytes);
-    if (rv == NULL) {
-        fprintf(stderr, "out of memory\n");
-        abort();
-    }
-    return rv;
-}
-
-void *grealloc(void *ptr, size_t size)
-{
-    void *p = realloc(ptr, size);
-    if (p == NULL && size) {
-        fprintf(stderr, "out of memory\n");
-        abort();
-    }
-    return p;
-}
-
-#endif
 
 static char* usestr =
 "    -C k - generate no more than k clusters (0)\n\
@@ -125,7 +99,7 @@ static void init(int argc, char *argv[], opts_t* opts) {
   Verbose = 0;
 
   opts->clustering_method =  CLUSTERING_MODULARITY;
-  while ((c = getopt(argc, argv, ":vC:c:o:")) != -1) {
+  while ((c = getopt(argc, argv, ":vC:c:o:?")) != -1) {
     switch (c) {
     case 'c':
       if ((sscanf(optarg,"%d", &v) == 0) || (v < 0)) {
@@ -146,12 +120,12 @@ static void init(int argc, char *argv[], opts_t* opts) {
       Verbose = 1;
       break;
     case '?':
-      if (optopt == '?')
+      if (optopt == '\0' || optopt == '?')
 	usage(cmd, 0);
       else {
-	fprintf(stderr, " option -%c unrecognized - ignored\n",
+	fprintf(stderr, " option -%c unrecognized\n",
 		optopt);
-	usage(cmd, 0);
+	usage(cmd, 1);
       }
       break;
     }

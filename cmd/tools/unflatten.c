@@ -24,8 +24,8 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include    "cgraph.h"
-#include    "ingraphs.h"
+#include    <cgraph/cgraph.h>
+#include    <ingraphs/ingraphs.h>
 
 #include <getopt.h>
 
@@ -187,6 +187,8 @@ static char **scanargs(int argc, char **argv)
 		ChainLimit = ival;
 	    break;
 	case 'o':
+	    if (outFile != NULL)
+		fclose(outFile);
 	    outFile = openFile(optarg, "w");
 	    break;
 	case '?':

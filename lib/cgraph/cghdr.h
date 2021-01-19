@@ -15,10 +15,6 @@
 #define ATT_GRAPHPVT_H 1
 #define _BLD_cgraph 1
 
-#ifndef EXTERN
-#define EXTERN extern
-#endif
-
 #ifdef _WIN32
 #   ifdef EXPORT_CGHDR
 #       define CGHDR_API __declspec(dllexport)
@@ -75,7 +71,7 @@ CGHDR_API int agapply(Agraph_t * g, Agobj_t * obj, agobjfn_t fn, void *arg,
 	    int preorder);
 
 	/* global variables */
-EXTERN Agraph_t *Ag_G_global;
+extern Agraph_t *Ag_G_global;
 extern char *AgDataRecName;
 
 	/* set ordering disciplines */
@@ -106,7 +102,7 @@ uint64_t agnextseq(Agraph_t * g, int objtype);
 /* dict helper functions */
 Dict_t *agdtopen(Agraph_t * g, Dtdisc_t * disc, Dtmethod_t * method);
 void agdtdisc(Agraph_t * g, Dict_t * dict, Dtdisc_t * disc);
-long agdtdelete(Agraph_t * g, Dict_t * dict, void *obj);
+int agdtdelete(Agraph_t * g, Dict_t * dict, void *obj);
 int agdtclose(Agraph_t * g, Dict_t * dict);
 void *agdictobjmem(Dict_t * dict, void * p, size_t size,
 		   Dtdisc_t * disc);

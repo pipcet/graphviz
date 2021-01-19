@@ -22,12 +22,12 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "compile.h"
+#include <gvpr/compile.h>
 #include <assert.h>
-#include "cgraph.h"
-#include <error.h>
-#include <actions.h>
-#include "sfstr.h"
+#include <cgraph/cgraph.h>
+#include <ast/error.h>
+#include <gvpr/actions.h>
+#include <ast/sfstr.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
@@ -36,10 +36,10 @@
 #define MIN(a,b)        ((a)<(b)?(a):(b))
 #define MAX(a,b)        ((a)>(b)?(a):(b))
 
-#include <gdefs.h>
+#include <gvpr/gdefs.h>
 
-#include "ctype.h"
-#include "trie.c"
+#include <ctype.h>
+#include <gvpr/trie.c>
 
 #define BITS_PER_BYTE 8
 #ifdef HAVE_INTPTR_T
@@ -2085,7 +2085,7 @@ tvtypeToStr (int v)
  * Return -1 if conversion cannot be done, 0 otherwise.
  * If arg is > 0, conversion unnecessary; just report possibility.
  */
-static int stringOf(Expr_t * prog, register Exnode_t * x, int arg, Exdisc_t* disc)
+static int stringOf(Expr_t * prog, Exnode_t * x, int arg, Exdisc_t* disc)
 {
     Agobj_t *objp;
     int rv = 0;
@@ -2118,12 +2118,10 @@ static int stringOf(Expr_t * prog, register Exnode_t * x, int arg, Exdisc_t* dis
  * Return -1 if conversion cannot be done, 0 otherwise.
  * If arg is > 0, conversion unnecessary; just report possibility.
  * In particular, assume x != 0 if arg == 0.
- * Use #ifdef OLD to remove graph object conversion to strings,
- * as this seemed to dangerous.
  */
 static int
-convert(Expr_t * prog, register Exnode_t * x, int type,
-	register Exid_t * xref, int arg, Exdisc_t * disc)
+convert(Expr_t * prog, Exnode_t * x, int type,
+	Exid_t * xref, int arg, Exdisc_t * disc)
 {
     Agobj_t *objp;
     int ret = -1;
@@ -2158,12 +2156,6 @@ convert(Expr_t * prog, register Exnode_t * x, int type,
 		if (!objp || ISEDGE(objp))
 		    ret = 0;
 		break;
-#ifdef OLD
-	    case STRING:
-		x->data.constant.value.string = nameOf(prog, objp);
-		ret = 0;
-		break;
-#endif
 	    }
 	}
     } else if (type == STRING) {
@@ -2174,16 +2166,6 @@ convert(Expr_t * prog, register Exnode_t * x, int type,
 		    tvtypeToStr (x->data.constant.value.integer);
 	    }
 	}
-#ifdef OLD
-	else {
-	    objp = INT2PTR(Agobj_t *, x->data.constant.value.integer);
-	    if (objp) {
-		x->data.constant.value.string = nameOf(prog, objp);
-		ret = 0;
-	    } else
-		cvtError(xref, "Uninitialized object");
-	}
-#endif
     } else if ((type == T_tvtyp) && (x->type == INTEGER)) {
 	if (arg)
 	    ret = 0;

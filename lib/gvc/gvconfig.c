@@ -13,7 +13,7 @@
 
 #include "config.h"
 
-#include "gvconfig.h"
+#include <gvc/gvconfig.h>
 
 #include	<string.h>
 #include    <regex.h>
@@ -49,14 +49,14 @@ static int glob (GVC_t * gvc, char*, int, int (*errfunc)(const char *, int), glo
 #include <mach-o/dyld.h>
 #endif
 
-#include        "memory.h"
-#include        "const.h"
-#include        "types.h"
+#include        <common/memory.h>
+#include        <common/const.h>
+#include        <common/types.h>
 
-#include	"gvplugin.h"
-#include	"gvcjob.h"
-#include	"gvcint.h"
-#include        "gvcproc.h"
+#include	<gvc/gvplugin.h>
+#include	<gvc/gvcjob.h>
+#include	<gvc/gvcint.h>
+#include        <gvc/gvcproc.h>
 
 /* FIXME */
 extern Dt_t * textfont_dict_open(GVC_t *gvc);
@@ -590,11 +590,10 @@ glob (GVC_t* gvc, char* pattern, int flags, int (*errfunc)(const char *, int), g
     do {
       if (cnt >= arrsize-1) {
         arrsize += 512;
-        if (str) str = (char**)realloc (str, arrsize*sizeof(char*));
-        else str = (char**)malloc (arrsize*sizeof(char*));
+        str = realloc (str, arrsize*sizeof(char*));
         if (!str) return GLOB_NOSPACE;
       }
-      str[cnt] = (char*)malloc (strlen(libdir)+1+strlen(wfd.cFileName)+1);
+      str[cnt] = malloc (strlen(libdir)+1+strlen(wfd.cFileName)+1);
       if (!str[cnt]) return GLOB_NOSPACE;
       strcpy(str[cnt],libdir);
       strcat(str[cnt],DIRSEP);
@@ -604,7 +603,7 @@ glob (GVC_t* gvc, char* pattern, int flags, int (*errfunc)(const char *, int), g
     str[cnt] = 0;
 
     pglob->gl_pathc = cnt;
-    pglob->gl_pathv = (char**)realloc(str, (cnt+1)*sizeof(char*));
+    pglob->gl_pathv = realloc(str, (cnt+1)*sizeof(char*));
     
     return 0;
 }
@@ -615,8 +614,7 @@ globfree (glob_t* pglob)
     int i;
     for (i = 0; i < pglob->gl_pathc; i++)
       free (pglob->gl_pathv[i]);
-    if (pglob->gl_pathv)
-		free (pglob->gl_pathv);
+    free (pglob->gl_pathv);
 }
 #endif
 #endif

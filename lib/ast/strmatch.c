@@ -51,9 +51,9 @@
  *	  element size
  */
 
-#include <ast.h>
+#include <ast/ast.h>
 #include <ctype.h>
-#include <hashkey.h>
+#include <ast/hashkey.h>
 #include <string.h>
 
 #if _hdr_wchar && _lib_wctype && _lib_iswctype
@@ -120,7 +120,7 @@ static int iswblank(wint_t wc)
 #endif
 
 #if _DEBUG_MATCH
-#include <error.h>
+#include <ast/error.h>
 #endif
 
 #define MAXGROUP	10
@@ -167,11 +167,11 @@ extern int fnmatch(const char *, const char *, int);
  * 0 returned if s runs out
  */
 
-static char *gobble(Match_t * mp, register char *s, register int sub,
+static char *gobble(Match_t * mp, char *s, int sub,
 		    int *g, int clear)
 {
-    register int p = 0;
-    register char *b = 0;
+    int p = 0;
+    char *b = 0;
     int c = 0;
     int n;
 
@@ -221,7 +221,7 @@ static char *gobble(Match_t * mp, register char *s, register int sub,
 	}
 }
 
-static int grpmatch(Match_t *, int, char *, register char *, char *, int);
+static int grpmatch(Match_t *, int, char *, char *, char *, int);
 
 #if _DEBUG_MATCH
 #define RETURN(v)	{error_info.indent--;return (v);}
@@ -239,10 +239,10 @@ static int
 onematch(Match_t * mp, int g, char *s, char *p, char *e, char *r,
 	 int flags)
 {
-    register int pc;
-    register int sc;
-    register int n;
-    register int icase;
+    int pc;
+    int sc;
+    int n;
+    int icase;
     char *olds;
     char *oldp;
 
@@ -691,10 +691,10 @@ onematch(Match_t * mp, int g, char *s, char *p, char *e, char *r,
  */
 
 static int
-grpmatch(Match_t * mp, int g, char *s, register char *p, char *e,
+grpmatch(Match_t * mp, int g, char *s, char *p, char *e,
 	 int flags)
 {
-    register char *a;
+    char *a;
 
 #if _DEBUG_MATCH
     error_info.indent++;
@@ -721,8 +721,8 @@ grpmatch(Match_t * mp, int g, char *s, register char *p, char *e,
 
 int strgrpmatch(const char *b, const char *p, int *sub, int n, int flags)
 {
-    register int i;
-    register char *s;
+    int i;
+    char *s;
     char *e;
     Match_t match;
 
@@ -776,21 +776,4 @@ int strgrpmatch(const char *b, const char *p, int *sub, int n, int flags)
 int strmatch(const char *s, const char *p)
 {
     return strgrpmatch(s, p, NiL, 0, STR_MAXIMAL | STR_LEFT | STR_RIGHT);
-}
-
-/*
- * leading substring match
- * first char after end of substring returned
- * 0 returned if no match
- *
- * OBSOLETE: use strgrpmatch()
- */
-
-char *strsubmatch(const char *s, const char *p, int flags)
-{
-    int match[2];
-
-    return strgrpmatch(s, p, match, 1,
-		       (flags ? STR_MAXIMAL : 0) | STR_LEFT) ? (char *) s +
-	match[1] : (char *) 0;
 }

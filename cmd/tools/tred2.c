@@ -24,14 +24,14 @@
 
 #include "config.h"
 
-#include "gvc.h"
-#include "cgraph.h"
+#include <gvc/gvc.h>
+#include <cgraph/cgraph.h>
 #include <stdlib.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "ingraphs.h"
+#include <ingraphs/ingraphs.h>
 
 #include <getopt.h>
 
@@ -60,14 +60,16 @@ static void init(int argc, char *argv[])
 
     CmdName = argv[0];
     opterr = 0;
-    while ((c = getopt(argc, argv, ":")) != -1) {
+    while ((c = getopt(argc, argv, ":?")) != -1) {
 	switch (c) {
 	case '?':
-	    if (optopt == '?')
+	    if (optopt == '\0')
 		usage(0);
-	    else
-		fprintf(stderr, "%s: option -%c unrecognized - ignored\n",
+	    else {
+		fprintf(stderr, "%s: option -%c unrecognized\n",
 			CmdName, optopt);
+		usage(1);
+	    }
 	    break;
 	}
     }

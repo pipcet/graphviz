@@ -17,8 +17,9 @@
 
 #include <sys/stat.h>
 
-#include "render.h"
-#include "gvio.h"
+#include <common/render.h>
+#include <gvc/gvio.h>
+#include <cgraph/strcasecmp.h>
 
 static int N_EPSF_files;
 static Dict_t *EPSF_contents;
@@ -84,9 +85,17 @@ static usershape_t *user_init(const char *str)
 	contents = us->data = N_GNEW(statbuf.st_size + 1, char);
 	fseek(fp, 0, SEEK_SET);
 	rc = fread(contents, statbuf.st_size, 1, fp);
-	contents[statbuf.st_size] = '\0';
-	dtinsert(EPSF_contents, us);
-	us->must_inline = must_inline;
+	if (rc == 1) {
+            contents[statbuf.st_size] = '\0';
+            dtinsert(EPSF_contents, us);
+            us->must_inline = must_inline;
+        }
+        else {
+            agerr(AGWARN, "couldn't read from epsf file %s\n", str);
+            free(us->data);
+            free(us);
+            us = NULL;
+        }
     } else {
 	agerr(AGWARN, "BoundingBox not found in epsf file %s\n", str);
 	us = NULL;
@@ -121,8 +130,7 @@ void epsf_init(node_t * n)
 void epsf_free(node_t * n)
 {
 
-    if (ND_shape_info(n))
-	free(ND_shape_info(n));
+    free(ND_shape_info(n));
 }
 
 

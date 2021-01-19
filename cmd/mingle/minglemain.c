@@ -10,15 +10,15 @@
 
 #include "config.h"
 
-#include <cgraph.h>
-#include <agxbuf.h>
-#include <ingraphs.h>
-#include <pointset.h>
+#include <cgraph/cgraph.h>
+#include <cgraph/agxbuf.h>
+#include <ingraphs/ingraphs.h>
+#include <common/pointset.h>
 #include <getopt.h>
 
-#include "DotIO.h"
-#include "edge_bundling.h"
-#include "nearest_neighbor_graph.h"
+#include <sparse/DotIO.h>
+#include <mingle/edge_bundling.h>
+#include <mingle/nearest_neighbor_graph.h>
 
 typedef enum {
 	FMT_GV,
@@ -115,9 +115,9 @@ static void init(int argc, char *argv[], opts_t* opts)
 	int c;
 	char* cmd = argv[0];
 	real s;
-    int i;
+	int i;
 
-    opterr = 0;
+	opterr = 0;
 	opts->outer_iter = 4;
 	opts->method = METHOD_INK_AGGLOMERATE;
 	opts->compatibility_method = COMPATIBILITY_FULL;
@@ -128,40 +128,40 @@ static void init(int argc, char *argv[], opts_t* opts)
 	opts->angle_param = -1;
 	opts->angle = 40.0/180.0*M_PI;
 
-	while ((c = getopt(argc, argv, ":a:c:i:k:K:m:o:p:r:T:v:")) != -1) {
+	while ((c = getopt(argc, argv, ":a:c:i:k:K:m:o:p:r:T:v:?")) != -1) {
 		switch (c) {
 		case 'a':
-            if ((sscanf(optarg,"%lf",&s) > 0) && (s >= 0))
+			if ((sscanf(optarg,"%lf",&s) > 0) && (s >= 0))
 				opts->angle =  M_PI*s/180;
 			else 
 				fprintf (stderr, "-a arg %s must be positive real - ignored\n", optarg); 
 			break;
 		case 'c':
-            if ((sscanf(optarg,"%d",&i) > 0) && (0 <= i) && (i <= COMPATIBILITY_FULL))
+			if ((sscanf(optarg,"%d",&i) > 0) && (0 <= i) && (i <= COMPATIBILITY_FULL))
 				opts->compatibility_method =  i;
 			else 
 				fprintf (stderr, "-c arg %s must be an integer in [0,%d] - ignored\n", optarg, COMPATIBILITY_FULL); 
 			break;
 		case 'i':
-            if ((sscanf(optarg,"%d",&i) > 0) && (i >= 0))
+			if ((sscanf(optarg,"%d",&i) > 0) && (i >= 0))
 				opts->outer_iter =  i;
 			else 
 				fprintf (stderr, "-i arg %s must be a non-negative integer - ignored\n", optarg); 
 			break;
 		case 'k':
-            if ((sscanf(optarg,"%d",&i) > 0) && (i >= 2))
+			if ((sscanf(optarg,"%d",&i) > 0) && (i >= 2))
 				opts->nneighbors =  i;
 			else 
 				fprintf (stderr, "-k arg %s must be an integer >= 2 - ignored\n", optarg); 
 			break;
 		case 'K':
-            if ((sscanf(optarg,"%lf",&s) > 0) && (s > 0))
+			if ((sscanf(optarg,"%lf",&s) > 0) && (s > 0))
 				opts->K =  s;
 			else 
 				fprintf (stderr, "-K arg %s must be positive real - ignored\n", optarg); 
 			break;
 		case 'm':
-            if ((sscanf(optarg,"%d",&i) > 0) && (0 <= i) && (i <= METHOD_INK))
+			if ((sscanf(optarg,"%d",&i) > 0) && (0 <= i) && (i <= METHOD_INK))
 				opts->method =  i;
 			else 
 				fprintf (stderr, "-k arg %s must be an integer >= 2 - ignored\n", optarg); 
@@ -170,13 +170,13 @@ static void init(int argc, char *argv[], opts_t* opts)
 			outfile = openFile(optarg, "w", cmd);
 			break;
 		case 'p':
-            if ((sscanf(optarg,"%lf",&s) > 0))
+			if ((sscanf(optarg,"%lf",&s) > 0))
 				opts->angle_param =  s;
 			else 
 				fprintf (stderr, "-p arg %s must be real - ignored\n", optarg); 
 			break;
 		case 'r':
-            if ((sscanf(optarg,"%d",&i) > 0) && (i >= 0))
+			if ((sscanf(optarg,"%d",&i) > 0) && (i >= 0))
 				opts->max_recursion =  i;
 			else 
 				fprintf (stderr, "-r arg %s must be a non-negative integer - ignored\n", optarg); 
@@ -191,7 +191,7 @@ static void init(int argc, char *argv[], opts_t* opts)
 			break;
 		case 'v':
 			Verbose = 1;
-            if ((sscanf(optarg,"%d",&i) > 0) && (i >= 0))
+			if ((sscanf(optarg,"%d",&i) > 0) && (i >= 0))
 				Verbose =  (unsigned char)i;
 			else 
 				optind--;
@@ -205,10 +205,12 @@ static void init(int argc, char *argv[], opts_t* opts)
 			}
 			break;
 		case '?':
-			if (optopt == '?')
+			if (optopt == '\0')
 				usage(0);
-			else
-				fprintf(stderr, "%s: option -%c unrecognized - ignored\n", cmd, optopt);
+			else {
+				fprintf(stderr, "%s: option -%c unrecognized\n", cmd, optopt);
+				usage(1);
+			}
 			break;
 		default:
 			break;
@@ -242,7 +244,6 @@ static void
 genBundleSpline (pedge edge, agxbuf* xb)
 {
 	int k, j, mm, kk;
-	char buf[BUFSIZ];
 	int dim = edge->dim;
 	real* x = edge->x;
 	real tt1[3]={0.15,0.5,0.85};
@@ -263,8 +264,7 @@ genBundleSpline (pedge edge, agxbuf* xb)
 				t = tt[kk-1];
 				for (k = 0; k < dim; k++) {
 					if (k != 0) agxbputc(xb,',');
-					sprintf(buf, "%.03f", (x[(j-1)*dim+k]*(1-t)+x[j*dim+k]*(t)));
-					agxbput(xb, buf);
+					agxbprint(xb, "%.03f", (x[(j-1)*dim+k]*(1-t)+x[j*dim+k]*(t)));
 				}
 				agxbputc(xb,' ');
 			}
@@ -272,8 +272,7 @@ genBundleSpline (pedge edge, agxbuf* xb)
 		if ((j == 0) || (j == edge->npoints - 1)) {
 			for (k = 0; k < dim; k++) {
 				if (k != 0) agxbputc(xb,',');
-				sprintf(buf, "%.03f", x[j*dim+k]);
-				agxbput(xb, buf);
+				agxbprint(xb, "%.03f", x[j*dim+k]);
 			}
 		}
     }
@@ -283,7 +282,6 @@ static void
 genBundleInfo (pedge edge, agxbuf* xb)
 {
 	int k, j;
-	char buf[BUFSIZ];
 	int dim = edge->dim;
 	real* x = edge->x;
 
@@ -291,13 +289,11 @@ genBundleInfo (pedge edge, agxbuf* xb)
 		if (j != 0)  agxbputc(xb, ':');
 		for (k = 0; k < dim; k++) {
 			if (k != 0)  agxbputc(xb, ',');
-			sprintf(buf, "%.03f", x[j*dim+k]);
-			agxbput(xb, buf);
+			agxbprint(xb, "%.03f", x[j*dim+k]);
 		}
 
 		if ((j < edge->npoints-1) && (edge->wgts))  {
-        	sprintf(buf, ";%.03f", edge->wgts[j]);
-			agxbput(xb, buf);
+			agxbprint(xb, ";%.03f", edge->wgts[j]);
 		}
 	}
 }
@@ -310,7 +306,6 @@ genBundleColors (pedge edge, agxbuf* xb, real maxwgt)
 	int dim = edge->dim;
 	real* x = edge->x;
 	real* lens = MALLOC(sizeof(real)*edge->npoints);
-	char buf[BUFSIZ];
 
 	for (j = 0; j < edge->npoints - 1; j++){
 		len = 0;
@@ -325,11 +320,9 @@ genBundleColors (pedge edge, agxbuf* xb, real maxwgt)
 		/* interpolate between red (t = 1) to blue (t = 0) */
 		r = 255*t; g = 0; b = 255*(1-t);
 		if (j != 0) agxbputc(xb,':');
-		sprintf(buf, "#%02x%02x%02x%02x", r, g, b, 85);
-		agxbput(xb, buf);
+		agxbprint(xb, "#%02x%02x%02x%02x", r, g, b, 85);
 		if (j < edge->npoints-2) {
-			sprintf(buf,";%f",lens[j]/len_total0);
-			agxbput(xb, buf);
+			agxbprint(xb,";%f",lens[j]/len_total0);
 		}
 	}
 	free (lens);

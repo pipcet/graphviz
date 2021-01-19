@@ -11,13 +11,21 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
+%require "3.0"
+
+  /* By default, Bison emits a parser using symbols prefixed with "yy". Graphviz
+   * contains multiple Bison-generated parsers, so we alter this prefix to avoid
+   * symbol clashes.
+   */
+%define api.prefix {html}
+
 %{
 
-#include "render.h"
-#include "htmltable.h"
-#include "htmllex.h"
+#include <common/render.h>
+#include <common/htmltable.h>
+#include <common/htmllex.h>
 
-extern int yyparse(void);
+extern int htmlparse(void);
 
 typedef struct sfont_t {
     textfont_t *cfont;	
@@ -124,8 +132,7 @@ typedef struct {
 static void 
 free_fitem(Dt_t* d, fitem* p, Dtdisc_t* ds)
 {
-    if (p->ti.str)
-	free (p->ti.str);
+    free (p->ti.str);
     free (p);
 }
 
@@ -179,7 +186,7 @@ appendFItemList (agxbuf *ag)
 {
     fitem *fi = NEW(fitem);
 
-    fi->ti.str = strdup(agxbuse(ag));
+    fi->ti.str = agxbdisown(ag);
     fi->ti.font = HTMLstate.fontstack->cfont;
     dtinsert(HTMLstate.fitemList, fi);
 }	
@@ -526,7 +533,7 @@ string : T_string
 
 table : opt_space T_table { 
           if (nonSpace(agxbuse(HTMLstate.str))) {
-            yyerror ("Syntax error: non-space string used before <TABLE>");
+            htmlerror ("Syntax error: non-space string used before <TABLE>");
             cleanup(); YYABORT;
           }
           $2->u.p.prev = HTMLstate.tblstack;
@@ -537,7 +544,7 @@ table : opt_space T_table {
         }
         rows T_end_table opt_space {
           if (nonSpace(agxbuse(HTMLstate.str))) {
-            yyerror ("Syntax error: non-space string used after </TABLE>");
+            htmlerror ("Syntax error: non-space string used after </TABLE>");
             cleanup(); YYABORT;
           }
           $$ = HTMLstate.tblstack;
@@ -620,7 +627,7 @@ parseHTML (char* txt, int* warn, htmlenv_t *env)
     l = NULL;
   }
   else {
-    yyparse();
+    htmlparse();
     *warn = clearHTMLlexer ();
     l = HTMLstate.lbl;
   }

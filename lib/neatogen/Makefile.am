@@ -2,16 +2,12 @@
 ## Process this file with automake to produce Makefile.in
 
 AM_CPPFLAGS = \
-        -I$(top_srcdir) \
+	-I$(top_srcdir)/lib \
         -I$(top_srcdir)/lib/common \
         -I$(top_srcdir)/lib/gvc \
         -I$(top_srcdir)/lib/pack \
-        -I$(top_srcdir)/lib/ortho \
         -I$(top_srcdir)/lib/pathplan \
         -I$(top_srcdir)/lib/cgraph \
-	-I$(top_srcdir)/lib/sparse \
-	-I$(top_srcdir)/lib/rbtree \
-        -I$(top_srcdir)/lib/sfdpgen \
         -I$(top_srcdir)/lib/cdt $(IPSEPCOLA_INCLUDES) $(GTS_CFLAGS)
 
 noinst_LTLIBRARIES = libneatogen_C.la

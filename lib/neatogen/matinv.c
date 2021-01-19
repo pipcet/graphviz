@@ -35,13 +35,13 @@
  */
 
 #include <stdlib.h>
-#include "render.h"
+#include <common/render.h>
 extern int lu_decompose(double **a, int n);
 extern void lu_solve(double *x, double *b, int n);
 
 int matinv(double **A, double **Ainv, int n)
 {
-    register int i, j;
+    int i, j;
     double *b, temp;
 
     /* Decompose matrix into L and U triangular matrices */

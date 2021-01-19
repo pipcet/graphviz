@@ -16,10 +16,11 @@
  * set edge splines.
  */
 
-#include "dot.h"
+#include <dotgen/dot.h>
+#include <math.h>
 
 #ifdef ORTHO
-#include <ortho.h>
+#include <ortho/ortho.h>
 #endif
 
 #define	NSUB	9		/* number of subdivisions, re-aiming splines */
@@ -605,15 +606,15 @@ static int edgecmp(edge_t** ptr0, edge_t** ptr1)
 
     t0 = ND_rank(agtail(le0)) - ND_rank(aghead(le0));
     t1 = ND_rank(agtail(le1)) - ND_rank(aghead(le1));
-    v0 = ABS((int)t0);   /* ugly, but explicit as to how we avoid equality tests on fp numbers */
-    v1 = ABS((int)t1);
+    v0 = abs((int)t0);   /* ugly, but explicit as to how we avoid equality tests on fp numbers */
+    v1 = abs((int)t1);
     if (v0 != v1)
 	return (v0 - v1);
 
     t0 = ND_coord(agtail(le0)).x - ND_coord(aghead(le0)).x;
     t1 = ND_coord(agtail(le1)).x - ND_coord(aghead(le1)).x;
-    v0 = ABS((int)t0);
-    v1 = ABS((int)t1);
+    v0 = abs((int)t0);
+    v1 = abs((int)t1);
     if (v0 != v1)
 	return (v0 - v1);
 
@@ -1674,7 +1675,7 @@ makeLineEdge(graph_t* g, edge_t* fe, pointf* points, node_t** hp)
 	e = ED_to_orig(e);
     hn = aghead(e);
     tn = agtail(e);
-    delr = ABS(ND_rank(hn)-ND_rank(tn));
+    delr = abs(ND_rank(hn)-ND_rank(tn));
     if ((delr == 1) || ((delr == 2) && (GD_has_labels(g->root) & EDGE_LABEL)))
 	return 0;
     if (agtail(fe) == agtail(e)) {
@@ -1757,7 +1758,7 @@ make_regular_edge(graph_t* g, spline_info_t* sp, path * P, edge_t ** edges, int 
     sl = 0;
     e = edges[ind];
     hackflag = FALSE;
-    if (ABS(ND_rank(agtail(e)) - ND_rank(aghead(e))) > 1) {
+    if (abs(ND_rank(agtail(e)) - ND_rank(aghead(e))) > 1) {
 	fwdedgeai = *(Agedgeinfo_t*)e->base.data;
 	fwdedgea.out = *e;
 	fwdedgea.in = *AGOUT2IN(e);
@@ -1952,33 +1953,23 @@ completeregularpath(path * P, edge_t * first, edge_t * last,
     edge_t *uleft, *uright, *lleft, *lright;
     int i, fb, lb;
     splines *spl;
-    pointf *pp;
-    int pn;
 
     fb = lb = -1;
     uleft = uright = NULL;
     uleft = top_bound(first, -1), uright = top_bound(first, 1);
     if (uleft) {
 	if (!(spl = getsplinepoints(uleft))) return;
-	pp = spl->list[0].list;
-       	pn = spl->list[0].size;
     }
     if (uright) {
 	if (!(spl = getsplinepoints(uright))) return;
-	pp = spl->list[0].list;
-       	pn = spl->list[0].size;
     }
     lleft = lright = NULL;
     lleft = bot_bound(last, -1), lright = bot_bound(last, 1);
     if (lleft) {
 	if (!(spl = getsplinepoints(lleft))) return;
-	pp = spl->list[spl->size - 1].list;
-       	pn = spl->list[spl->size - 1].size;
     }
     if (lright) {
 	if (!(spl = getsplinepoints(lright))) return;
-	pp = spl->list[spl->size - 1].list;
-       	pn = spl->list[spl->size - 1].size;
     }
     for (i = 0; i < tendp->boxn; i++)
 	add_box(P, tendp->boxes[i]);
@@ -2323,10 +2314,6 @@ static edge_t *top_bound(edge_t * e, int side)
     int i;
 
     for (i = 0; (f = ND_out(agtail(e)).list[i]); i++) {
-#if 0				/* were we out of our minds? */
-	if (ED_tail_port(e).p.x != ED_tail_port(f).p.x)
-	    continue;
-#endif
 	if (side * (ND_order(aghead(f)) - ND_order(aghead(e))) <= 0)
 	    continue;
 	if ((ED_spl(f) == NULL)
@@ -2345,10 +2332,6 @@ static edge_t *bot_bound(edge_t * e, int side)
     int i;
 
     for (i = 0; (f = ND_in(aghead(e)).list[i]); i++) {
-#if 0				/* same here */
-	if (ED_head_port(e).p.x != ED_head_port(f).p.x)
-	    continue;
-#endif
 	if (side * (ND_order(agtail(f)) - ND_order(agtail(e))) <= 0)
 	    continue;
 	if ((ED_spl(f) == NULL)

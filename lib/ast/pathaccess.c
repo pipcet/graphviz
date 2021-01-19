@@ -22,23 +22,21 @@
  * path returned in path buffer
  */
 
-#include <ast.h>
+#include <ast/ast.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #else
-#include <compat_unistd.h>
+#include <ast/compat_unistd.h>
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
 
-/* #include <ls.h> */
-
 char *pathcanon(char *path, int flags);
 
-char *pathaccess(register char *path, register const char *dirs,
-		 const char *a, const char *b, register int mode)
+char *pathaccess(char *path, const char *dirs,
+		 const char *a, const char *b, int mode)
 {
-    register int m = 0;
+    int m = 0;
     int sep = ':';
     char cwd[PATH_MAX];
     struct stat st;

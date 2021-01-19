@@ -15,16 +15,16 @@
     <ProjectGuid>{C5CEB09E-79AF-4091-ACCF-D28EC3D7D90F}</ProjectGuid>
     <RootNamespace>gvneatogen</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -52,7 +52,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)windows\include;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\gvc;$(SolutionDir)lib\pack;$(SolutionDir)lib\pathplan;$(SolutionDir)lib\ortho;$(SolutionDir)lib\rbtree;$(SolutionDir)lib\sfdpgen;$(SolutionDir)lib\sparse;$(SolutionDir)lib\vpsc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)windows\include;$(SolutionDir)lib;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\gvc;$(SolutionDir)lib\pack;$(SolutionDir)lib\pathplan</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;_LIB;WIN32_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -71,7 +71,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)windows\include;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\gvc;$(SolutionDir)lib\pack;$(SolutionDir)lib\pathplan;$(SolutionDir)lib\ortho;$(SolutionDir)lib\rbtree;$(SolutionDir)lib\sfdpgen;$(SolutionDir)lib\sparse;$(SolutionDir)lib\vpsc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)windows\include;$(SolutionDir)lib;$(SolutionDir)lib\cdt;$(SolutionDir)lib\cgraph;$(SolutionDir)lib\common;$(SolutionDir)lib\gvc;$(SolutionDir)lib\pack;$(SolutionDir)lib\pathplan</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;_LIB;WIN32_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>

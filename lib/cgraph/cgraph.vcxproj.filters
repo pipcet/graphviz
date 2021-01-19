@@ -24,7 +24,7 @@
     <ClInclude Include="cgraph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="malloc.h">
+    <ClInclude Include="strcasecmp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

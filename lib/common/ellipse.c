@@ -58,8 +58,8 @@
 #define MAX(a,b)        ((a)>(b)?(a):(b))
 #define MIN(a,b)        ((a)<(b)?(a):(b))
 
-#define NEW(t) ((t*)calloc(1,sizeof(t)))
-#define N_NEW(n,t) ((t*)calloc(n,sizeof(t)))
+#define NEW(t) calloc(1,sizeof(t))
+#define N_NEW(n,t) calloc(n,sizeof(t))
 
 #define PI            3.14159265358979323846
 
@@ -77,8 +77,8 @@ typedef struct Ppoly_t {
 
 typedef Ppoly_t Ppolyline_t;
 #else
-#include "render.h"
-#include "pathplan.h"
+#include <common/render.h>
+#include <pathplan/pathplan.h>
 #endif
 
 #define TWOPI (2*M_PI)

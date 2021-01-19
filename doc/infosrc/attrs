@@ -2,15 +2,15 @@
 # Each item consist of a header line, followed by a description in HTML.
 #
 # The header line has the format
-#    :name:uses:kind[:dflt[:minv]];  [notes]
+#    :name:used_by:types[:dflt[:minv]];  [notes]
 # where
 #  name has the format name1[/namei]*[ notes]
 #    the note can be used as a comment
 #
-#  uses is a string consisting of G,C,N,E, indicating that the attribute
+#  used_by is a string consisting of G,C,N,E, indicating that the attribute
 #    applies to graphs, clusters, nodes and edges, respectively.
 #
-#  kind has the format type[/typei]*
+#  types has the format type[/typei]*
 #    type can be int, bool, string, double, or a special <typename>.
 #    In the last case, we assume there is an entry for <typename> in
 #    the types file.
@@ -57,7 +57,7 @@ is limited to this factor of its potential motion. By being less than
 #  Set by attribute, overwritten, unused
 #:Nodesep:G:double:1.0;
 #  Set by attribute, overwritten, unused
-:URL:ENGC:escString:<none>;   map,ps,svg
+:URL:ENGC:escString:<none>;   map,postscript,svg
 Hyperlinks incorporated into device-dependent output.
 At present, used in ps2, cmap, i*map and svg formats.
 For all these formats, URLs can be attached to nodes, edges and
@@ -282,7 +282,7 @@ case, only these constraints are involved, so a faster solver can be used.
 Distortion factor for <A HREF=#d:shape><B>shape</B></A>=polygon.
 Positive values cause top part to
 be larger than bottom; negative values do the opposite.
-:dpi:G:double:96.0/0.0;  bitmap,svg
+:dpi:G:double:96.0/0.0;  bitmap output,svg
 This specifies the expected number of pixels per inch on a display device.
 For bitmap output, this guarantees that text rendering will be
 done more accurately, both in size and in placement. For SVG output,
@@ -481,9 +481,9 @@ In this case, if both the width or the height are set explicitly,
 the maximum of the two values is used.
 If neither is set explicitly, the minimum of the two default values
 is used.
-:href:GCNE:escString:"";  map,ps,svg
+:href:GCNE:escString:"";  map,postscript,svg
 Synonym for <A HREF=#d:URL>URL</A>.
-:id:GCNE:escString:"";  map,ps,svg
+:id:GCNE:escString:"";  map,postscript,svg
 Allows the graph author to provide an id for graph objects which is to be included in the output.
 Normal "&#92;N", "&#92;E", "&#92;G" substitutions are applied.
 If provided, it is the responsibility of the provider to keep
@@ -847,11 +847,17 @@ corresponding to 0 degrees. <B>NOTE:</B> Since the attribute is evaluated first 
 By default, the final layout is translated so that the lower-left corner of the bounding box is
 at the origin. This can be annoying if some nodes are pinned or if the user runs <TT>neato -n</TT>. 
 To avoid this translation, set <TT>notranslate</TT> to true.
-:nslimit/nslimit1:G:double;  dot
+:nslimit:G:double;  dot
 Used to set number of iterations in
 network simplex applications. <B>nslimit</B> is used in
-computing node x coordinates, <B>nslimit1</B> for ranking nodes.
-If defined, # iterations =  <B>nslimit(1)</B> * # nodes;
+computing node x coordinates.
+If defined, # iterations =  <B>nslimit</B> * # nodes;
+otherwise,  # iterations = MAXINT.
+:nslimit1:G:double;  dot
+Used to set number of iterations in
+network simplex applications. 
+<B>nslimit1</B> is used for ranking nodes.
+If defined, # iterations =  <B>nslimit1</B> * # nodes;
 otherwise,  # iterations = MAXINT.
 :ordering:GN:string:""; dot
 If the value of the attribute is "out", then
@@ -866,10 +872,10 @@ the input.
 If defined as a graph or subgraph attribute, the value is applied to all nodes
 in the graph or subgraph. Note that the graph attribute takes
 precedence over the node attribute.
-:orientation:N:double:0.0:360.0;
-Angle, in degrees, used to rotate polygon node shapes. For any number of polygon sides, 0 degrees rotation results in a flat base.
-:orientation:G:string:"";
-If "[lL]*", set graph orientation to landscape
+:orientation:NG:double/string:0.0/"":360.0;
+When used on nodes: Angle, in degrees, used to rotate polygon node shapes. For any number of polygon sides, 0 degrees rotation results in a flat base.
+<P>
+When used on graphs: If <CODE>"[lL]*"</CODE>, set graph orientation to landscape.
 Used only if <A HREF=#d:rotate><B>rotate</B></A> is not defined.
 :outputorder:G:outputMode:breadthfirst;
 Specify order in which nodes and edges are drawn.
@@ -1172,7 +1178,7 @@ minimization a second time.
 The power of the repulsive force used in an extended Fruchterman-Reingold 
 force directed model. Values larger than 1 tend to reduce 
 the warping effect at the expense of less clustering.
-:resolution:G:double:96.0/0.0;  bitmap,svg
+:resolution:G:double:96.0/0.0;  bitmap output,svg
 This is a synonym for the <A HREF=#d:dpi>dpi</A> attribute.
 :root:GN:string/bool:<none>(graphs)/false(nodes);  twopi,circo
 This specifies nodes to be used as the center of the
@@ -1402,7 +1408,7 @@ tooltips will be generated, the user should set a <TT>tooltip</TT>
 attribute explicitly.
 #toplabel:N:string:"";
 #  Additional label near top of nodes of shape M*.
-:truecolor:G:bool:;  bitmap
+:truecolor:G:bool:;  bitmap output
 If set explicitly to true or false, the value determines whether or not
 internal bitmap rendering relies on a truecolor color model or uses
 a color palette.

@@ -1,6 +1,18 @@
 #! /bin/sh
 
-if ! GRAPHVIZ_GIT_DATE=$( git log -n 1 --format=%ci ) ; then
+if ! GRAPHVIZ_VERSION=$( python3 gen_version.py ) ; then
+    echo "Error: Failed to set version" >&2
+    exit 1
+fi
+GRAPHVIZ_VERSION_MAJOR=$( echo $GRAPHVIZ_VERSION | sed 's/\([^\.]*\).*/\1/' )
+GRAPHVIZ_VERSION_MINOR=$( echo $GRAPHVIZ_VERSION | sed 's/[^\.]*\.\([^\.]*\).*/\1/' )
+GRAPHVIZ_VERSION_PATCH=$( echo $GRAPHVIZ_VERSION | sed 's/[^\.]*\.[^\.]*\.//' )
+
+if ! GRAPHVIZ_GIT_DATE=$( python3 gen_version.py --committer-date-iso ) ; then
+    echo "Error: Failed to set date" >&2
+    exit 1
+fi
+if [ "$GRAPHVIZ_GIT_DATE" = "0" ]; then
     GRAPHVIZ_VERSION_DATE="0"
     echo "Warning: build not started in a Git clone, or Git is not installed: setting version date to 0." >&2
 else
@@ -24,25 +36,19 @@ else
     echo "Graphviz: abbreviated hash of last commit: $GRAPHVIZ_VERSION_COMMIT"
 fi
 
+if ! GRAPHVIZ_COLLECTION=$( python3 gen_version.py --collection) ; then
+    echo "Error: Failed to set collection" >&2
+    exit 1
+fi
+
 # initialize version for a "development" build
 cat >./version.m4 <<EOF
 dnl Graphviz package version number, (as distinct from shared library version)
-dnl For the minor number: odd => unstable series
-dnl                       even => stable series
-dnl For the micro number: 0 => in-progress development
-dnl                       timestamp => tar-file snapshot or release
 
-dnl uncomment the next 4 lines for development releases, minor version must be odd
-m4_define([graphviz_version_major],[2])
-m4_define([graphviz_version_minor],[45])
-m4_define([graphviz_version_micro],[$GRAPHVIZ_VERSION_DATE])
-m4_define([graphviz_collection],[development])
-
-dnl uncomment the next 4 lines for stable releases, minor version must be even
-dnl m4_define([graphviz_version_major],[2])
-dnl m4_define([graphviz_version_minor],[44])
-dnl m4_define([graphviz_version_micro],[0])
-dnl m4_define([graphviz_collection],[stable])
+m4_define([graphviz_version_major],[$GRAPHVIZ_VERSION_MAJOR])
+m4_define([graphviz_version_minor],[$GRAPHVIZ_VERSION_MINOR])
+m4_define([graphviz_version_micro],[$GRAPHVIZ_VERSION_PATCH])
+m4_define([graphviz_collection],[$GRAPHVIZ_COLLECTION])
 
 m4_define([graphviz_version_date],[$GRAPHVIZ_VERSION_DATE])
 m4_define([graphviz_change_date],["$GRAPHVIZ_CHANGE_DATE"])
@@ -63,10 +69,3 @@ autoreconf -v --install --force || exit 1
 # ensure config/depcomp exists even if still using automake-1.4
 # otherwise "make dist" fails.
 touch config/depcomp
-
-# suppress automatic ./configure  if "./autogen.sh NOCONFIG"
-if test "$1" != "NOCONFIG"; then
-    # don't use any old cache, but create a new one
-    rm -f config.cache
-    ./configure -C "$@"
-fi

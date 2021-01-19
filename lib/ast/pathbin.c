@@ -18,11 +18,11 @@
  * return current PATH
  */
 
-#include <ast.h>
+#include <ast/ast.h>
 
 char *pathbin(void)
 {
-    register char *bin;
+    char *bin;
 
     static char *val;
 

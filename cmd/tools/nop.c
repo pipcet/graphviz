@@ -13,8 +13,8 @@
 
 #include "config.h"
 
-#include "cgraph.h"
-#include "ingraphs.h"
+#include <cgraph/cgraph.h>
+#include <ingraphs/ingraphs.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H
@@ -42,17 +42,19 @@ static void init(int argc, char *argv[])
     int c;
 
     opterr = 0;
-    while ((c = getopt(argc, argv, "p")) != -1) {
+    while ((c = getopt(argc, argv, "p?")) != -1) {
 	switch (c) {
 	case 'p':
 	    chkOnly = 1;
 	    break;
 	case '?':
-	    if (optopt == '?')
+	    if (optopt == '\0' || optopt == '?')
 		usage(0);
-	    else
-		fprintf(stderr, "nop: option -%c unrecognized - ignored\n",
+	    else {
+		fprintf(stderr, "nop: option -%c unrecognized\n",
 			optopt);
+		usage(1);
+	    }
 	    break;
 	}
     }

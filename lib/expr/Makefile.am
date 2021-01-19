@@ -7,21 +7,26 @@ pdfdir = $(pkgdatadir)/doc/pdf
 pkgconfigdir = $(libdir)/pkgconfig
 
 AM_CPPFLAGS = \
-        -I. \
-        -I$(top_srcdir) \
-        -I$(top_srcdir)/lib/vmalloc \
-	-I$(top_srcdir)/lib/sfio \
-	-I$(top_srcdir)/lib/ast \
+	-I$(top_srcdir)/lib \
 	-I$(top_srcdir)/lib/cdt
 
-noinst_HEADERS = exgram.h exlib.h expr.h
+noinst_HEADERS = exgram.h exlib.h exop.h expr.h
 noinst_LTLIBRARIES = libexpr_C.la
 
 ### expr.h includes ast.h and vmalloc.h which we don't install
 #lib_LTLIBRARIES = libexpr.la
 man_MANS = expr.3
+if ENABLE_MAN_PDFS
 pdf_DATA = expr.3.pdf
-#pkgconfig_DATA = libexpr.pc
+
+if HAVE_PS2PDF
+pdf = $(pdf_DATA)
+else
+pdf = ERROR_NO_PS2PDF
+endif
+else
+pdf =
+endif
 
 #### -no-undefined breaks Mac OS/X builds.
 #### libast has "extern char **environ" which remains
@@ -44,44 +49,35 @@ libexpr_C_la_LIBADD = \
 $(libexpr_C_la_OBJECTS) $(libexpr_la_OBJECTS): \
 	exparse.h exparse.c exgram.h exop.h
 
-exop.h: exparse.h
-	echo "static const char* exop[] = {" > exop.h
-	echo "	\"MINTOKEN\"," >> exop.h
-	$(SED) -e '1,/^[   ]*#[    ]*define[   ][  ]*MINTOKEN/d' -e '/MAXTOKEN/,$$d' -e '/^[ 	]*#[ 	]*define[ 	][ 	]*[A-Z]/!d' -e 's/^[ 	]*#[ 	]*define[ 	]*\([A-Z0-9_]*\).*/	"\1",/' < exparse.h >> exop.h
-	echo "};" >> exop.h
-
 exparse.c: y.tab.c 
-	@SED@ "s/yy/ex/g" <y.tab.c | \
-		@SED@ "s/YY/EX/g" | \
-		@SED@ "s/unsigned long int/uint64_t/g" | \
-		@SED@ "s/unsigned long/uint64_t/g" | \
-		@SED@ "s/fprintf/sfprintf/g" | \
+	@SED@ "s/fprintf/sfprintf/g" <y.tab.c | \
 		@SED@ "s/FILE/Sfio_t/g" | \
 		@SED@ "s/stderr/sfstderr/g" > exparse.c
 
 exparse.h: y.tab.h
 	echo "#ifndef _EXPARSE_H" > exparse.h
 	echo "#define _EXPARSE_H" >> exparse.h
-	@SED@ "s/yy/ex/g" < y.tab.h | \
-		@SED@ "s/unsigned long int/uint64_t/g" | \
-		@SED@ "s/unsigned long/uint64_t/g" | \
-		@SED@ "s/YY/EX/g" >> exparse.h
+	cat y.tab.h >> exparse.h
 	echo "#endif /* _EXPARSE_H */" >> exparse.h
 
 y.tab.c y.tab.h: y.output
 
 y.output: $(top_srcdir)/lib/expr/exparse.y
-	@YACC@ -dtv $(top_srcdir)/lib/expr/exparse.y
+	@YACC@ -Wno-yacc -dtv $(top_srcdir)/lib/expr/exparse.y -o y.tab.c
 
+if ENABLE_MAN_PDFS
+if HAVE_PS2PDF
 expr.3.pdf: expr.3.ps
-	@PS2PDF@ $< $@
+	@PS2PDF@ $<
 
 expr.3.ps: $(srcdir)/expr.3
 	@GROFF@ -Tps -man $< >$@
+endif
+endif
 
-EXTRA_DIST = $(man_MANS) $(pdf_DATA) \
+EXTRA_DIST = $(man_MANS) $(pdf) \
 	Makefile.nmake Makefile.orig \
-	exparse.c exparse.h exop.h \
+	exparse.c exparse.h \
 	y.tab.c y.tab.h y.output expr.vcxproj*
 
-DISTCLEANFILES = $(pdf_DATA) exparse.[ch] exop.h y.tab.[ch] y.output expr.3.ps
+DISTCLEANFILES = $(pdf) exparse.[ch] y.tab.[ch] y.output expr.3.ps

@@ -22,13 +22,13 @@
 
 #include "config.h"
 
-#include "cgraph.h"
-#include "arith.h"
-#include "timing.h"
+#include <cgraph/cgraph.h>
+#include <common/arith.h>
+#include <common/timing.h>
 #include <stdlib.h>
 
-#define NEW(t)           (t*)malloc(sizeof(t))
-#define N_NEW(n,t)       (t*)malloc((n)*sizeof(t))
+#define NEW(t)           malloc(sizeof(t))
+#define N_NEW(n,t)       calloc((n),sizeof(t))
 
 typedef struct {
     unsigned char on_stack;
@@ -42,7 +42,7 @@ typedef struct {
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "ingraphs.h"
+#include <ingraphs/ingraphs.h>
 
 #include <getopt.h>
 
@@ -248,7 +248,7 @@ static void init(int argc, char *argv[])
 
     CmdName = argv[0];
     opterr = 0;
-    while ((c = getopt(argc, argv, "vr")) != -1) {
+    while ((c = getopt(argc, argv, "vr?")) != -1) {
 	switch (c) {
 	case 'v':
 	    Verbose = 1;
@@ -257,11 +257,13 @@ static void init(int argc, char *argv[])
         PrintRemovedEdges = 1;
         break;
 	case '?':
-	    if (optopt == '?')
+	    if (optopt == '\0' || optopt == '?')
 		usage(0);
-	    else
-		fprintf(stderr, "%s: option -%c unrecognized - ignored\n",
+	    else {
+		fprintf(stderr, "%s: option -%c unrecognized\n",
 			CmdName, optopt);
+		usage(1);
+	    }
 	    break;
 	}
     }
@@ -287,7 +289,7 @@ static void process(Agraph_t * g, estack_t* sp)
     size_t infosize;
 
     infosize = (agnnodes(g)+1)*sizeof(nodeinfo_t);
-    ninfo = (nodeinfo_t*)malloc(infosize);
+    ninfo = malloc(infosize);
 
     if (Verbose)
 	fprintf(stderr, "Processing graph %s\n", agnameof(g));

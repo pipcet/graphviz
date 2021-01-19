@@ -1,9 +1,7 @@
 # Header checks
 include(CheckIncludeFile)
 
-check_include_file( crt_externs.h       HAVE_CRT_EXTERNS_H      )
 check_include_file( fcntl .h            HAVE_FCNTL_H            )
-check_include_file( malloc.h            HAVE_MALLOC_H           )
 check_include_file( search.h            HAVE_SEARCH_H           )
 check_include_file( stat.h              HAVE_STAT_H             )
 check_include_file( strings.h           HAVE_STRINGS_H          )
@@ -20,11 +18,11 @@ check_include_file( unistd.h            HAVE_UNISTD_H           )
 check_include_file( vfork.h             HAVE_VFORK_H            )
 check_include_file( X11/Intrinsic.h     HAVE_X11_INTRINSIC_H    )
 check_include_file( X11/Xaw/Text.h      HAVE_X11_XAW_TEXT_H     )
+check_include_file( getopt.h            HAVE_GETOPT_H           )
 
 # Function checks
 include(CheckFunctionExists)
 
-check_function_exists( _NSGetEnviron    HAVE__NSGETENVIRON  )
 check_function_exists( drand48          HAVE_DRAND48        )
 check_function_exists( cbrt             HAVE_CBRT           )
 check_function_exists( getpagesize      HAVE_GETPAGESIZE    )
@@ -37,8 +35,6 @@ check_function_exists( setenv           HAVE_SETENV         )
 check_function_exists( setmode          HAVE_SETMODE        )
 check_function_exists( sincos           HAVE_SINCOS         )
 check_function_exists( srand48          HAVE_SRAND48        )
-check_function_exists( strcasecmp       HAVE_STRCASECMP     )
-check_function_exists( strncasecmp      HAVE_STRNCASECMP    )
 check_function_exists( vsnprintf        HAVE_VSNPRINTF      )
 
 # Type checks

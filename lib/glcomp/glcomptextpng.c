@@ -11,15 +11,15 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include "glcompfont.h"
-#include "memory.h"
+#include <glcomp/glcompfont.h>
+#include <glcomp/glcomptextpng.h>
+#include <common/memory.h>
 #include <gtk/gtk.h>
 #include <png.h>
 
 unsigned char *glCompLoadPng (char *filename, int *imageWidth, int *imageHeight)
 {
     cairo_surface_t *surface;
-    cairo_format_t format;
     int w, h;
     unsigned char *d;
     surface = NULL;
@@ -30,7 +30,6 @@ unsigned char *glCompLoadPng (char *filename, int *imageWidth, int *imageHeight)
     h = cairo_image_surface_get_height(surface);
     *imageWidth = w;
     *imageHeight = h;
-    format = cairo_image_surface_get_format(surface);
     d = cairo_image_surface_get_data(surface);
     return d;
 }

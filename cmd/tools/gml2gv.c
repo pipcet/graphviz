@@ -22,7 +22,7 @@
 
 #include <getopt.h>
 
-#define N_NEW(n,t)       (t*)malloc((n)*sizeof(t))
+#define N_NEW(n,t)       calloc((n),sizeof(t))
 
 static int Verbose;
 static char* gname = "";
@@ -114,6 +114,8 @@ static void initargs(int argc, char **argv)
 	    Verbose = 1;
 	    break;
 	case 'o':
+	    if (outFile != NULL)
+		fclose(outFile);
 	    outFile = openFile(optarg, "w");
 	    break;
 	case ':':

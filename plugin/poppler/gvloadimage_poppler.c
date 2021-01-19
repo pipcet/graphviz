@@ -16,18 +16,12 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#include "gvplugin_loadimage.h"
+#include <gvc/gvplugin_loadimage.h>
 
 #ifdef HAVE_PANGOCAIRO
 #ifdef HAVE_POPPLER
 #include <poppler.h>
 #include <cairo.h>
-
-#ifdef _WIN32
-#define NUL_FILE "nul"
-#else
-#define NUL_FILE "/dev/null"
-#endif
 
 typedef enum {
     FORMAT_PDF_CAIRO,

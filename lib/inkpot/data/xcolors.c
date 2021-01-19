@@ -13,6 +13,7 @@
  */
 
 #include <tkInt.h>
+#include <cgraph/strcasecmp.h>
 
 /*
  * This value will be set to the number of colors in the color table

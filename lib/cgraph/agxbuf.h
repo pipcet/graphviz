@@ -18,6 +18,8 @@ extern "C" {
 #ifndef         AGXBUF_H
 #define         AGXBUF_H
 
+#include <stddef.h>
+
 #ifdef _WIN32
 #   ifdef EXPORT_AGXBUF
 #       define AGXBUF_API __declspec(dllexport)
@@ -44,6 +46,21 @@ extern "C" {
  */
     AGXBUF_API void agxbinit(agxbuf * xb, unsigned int hint,
 			 unsigned char *init);
+
+/* support for extra API misuse warnings if available */
+#ifdef __GNUC__
+  #define PRINTF_LIKE(index, first) __attribute__((format(printf, index, first)))
+#else
+  #define PRINTF_LIKE(index, first) /* nothing */
+#endif
+
+/* agxbprint:
+ * Printf-style output to an agxbuf
+ */
+    AGXBUF_API int agxbprint(agxbuf * xb, const char *fmt, ...)
+       PRINTF_LIKE(2, 3);
+
+#undef PRINTF_LIKE
 
 /* agxbput_n:
  * Append string s of length n into xb
@@ -77,7 +94,10 @@ extern "C" {
 #define agxbputc(X,C) ((((X)->ptr >= (X)->eptr) ? agxbmore(X,1) : 0), (void)(*(X)->ptr++ = ((unsigned char)C)))
 
 /* agxbuse:
- * Null-terminates buffer; resets and returns pointer to data;
+ * Null-terminates buffer; resets and returns pointer to data. The buffer is
+ * still associated with the agxbuf and will be overwritten on the next, e.g.,
+ * agxbput. If you want to retrieve and disassociate the buffer, use agxbdisown
+ * instead.
  *  char* agxbuse(agxbuf* xb)
  */
 #define agxbuse(X) ((void)agxbputc(X,'\0'),(char*)((X)->ptr = (X)->buf))
@@ -105,6 +125,16 @@ extern "C" {
  *  char* agxbnext(agxbuf* xb)
  */
 #define agxbnext(X) ((char*)((X)->ptr))
+
+/* agxbdisown:
+ * Disassociate the backing buffer from this agxbuf and return it. The buffer is
+ * NUL terminated before being returned. If the agxbuf is using stack memory,
+ * this will first copy the data to a new heap buffer to then return. If failure
+ * occurs, NULL is returned. If you want to temporarily access the string in the
+ * buffer, but have it overwritten and reused the next time, e.g., agxbput is
+ * called, use agxbuse instead of agxbdisown.
+ */
+    AGXBUF_API char *agxbdisown(agxbuf * xb);
 
 #endif
 

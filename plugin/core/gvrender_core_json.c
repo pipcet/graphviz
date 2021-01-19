@@ -15,7 +15,6 @@
 
 #ifdef _WIN32
 #include <io.h>
-#include "compat.h"
 #endif
 
 #include <stdarg.h>
@@ -23,17 +22,17 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "macros.h"
-#include "const.h"
-#include "xdot.h"
+#include <common/macros.h>
+#include <common/const.h>
+#include <xdot/xdot.h>
 
-#include "gvplugin_render.h"
-#include "gvplugin_device.h"
-#include "agxbuf.h"
-#include "utils.h"
-#include "gvc.h"
-#include "gvio.h"
-#include "gvcint.h"
+#include <gvc/gvplugin_render.h>
+#include <gvc/gvplugin_device.h>
+#include <cgraph/agxbuf.h>
+#include <common/utils.h>
+#include <gvc/gvc.h>
+#include <gvc/gvio.h>
+#include <gvc/gvcint.h>
 
 typedef enum {
 	FORMAT_JSON,
@@ -615,7 +614,7 @@ static Dtdisc_t intDisc = {
     0
 };
 
-#define NEW(t)          (t*)calloc(1,sizeof(t))
+#define NEW(t)          calloc(1,sizeof(t))
 
 static int lookup (Dt_t* map, char* name)
 {
@@ -717,7 +716,6 @@ static void json_end_graph(GVJ_t *job)
 {
     graph_t *g = job->obj->u.g;
     state_t sp;
-    Agiodisc_t* io_save;
     static Agiodisc_t io;
 
     if (io.afread == NULL) {
@@ -726,7 +724,6 @@ static void json_end_graph(GVJ_t *job)
 	io.flush = (flushfn)gvflush;
     }
 
-    io_save = g->clos->disc.io;
     g->clos->disc.io = &io;
 
     set_attrwf(g, TRUE, FALSE);

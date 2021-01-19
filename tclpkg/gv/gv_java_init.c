@@ -13,10 +13,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "gvc.h"
-#include "gvplugin.h"
-#include "gvcjob.h"
-#include "gvcint.h"
+#include <gvc/gvc.h>
+#include <gvc/gvplugin.h>
+#include <gvc/gvcjob.h>
+#include <gvc/gvcint.h>
 
 typedef struct {
     char* data;
@@ -33,7 +33,7 @@ static size_t gv_string_writer(GVJ_t *job, const char *s, size_t len)
 	bap->sz *= 2;
 	if (newlen > bap->sz)
 	    bap->sz = 2*newlen;
-        bap->data = (char*)realloc(bap->data, bap->sz);
+        bap->data = realloc(bap->data, bap->sz);
     }
     memcpy (bap->data+bap->len, s, len); 
     bap->len = newlen;

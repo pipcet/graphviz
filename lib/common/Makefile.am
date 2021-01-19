@@ -2,13 +2,11 @@
 ## Process this file with automake to produce Makefile.in
 
 AM_CPPFLAGS = \
-        -I$(top_srcdir) \
+	-I$(top_srcdir)/lib \
         -I$(top_srcdir)/libltdl \
 	-I$(top_srcdir)/lib/gvc \
 	-I$(top_srcdir)/lib/pack \
-	-I$(top_srcdir)/lib/label \
 	-I$(top_srcdir)/lib/xdot \
-	-I$(top_srcdir)/lib/fdpgen \
 	-I$(top_srcdir)/lib/pathplan \
 	-I$(top_srcdir)/lib/cgraph \
 	-I$(top_srcdir)/lib/cdt $(GD_INCLUDES) $(EXPAT_INCLUDES) $(Z_INCLUDES)
@@ -59,26 +57,14 @@ svgcolor_lib : $(top_srcdir)/lib/common/svgcolor_names  $(top_srcdir)/awk/svgcol
 htmllex.o htmllex.lo: htmllex.c htmllex.h htmlparse.h
 htmlparse.o htmlparse.lo: htmlparse.c htmlparse.h
                                                                                 
-htmlparse.c: y.tab.c
-	@SED@ "s/yy/html/g" < y.tab.c | \
-		@SED@ "s/unsigned long int/uint64_t/g" | \
-                @SED@ "s/unsigned long/uint64_t/g" > htmlparse.c
-
-htmlparse.h: y.tab.h
-	@SED@ "s/yy/html/g" < y.tab.h | \
-		@SED@ "s/unsigned long int/uint64_t/g" | \
-                @SED@ "s/unsigned long/uint64_t/g"> htmlparse.h
-
-y.tab.c y.tab.h: y.output
-
-y.output: $(top_srcdir)/lib/common/htmlparse.y
-	@YACC@ -dv $(top_srcdir)/lib/common/htmlparse.y
+htmlparse.c htmlparse.h: $(top_srcdir)/lib/common/htmlparse.y
+	@YACC@ -Wno-yacc -dv $(top_srcdir)/lib/common/htmlparse.y -o htmlparse.c
 
 DISTCLEANFILES = brewer_lib color_lib colortbl.h ps_font_equiv.h \
-	y.output y.tab.[ch] htmlparse.[ch]
+	htmlparse.[ch]
 
 EXTRA_DIST = README.imap chars.tcl ps_font_equiv.h \
-	strcasecmp.c strncasecmp.c htmlparse.c htmlparse.h \
-	y.tab.c y.tab.h y.output entities.html entities.tcl \
+	htmlparse.c htmlparse.h \
+	entities.html entities.tcl \
 	brewer_colors brewer_lib svgcolor_names svgcolor_lib \
 	color_names color_lib colortbl.h mksvgfonts.pl

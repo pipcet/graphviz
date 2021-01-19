@@ -17,9 +17,9 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "gvplugin_layout.h"
-#include "gvcint.h"
-#include "gvcproc.h"
+#include <gvc/gvplugin_layout.h>
+#include <gvc/gvcint.h>
+#include <gvc/gvcproc.h>
 
 extern char *strdup_and_subst_obj(char *str, void * n);
 extern void emit_graph(GVJ_t * job, graph_t * g);
@@ -248,10 +248,8 @@ static void gvevent_enter_obj(GVJ_t * job)
     node_t *n;
     Agsym_t *a;
 
-    if (job->active_tooltip) {
-	free(job->active_tooltip);
-	job->active_tooltip = NULL;
-    }
+    free(job->active_tooltip);
+    job->active_tooltip = NULL;
     obj = job->current_obj;
     if (obj) {
         switch (agobjkind(obj)) {
@@ -347,10 +345,8 @@ static void gvevent_select_current_obj(GVJ_t * job)
         }
     }
 
-    if (job->selected_href) {
-	free(job->selected_href);
-        job->selected_href = NULL;
-    }
+    free(job->selected_href);
+    job->selected_href = NULL;
 
     obj = job->selected_obj = job->current_obj;
     if (obj) {

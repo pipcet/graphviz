@@ -27,11 +27,8 @@ extern "C" {
 **	Written by Kiem-Phong Vo
 */
 
-#include	"FEATURE/sfio"
-#include	"sfio_t.h"
+#include	<sfio/sfio_t.h>
 #include	"config.h"
-
-#include	<vthread.h>
 
 #if defined(__mips) && __mips == 2 && !defined(_NO_LARGEFILE64_SOURCE)
 #define _NO_LARGEFILE64_SOURCE  1
@@ -52,7 +49,6 @@ extern "C" {
 #ifdef _SFBINARY_H
 #undef  HAVE_SYS_ST
 #undef  HAVE_STAT_H
-#undef  _lib_poll
 #undef  _stream_peek
 #undef  _socket_peek
 #undef  HAVE_VFORK_H
@@ -89,49 +85,8 @@ extern "C" {
 #undef SF_MTSAFE		/* no need to worry about thread-safety */
 #define SF_MTSAFE		0
 
-#define SFONCE()		(void)(0)
-
-#define SFMTXLOCK(f)		(void)(0)
-#define SFMTXUNLOCK(f)		(void)(0)
 #define SFMTXSTART(f,v)		{ if(!f) return(v); }
 #define SFMTXRETURN(f,v)	{ return(v); }
-
-#define POOLMTXLOCK(p)
-#define POOLMTXUNLOCK(p)
-#define POOLMTXSTART(p)
-#define POOLMTXRETURN(p,v)	{ return(v); }
-
-/* functions for polling readiness of streams */
-#ifdef HAVE_SELECT
-#undef _lib_poll
-#else
-#if _lib_poll_fd_1 || _lib_poll_fd_2
-#define _lib_poll	1
-#endif
-#endif /*HAVE_SELECT*/
-
-#ifdef _lib_poll
-#include	<poll.h>
-
-#if _lib_poll_fd_1
-#define SFPOLL(pfd,n,tm)	poll((pfd),(ulong)(n),(tm))
-#else
-#define SFPOLL(pfd,n,tm)	poll((ulong)(n),(pfd),(tm))
-#endif
-#endif /*_lib_poll*/
-
-#if _stream_peek
-#include	<stropts.h>
-#endif
-
-#if _socket_peek
-#include	<sys/socket.h>
-#endif
-
-/* to test for executable access mode of a file */
-#ifndef X_OK
-#define X_OK	01
-#endif
 
 /* alternative process forking */
 #if defined(HAVE_VFORK) && !defined(fork) && !defined(sparc) && !defined(__sparc)
@@ -172,33 +127,24 @@ extern "C" {
 #define SF_SEQUENTIAL	00000020	/* sequential access                    */
 #define SF_JUSTSEEK	00000040	/* just did a sfseek                    */
 
-/* this bit signals sfmutex() not to create a mutex for a private stream */
-#define SF_PRIVATE	00000200	/* private stream to Sfio               */
-
 /* on closing, don't be a hero about reread/rewrite on interrupts */
 #define SF_ENDING	00000400
 
-/* private flags that must be cleared in sfclrlock */
 #define SF_DCDOWN	00001000	/* recurse down the discipline stack    */
-#define SF_MVSIZE	00002000
-#define SFMVSET(f)	(((f)->size *= SF_NMAP), ((f)->bits |= SF_MVSIZE) )
-#define SFMVUNSET(f)	(!((f)->bits&SF_MVSIZE) ? 0 : \
-				(((f)->bits &= ~SF_MVSIZE), ((f)->size /= SF_NMAP)) )
-#define SFCLRBITS(f)	(SFMVUNSET(f), ((f)->bits &= ~(SF_DCDOWN|SF_MVSIZE)) )
 
 /* bits for the mode field, SF_INIT defined in sfio_t.h */
-#define SF_RC		00000010	/* peeking for a record                 */
-#define SF_RV		00000020	/* reserve without read or most write   */
-#define SF_LOCK		00000040	/* stream is locked for io op           */
-#define SF_PUSH		00000100	/* stream has been pushed               */
-#define SF_POOL		00000200	/* stream is in a pool but not current  */
-#define SF_PEEK		00000400	/* there is a pending peek              */
-#define SF_PKRD		00001000	/* did a peek read                      */
-#define SF_GETR		00002000	/* did a getr on this stream            */
-#define SF_SYNCED	00004000	/* stream was synced                    */
-#define SF_STDIO	00010000	/* given up the buffer to stdio         */
-#define SF_AVAIL	00020000	/* was closed, available for reuse      */
-#define SF_LOCAL	00100000	/* sentinel for a local call            */
+#define SF_RC		00000010u	/* peeking for a record                 */
+#define SF_RV		00000020u	/* reserve without read or most write   */
+#define SF_LOCK		00000040u	/* stream is locked for io op           */
+#define SF_PUSH		00000100u	/* stream has been pushed               */
+#define SF_POOL		00000200u	/* stream is in a pool but not current  */
+#define SF_PEEK		00000400u	/* there is a pending peek              */
+#define SF_PKRD		00001000u	/* did a peek read                      */
+#define SF_GETR		00002000u	/* did a getr on this stream            */
+#define SF_SYNCED	00004000u	/* stream was synced                    */
+#define SF_STDIO	00010000u	/* given up the buffer to stdio         */
+#define SF_AVAIL	00020000u	/* was closed, available for reuse      */
+#define SF_LOCAL	00100000u	/* sentinel for a local call            */
 
 #ifdef DEBUG
 #define ASSERT(p)	((p) ? 0 : (abort(),0) )
@@ -208,7 +154,6 @@ extern "C" {
 
 /* short-hands */
 #define NIL(t)		((t)0)
-#define reg		register
 #ifndef uchar
 #define uchar		unsigned char
 #endif
@@ -332,7 +277,6 @@ extern "C" {
 	int n_sf;		/* number currently in pool     */
 	Sfio_t **sf;		/* array of streams             */
 	Sfio_t *array[3];	/* start with 3                 */
-	Vtmutex_t mutex;	/* mutex lock object            */
     };
 
 /* reserve buffer structure */
@@ -453,9 +397,6 @@ extern "C" {
 #define _Sfcleanup	(_Sfextern.sf_cleanup)
 #define _Sfexiting	(_Sfextern.sf_exiting)
 #define _Sfdone		(_Sfextern.sf_done)
-#define _Sfonce		(_Sfextern.sf_once)
-#define _Sfoncef	(_Sfextern.sf_oncef)
-#define _Sfmutex	(_Sfextern.sf_mutex)
     typedef struct _sfextern_s {
 	ssize_t sf_page;
 	struct _sfpool_s sf_pool;
@@ -467,18 +408,7 @@ extern "C" {
 	void (*sf_cleanup) (void);
 	int sf_exiting;
 	int sf_done;
-	Vtonce_t *sf_once;
-	void (*sf_oncef) (void);
-	Vtmutex_t *sf_mutex;
     } Sfextern_t;
-
-/* get the real value of a byte in a coded long or ulong */
-#define SFUVALUE(v)	(((ulong)(v))&(SF_MORE-1))
-#define SFSVALUE(v)	((( long)(v))&(SF_SIGN-1))
-#define SFBVALUE(v)	(((ulong)(v))&(SF_BYTE-1))
-
-/* amount of precision to get in each iteration during coding of doubles */
-#define SF_PRECIS	(SF_UBITS-1)
 
 /* grain size for buffer increment */
 #define SF_GRAIN	1024
@@ -489,9 +419,6 @@ extern "C" {
 */
 #define SFDIRECT(f,n)	(((ssize_t)(n) >= (f)->size) || \
 			 ((n) >= SF_GRAIN && (ssize_t)(n) >= (f)->size/16 ) )
-
-/* number of pages to memory map at a time */
-#define SF_NMAP		8
 
 /* the bottomless bit bucket */
 #define DEVNULL		"/dev/null"
@@ -523,7 +450,6 @@ extern "C" {
 #define SFSETBUF(f,s,n)	(SETLOCAL(f),sfsetbuf(f,s,n))
 #define SFWRITE(f,s,n)	(SETLOCAL(f),sfwrite(f,s,n))
 #define SFREAD(f,s,n)	(SETLOCAL(f),sfread(f,s,n))
-#define SFSEEK(f,p,t)	(SETLOCAL(f),sfseek(f,p,t))
 #define SFNPUTC(f,c,n)	(SETLOCAL(f),sfnputc(f,c,n))
 #define SFRAISE(f,e,d)	(SETLOCAL(f),sfraise(f,e,d))
 
@@ -555,17 +481,17 @@ extern "C" {
 #define SFDCRD(f,buf,n,dc,rv) \
 	{	int		dcdown = f->bits&SF_DCDOWN; f->bits |= SF_DCDOWN; \
 		rv = (*dc->readf)(f,buf,n,dc); \
-		if(!dcdown)	f->bits &= ~SF_DCDOWN; \
+		if(!dcdown)	f->bits &= (unsigned short)~SF_DCDOWN; \
 	}
 #define SFDCWR(f,buf,n,dc,rv) \
 	{	int		dcdown = f->bits&SF_DCDOWN; f->bits |= SF_DCDOWN; \
 		rv = (*dc->writef)(f,buf,n,dc); \
-		if(!dcdown)	f->bits &= ~SF_DCDOWN; \
+		if(!dcdown)	f->bits &= (unsigned short)~SF_DCDOWN; \
 	}
 #define SFDCSK(f,addr,type,dc,rv) \
 	{	int		dcdown = f->bits&SF_DCDOWN; f->bits |= SF_DCDOWN; \
 		rv = (*dc->seekf)(f,addr,type,dc); \
-		if(!dcdown)	f->bits &= ~SF_DCDOWN; \
+		if(!dcdown)	f->bits &= (unsigned short)~SF_DCDOWN; \
 	}
 
 /* fast peek of a stream */
@@ -732,18 +658,9 @@ extern "C" {
     extern int _sfsetpool(Sfio_t *);
     extern char *_sfcvt(void *, int, int *, int *, int);
     extern char **_sfgetpath(char *);
-    extern Sfdouble_t _sfstrtod(const char *, char **);
 
 #ifndef errno
     extern int errno;
-#endif
-
-/* for portable encoding of double values */
-#if !__STDC__
-#ifndef _WIN32
-    extern double frexp(double, int *);
-    extern double ldexp(double, int);
-#endif
 #endif
 
 #ifdef _WIN32
@@ -776,11 +693,6 @@ extern "C" {
 
     extern time_t time(time_t *);
     extern int waitpid(int, int *, int);
-#ifndef _WIN32
-    extern void _exit(int);
-#endif
-    typedef int (*Onexit_f)(void);
-    extern Onexit_f onexit(Onexit_f);
 
 #ifdef HAVE_SYS_STAT_H
     extern int fstat(int, Stat_t *);
@@ -789,18 +701,6 @@ extern "C" {
 #if defined(HAVE_VFORK) && !defined(HAVE_VFORK_H) && !defined(_HAVE_SYS_VFORK_H)
     extern pid_t vfork(void);
 #endif /*HAVE_VFORK*/
-
-#ifdef _lib_poll
-#if _lib_poll_fd_1
-    extern int poll(struct pollfd *, ulong, int);
-#else
-    extern int poll(ulong, struct pollfd *, int);
-#endif
-#endif /*_lib_poll*/
-
-#if _proto_open && defined(__cplusplus)
-    extern int open(const char *, int, ...);
-#endif
 
 #endif /*_SFHDR_H*/
 #ifdef __cplusplus

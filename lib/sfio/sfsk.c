@@ -11,18 +11,18 @@
  * Contributors: See CVS logs. Details at http://www.graphviz.org/
  *************************************************************************/
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 
 /*	Seek function that knows discipline
 **
 **	Written by Kiem-Phong Vo.
 */
-Sfoff_t sfsk(reg Sfio_t * f, Sfoff_t addr, reg int type, Sfdisc_t * disc)
+Sfoff_t sfsk(Sfio_t * f, Sfoff_t addr, int type, Sfdisc_t * disc)
 {
     Sfoff_t p;
-    reg Sfdisc_t *dc;
-    reg ssize_t s;
-    reg int local, mode;
+    Sfdisc_t *dc;
+    ssize_t s;
+    int local, mode;
 
     SFMTXSTART(f, (Sfoff_t) (-1));
 

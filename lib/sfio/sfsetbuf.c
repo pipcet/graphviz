@@ -17,7 +17,7 @@ __STDPP__directive pragma pp:hide getpagesize
 #define getpagesize	______getpagesize
 #endif
 
-#include	"sfhdr.h"
+#include	<sfio/sfhdr.h>
 
 #if defined(__STDPP__directive) && defined(__STDPP__hide)
 __STDPP__directive pragma pp:nohide getpagesize
@@ -50,16 +50,14 @@ typedef struct stat Stat_t;
  * @param buf new buffer
  * @param size buffer size, -1 for default size
  */
-void *sfsetbuf(reg Sfio_t * f, reg void * buf, reg size_t size)
+void *sfsetbuf(Sfio_t * f, void * buf, size_t size)
 {
-    reg int sf_malloc;
-    reg uchar *obuf;
-    reg Sfdisc_t *disc;
-    reg ssize_t osize, blksize;
-    reg int oflags, init, local;
+    int sf_malloc;
+    uchar *obuf;
+    Sfdisc_t *disc;
+    ssize_t osize, blksize;
+    int oflags, init, local;
     Stat_t st;
-
-    SFONCE();
 
     SFMTXSTART(f, NIL(void *));
 
@@ -117,8 +115,8 @@ void *sfsetbuf(reg Sfio_t * f, reg void * buf, reg size_t size)
     obuf = f->data;
     osize = f->size;
 
-    f->flags &= ~SF_MALLOC;
-    f->bits &= ~SF_MMAP;
+    f->flags &= (unsigned short)~SF_MALLOC;
+    f->bits &= (unsigned short)~SF_MMAP;
 
     /* pure read/string streams must have a valid string */
     if ((f->flags & (SF_RDWR | SF_STRING)) == SF_RDSTR &&
@@ -150,11 +148,6 @@ void *sfsetbuf(reg Sfio_t * f, reg void * buf, reg size_t size)
 	if (fstat((int) f->file, &st) < 0)
 	    f->here = -1;
 	else {
-#if _sys_stat && _stat_blksize	/* preferred io block size */
-	    if ((blksize = (ssize_t) st.st_blksize) > 0)
-		while ((blksize + (ssize_t) st.st_blksize) <= SF_PAGE)
-		    blksize += (ssize_t) st.st_blksize;
-#endif
 	    if (S_ISREG(st.st_mode) || S_ISDIR(st.st_mode))
 		f->here = SFSK(f, (Sfoff_t) 0, SEEK_CUR, f->disc);
 	    else
@@ -183,7 +176,7 @@ void *sfsetbuf(reg Sfio_t * f, reg void * buf, reg size_t size)
 			f->flags |= SF_LINE;
 #if _sys_stat
 		    else {	/* special case /dev/null */
-			reg int dev, ino;
+			int dev, ino;
 			dev = (int) st.st_dev;
 			ino = (int) st.st_ino;
 			if (stat(DEVNULL, &st) >= 0 &&
@@ -239,7 +232,7 @@ void *sfsetbuf(reg Sfio_t * f, reg void * buf, reg size_t size)
 	}
 	if (!buf) {		/* do allocation */
 	    while (!buf && size > 0) {
-		if ((buf = (void *) malloc(size)))
+		if ((buf = malloc(size)))
 		    break;
 		else
 		    size /= 2;
@@ -269,10 +262,10 @@ void *sfsetbuf(reg Sfio_t * f, reg void * buf, reg size_t size)
 	    f->endb = f->data + size;
     }
 
-    f->flags = (f->flags & ~SF_MALLOC) | sf_malloc;
+    f->flags = (unsigned short)((f->flags & ~SF_MALLOC) | sf_malloc);
 
     if (obuf && obuf != f->data && osize > 0 && (oflags & SF_MALLOC)) {
-	free((void *) obuf);
+	free(obuf);
 	obuf = NIL(uchar *);
     }
 

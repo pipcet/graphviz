@@ -14,26 +14,26 @@
 #include <windows.h>
 #include <io.h>
 #else
-#include "unistd.h"
+#include <unistd.h>
 #endif
-#include "compat.h"
 #include "viewport.h"
 #include "draw.h"
-#include "color.h"
+#include <common/color.h>
 #include <glade/glade.h>
 #include "gui.h"
 #include "menucallbacks.h"
-#include "string.h"
+#include <string.h>
 #include "glcompui.h"
 /* #include "topview.h" */
 #include "gltemplate.h"
-#include "colorprocs.h"
-#include "memory.h"
+#include <common/colorprocs.h>
+#include <common/memory.h>
 #include "topviewsettings.h"
 #include "md5.h"
 #include "arcball.h"
 #include "hotkeymap.h"
 #include "topviewfuncs.h"
+#include <cgraph/strcasecmp.h>
 
 
   /* Forward declarations */
@@ -719,8 +719,7 @@ int add_graph_to_viewport(Agraph_t * graph, char *id)
 {
     if (graph) {
 	view->graphCount = view->graphCount + 1;
-	view->g =
-	    (Agraph_t **) realloc(view->g,
+	view->g = realloc(view->g,
 				  sizeof(Agraph_t *) * view->graphCount);
 	view->g[view->graphCount - 1] = graph;
 
@@ -749,7 +748,7 @@ int add_new_graph_to_viewport(void)
 {
     //returns graph index , otherwise -1
     Agraph_t *graph;
-    graph = (Agraph_t *) malloc(sizeof(Agraph_t));
+    graph = malloc(sizeof(Agraph_t));
     if (graph) {
 	view->graphCount = view->graphCount + 1;
 	view->g[view->graphCount - 1] = graph;
@@ -763,7 +762,7 @@ static md5_state_t pms;
 
 static int append_to_md5(void *chan, const char *str)
 {
-    md5_append(&pms, (unsigned char *) str, (int) strlen(str));
+    md5_append(&pms, (const unsigned char *) str, (int) strlen(str));
     return 1;
 
 }

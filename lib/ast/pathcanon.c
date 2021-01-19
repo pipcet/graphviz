@@ -32,22 +32,20 @@
  * will contain the components following the failure point
  */
 
-#include <ast.h>
-/* #include <ls.h> */
-/* #include <fs3d.h> */
+#include <ast/ast.h>
 #include <errno.h>
-#include <error.h>
+#include <ast/error.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <string.h>
 
 char *pathcanon(char *path, int flags)
 {
-    register char *p;
-    register char *r;
-    register char *s;
-    register char *t;
-    register int dots;
+    char *p;
+    char *r;
+    char *s;
+    char *t;
+    int dots;
     char *phys;
     char *v;
     char* e = path + PATH_MAX;
