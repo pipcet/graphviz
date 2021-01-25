@@ -182,6 +182,8 @@ portable-source:
             junit: ./report.xml
     tags:
         - windows
+    except:
+        - tags
 
 .test_template: &test_definition
     stage: test
@@ -193,12 +195,8 @@ portable-source:
     artifacts:
         reports:
             junit: ./report.xml
-
-centos6-build:
-    <<: *rpm_build_definition
-    tags:
-        - linux
-    image: "graphviz/graphviz:centos6"
+    except:
+        - tags
 
 centos7-build:
     <<: *rpm_build_definition
@@ -385,6 +383,8 @@ meta-data:
     artifacts:
         paths:
             - configuration-*.html
+    except:
+        - tags
 
 ubuntu18-04-test:
     <<: *test_definition
@@ -437,19 +437,6 @@ ubuntu20-10-test:
     tags:
         - linux
     image: "graphviz/graphviz:ubuntu-20.10"
-
-centos6-test:
-    <<: *test_definition
-    before_script:
-        - export build_system="autotools"
-    needs:
-        - job: portable-source
-          artifacts: true
-        - job: "centos6-build"
-          artifacts: true
-    tags:
-        - linux
-    image: "graphviz/graphviz:centos6"
 
 centos7-test:
     <<: *test_definition
