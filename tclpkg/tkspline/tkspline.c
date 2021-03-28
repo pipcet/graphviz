@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include "config.h"
@@ -188,7 +185,7 @@ int numSteps;			/* Not Used */
 	return;
     }
 
-    sprintf(buffer, "%.15g %.15g moveto\n",
+    snprintf(buffer, sizeof(buffer), "%.15g %.15g moveto\n",
 	    pointPtr[0], Tk_CanvasPsY(canvas, pointPtr[1]));
     Tcl_AppendResult(interp, buffer, (char *) NULL);
 
@@ -198,7 +195,8 @@ int numSteps;			/* Not Used */
      */
 
     for (i = numPoints - 2, pointPtr += 2; i > 0; i -= 3, pointPtr += 6) {
-	sprintf(buffer, "%.15g %.15g %.15g %.15g %.15g %.15g curveto\n",
+	snprintf(buffer, sizeof(buffer),
+		"%.15g %.15g %.15g %.15g %.15g %.15g curveto\n",
 		pointPtr[0], Tk_CanvasPsY(canvas, pointPtr[1]),
 		pointPtr[2], Tk_CanvasPsY(canvas, pointPtr[3]),
 		pointPtr[4], Tk_CanvasPsY(canvas, pointPtr[5]));

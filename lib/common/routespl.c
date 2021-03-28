@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include "config.h"
@@ -50,7 +47,8 @@ static void printboxes(int boxn, boxf* boxes)
     Show_boxes = ALLOC(newcnt+2,Show_boxes,char*);
     for (bi = 0; bi < boxn; bi++) {
 	ll = boxes[bi].LL, ur = boxes[bi].UR;
-	sprintf(buf, "%d %d %d %d pathbox", (int)ll.x, (int)ll.y, (int)ur.x, (int)ur.y);
+	snprintf(buf, sizeof(buf), "%d %d %d %d pathbox", (int)ll.x, (int)ll.y,
+	         (int)ur.x, (int)ur.y);
 	Show_boxes[bi+1+Show_cnt] = strdup (buf);
     }
     Show_cnt = newcnt;
@@ -106,7 +104,7 @@ static void psprintspline(Ppolyline_t spl)
     Show_boxes[li++] = strdup ("%% spline");
     Show_boxes[li++] = strdup ("gsave 1 0 0 setrgbcolor newpath");
     for (i = 0; i < spl.pn; i++) {
-	sprintf(buf, "%f %f %s", spl.ps[i].x, spl.ps[i].y,
+	snprintf(buf, sizeof(buf), "%f %f %s", spl.ps[i].x, spl.ps[i].y,
 	  (i == 0) ?  "moveto" : ((i % 3 == 0) ? "curveto" : ""));
 	Show_boxes[li++] = strdup (buf);
     }
@@ -127,7 +125,7 @@ static void psprintline(Ppolyline_t pl)
     Show_boxes[li++] = strdup ("%% line");
     Show_boxes[li++] = strdup ("gsave 0 0 1 setrgbcolor newpath");
     for (i = 0; i < pl.pn; i++) {
-	sprintf(buf, "%f %f %s", pl.ps[i].x, pl.ps[i].y,
+	snprintf(buf, sizeof(buf), "%f %f %s", pl.ps[i].x, pl.ps[i].y,
 		(i == 0 ? "moveto" : "lineto"));
 	Show_boxes[li++] = strdup (buf);
     }
@@ -155,7 +153,8 @@ static void psprintpoly(Ppoly_t p)
 	hd.y = (int)p.ps[(bi+1) % p.pn].y;
 	if ((tl.x == hd.x) && (tl.y == hd.y)) pfx = "%%";
 	else pfx ="";
-	sprintf(buf, "%s%d %d %d %d makevec", pfx, tl.x, tl.y, hd.x, hd.y);
+	snprintf(buf, sizeof(buf), "%s%d %d %d %d makevec", pfx, tl.x, tl.y, hd.x,
+	         hd.y);
 	Show_boxes[li++] = strdup (buf);
     }
     Show_boxes[li++] = strdup ("grestore");
@@ -177,13 +176,13 @@ static void psprintboxes(int boxn, boxf* boxes)
     Show_boxes[li++] = strdup ("gsave 0 1 0 setrgbcolor");
     for (bi = 0; bi < boxn; bi++) {
 	ll = boxes[bi].LL, ur = boxes[bi].UR;
-	sprintf(buf, "newpath\n%d %d moveto", (int)ll.x, (int)ll.y);
+	snprintf(buf, sizeof(buf), "newpath\n%d %d moveto", (int)ll.x, (int)ll.y);
 	Show_boxes[li++] = strdup (buf);
-	sprintf(buf, "%d %d lineto", (int)ll.x, (int)ur.y);
+	snprintf(buf, sizeof(buf), "%d %d lineto", (int)ll.x, (int)ur.y);
 	Show_boxes[li++] = strdup (buf);
-	sprintf(buf, "%d %d lineto", (int)ur.x, (int)ur.y);
+	snprintf(buf, sizeof(buf), "%d %d lineto", (int)ur.x, (int)ur.y);
 	Show_boxes[li++] = strdup (buf);
-	sprintf(buf, "%d %d lineto", (int)ur.x, (int)ll.y);
+	snprintf(buf, sizeof(buf), "%d %d lineto", (int)ur.x, (int)ll.y);
 	Show_boxes[li++] = strdup (buf);
 	Show_boxes[li++] = strdup ("closepath stroke");
     }

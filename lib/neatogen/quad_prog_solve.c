@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <neatogen/digcola.h>
@@ -216,7 +213,6 @@ constrained_majorization_new(CMajEnv * e, float *b, float **coords,
 
 	    /* reorder block by levels, and within levels by "relaxed" desired position */
 	    block_len = 0;
-	    first_next_level = 0;
 	    for (i = left; i < right; i = first_next_level) {
 		level = lev[ordering[i]];
 		if (level == num_levels) {

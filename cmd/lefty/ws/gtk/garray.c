@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -41,9 +38,9 @@ int GAcreatewidget(Gwidget_t * parent, Gwidget_t * widget,
 	case G_ATTRBORDERWIDTH:
 	    break;
 	case G_ATTRMODE:
-	    if (Strcmp("horizontal", attrp[ai].u.t) == 0) {
+	    if (strcmp("horizontal", attrp[ai].u.t) == 0) {
 		WAU->mode = G_AWHARRAY;
-	    } else if (Strcmp("vertical", attrp[ai].u.t) == 0) {
+	    } else if (strcmp("vertical", attrp[ai].u.t) == 0) {
 		WAU->mode = G_AWVARRAY;
 	    } else {
 		Gerr(POS, G_ERRBADATTRVALUE, attrp[ai].u.t);
@@ -51,9 +48,9 @@ int GAcreatewidget(Gwidget_t * parent, Gwidget_t * widget,
 	    }
 	    break;
 	case G_ATTRLAYOUT:
-	    if (Strcmp("on", attrp[ai].u.t) == 0)
+	    if (strcmp("on", attrp[ai].u.t) == 0)
 		Gawsetmode(widget, FALSE);
-	    else if (Strcmp("off", attrp[ai].u.t) == 0)
+	    else if (strcmp("off", attrp[ai].u.t) == 0)
 		Gawsetmode(widget, TRUE);
 	    else {
 		Gerr(POS, G_ERRBADATTRVALUE, attrp[ai].u.t);
@@ -127,9 +124,9 @@ int GAsetwidgetattr(Gwidget_t * widget, int attrn, Gwattr_t * attrp)
 	    Gerr(POS, G_ERRCANNOTSETATTR2, "mode");
 	    return -1;
 	case G_ATTRLAYOUT:
-	    if (Strcmp("on", attrp[ai].u.t) == 0)
+	    if (strcmp("on", attrp[ai].u.t) == 0)
 		Gawsetmode(widget, FALSE);
-	    else if (Strcmp("off", attrp[ai].u.t) == 0)
+	    else if (strcmp("off", attrp[ai].u.t) == 0)
 		Gawsetmode(widget, TRUE);
 	    else {
 		Gerr(POS, G_ERRBADATTRVALUE, attrp[ai].u.t);

@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -443,7 +440,7 @@ static void fillDict(Dt_t * newdict, Agraph_t* g, int kind)
     for (a = agnxtattr(g,kind,0); a; a = agnxtattr(g,kind,a)) {
 	name = a->name;
 	value = a->defval;
-	rv = (attr_t *) dtmatch(newdict, name);
+	rv = dtmatch(newdict, name);
 	if (!rv) {
 	    rv = NEW(attr_t);
 	    rv->name = name;
@@ -532,7 +529,7 @@ static void redoBB(Agraph_t * g, char *s, Agsym_t * G_bb, point delta)
 	bb.LL.y += delta.y;
 	bb.UR.x += delta.x;
 	bb.UR.y += delta.y;
-	sprintf(buf, "%d,%d,%d,%d", bb.LL.x, bb.LL.y, bb.UR.x, bb.UR.y);
+	snprintf(buf, sizeof(buf), "%d,%d,%d,%d", bb.LL.x, bb.LL.y, bb.UR.x, bb.UR.y);
 	agxset(g, G_bb->index, buf);
     }
 }
@@ -553,7 +550,7 @@ static char *xName(Dt_t * names, char *oldname)
     pair_t *p;
     int len;
 
-    p = (pair_t *) dtmatch(names, oldname);
+    p = dtmatch(names, oldname);
     if (p) {
 	p->cnt++;
 	len = strlen(oldname) + 100; /* 100 for "_gv" and decimal no. */

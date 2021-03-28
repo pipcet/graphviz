@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /* Lefteris Koutsofios - AT&T Bell Laboratories */
@@ -52,9 +49,12 @@ int PASCAL WinMain (HANDLE hInstance, HANDLE hPrevInstance,
         exit(0);
     }
     if (lpCmdLine[0] == 0)
-        sprintf (cmd, "%s -e \"load('dotty.lefty');dotty.protogt.lserver='neato';dotty.simple(null);\"", path);
+        snprintf(cmd, sizeof(cmd), "%s -e \"load('dotty.lefty');"
+                 "dotty.protogt.lserver='neato';dotty.simple(null);\"", path);
     else
-        sprintf (cmd, "%s -e \"load('dotty.lefty');dotty.protogt.lserver='neato';dotty.simple('%Ns');\"", path, lpCmdLine);
+        snprintf(cmd, sizeof(cmd), "%s -e \"load('dotty.lefty');"
+                 "dotty.protogt.lserver='neato';dotty.simple('%Ns');\"", path,
+                 lpCmdLine);
 
     handle = WinExec (cmd, SW_SHOW);
     exit (0);

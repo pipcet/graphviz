@@ -1,6 +1,3 @@
-/* $Id$Revision:  */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 /* 
 *   Matrix Market I/O library for ANSI C
@@ -440,21 +437,6 @@ int mm_write_mtx_crd(char fname[], int M, int N, int nz, int I[], int J[],
     return 0;
 }
 
-
-/**
-*  Create a new copy of a string s.  strdup() is a common routine, but
-*  not part of ANSI C, so it is included here.  Used by mm_typecode_to_str().
-*
-*/
-/* part of gcc
-char *strdup(const char *s)
-{
-	int len = strlen(s);
-	char *s2 = (char *) malloc((len+1)*sizeof(char));
-	return strcpy(s2, s);
-}
-*/
-
 char *mm_typecode_to_str(MM_typecode matcode)
 {
     char buffer[MM_MAX_LINE_LENGTH];
@@ -500,7 +482,8 @@ char *mm_typecode_to_str(MM_typecode matcode)
     else
 	return NULL;
 
-    sprintf(buffer, "%s %s %s %s", types[0], types[1], types[2], types[3]);
+    snprintf(buffer, sizeof(buffer), "%s %s %s %s", types[0], types[1],
+             types[2], types[3]);
     return strdup(buffer);
 
 }

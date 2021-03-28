@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -191,12 +191,21 @@ static char *symName(Expr_t * ex, int op)
     if (op >= MINNAME && op <= MAXNAME)
 	return gprnames[op];
     else {
-	Sfio_t *sf = sfstropen();
-	char *s;
+	// calculate how much space we need to construct a name
+	int bytes = vsnprintf(NULL, 0, "<unknown (%d)>", op);
+	if (bytes < 0) {
+		fprintf(stderr, "%s: vsnprintf failure\n", __func__);
+		exit(EXIT_FAILURE);
+	}
 
-	sfprintf(sf, "<unknown (%d)>", op);
-	s = exstring(ex, sfstruse(sf));
-	sfclose(sf);
+	// construct a managed buffer to store this name
+	char *s = vmalloc(ex->ve, (size_t)bytes + 1);
+
+	// make the name
+	if (s != NULL) {
+		snprintf(s, (size_t)bytes + 1, "<unknown (%d)>", op);
+	}
+
 	return s;
     }
 }
@@ -2214,7 +2223,7 @@ static int
 matchval(Expr_t * pgm, Exnode_t * xstr, const char *str, Exnode_t * xpat,
 	 const char *pat, void *env, Exdisc_t * disc)
 {
-    return strgrpmatch(str, pat, NiL, 0,
+    return strgrpmatch(str, pat, NULL, 0,
 		       STR_MAXIMAL | STR_LEFT | STR_RIGHT);
 }
 
@@ -2302,7 +2311,7 @@ static Exnode_t *compile(Expr_t * prog, char *src, char *input, int line,
     sfclose(sf);
 
     if (rv >= 0 && getErrorErrors() == 0)
-	e = exexpr(prog, lbl, NiL, kind);
+	e = exexpr(prog, lbl, NULL, kind);
 
     return e;
 }
@@ -2385,7 +2394,7 @@ static int mkBlock(comp_block* bp, Expr_t * prog, char *src, parse_block *inp, S
 	symbols[0].type = T_node;
 	tchk[V_this][1] = Y(V);
 	bp->n_nstmts = inp->n_nstmts;
-	sprintf (label, "_nd%d", i);
+	snprintf(label, sizeof(label), "_nd%d", i);
 	bp->node_stmts = mkStmts(prog, src, inp->node_stmts,
 				inp->n_nstmts, label, tmps);
 	if (getErrorErrors())
@@ -2398,7 +2407,7 @@ static int mkBlock(comp_block* bp, Expr_t * prog, char *src, parse_block *inp, S
 	symbols[0].type = T_edge;
 	tchk[V_this][1] = Y(E);
 	bp->n_estmts = inp->n_estmts;
-	sprintf (label, "_eg%d", i);
+	snprintf(label, sizeof(label), "_eg%d", i);
 	bp->edge_stmts = mkStmts(prog, src, inp->edge_stmts,
 				inp->n_estmts, label, tmps);
 	if (getErrorErrors())

@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #ifdef __cplusplus
@@ -56,18 +53,6 @@ extern "C" {
 #define CHARSRC 0
 #define FILESRC 1
 
-/*#define M_PI 3.14159265358979323846 */
-
-#ifndef REALSTRCMP
-#define Strcmp(s1, s2) ( \
-    *(s1) == *(s2) ? ( \
-        (*s1) ? strcmp ((s1) + 1, (s2) + 1) : 0 \
-    ) : (*(s1) < *(s2) ? -1 : 1) \
-)
-#else
-#define Strcmp(s1, s2) strcmp ((s1), (s2))
-#endif
-
     extern int warnflag;
     extern char *leftypath, *leftyoptions, *shellpath;
     extern jmp_buf exitljbuf;
@@ -79,8 +64,17 @@ extern "C" {
     char *buildpath(char *, int);
     char *buildcommand(char *, char *, int, int, char *);
     void warning(char *, int, char *, char *, ...);
-    void panic1(char *, int, char *, char *, ...);
-    void panic2(char *, int, char *, char *, ...);
+
+#ifdef __GNUC__
+  // FIXME: use _Noreturn for all compilers when we move to C11
+  #define NORETURN __attribute__((noreturn))
+#else
+  #define NORETURN /* nothing */
+#endif
+    NORETURN void panic1(char *, int, char *, char *, ...);
+    NORETURN void panic2(char *, int, char *, char *, ...);
+#undef NORETURN
+
 #endif				/* _COMMON_H */
 
 #ifdef __cplusplus

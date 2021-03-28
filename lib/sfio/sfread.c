@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include	<sfio/sfhdr.h>
@@ -22,7 +19,6 @@
  * @param f read from this stream
  * @param buf buffer to read into
  * @param n number of bytes to be read
- * @param 
  */
 ssize_t sfread(Sfio_t * f, void * buf, size_t n)
 {

@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -202,7 +199,7 @@ ID		({NAME}|{NUMBER})
 %x hstring
 %%
 {GRAPH_EOF_TOKEN}		return(EOF);
-<INITIAL,comment,qstring>\n	line_num++;
+<INITIAL,comment>\n	line_num++;
 "/*"					BEGIN(comment);
 <comment>[^*\n]*		/* eat anything not a '*' */
 <comment>"*"+[^*/\n]*	/* eat up '*'s not followed by '/'s */
@@ -227,6 +224,7 @@ ID		({NAME}|{NUMBER})
 <qstring>[\\]["]		addstr ("\"");
 <qstring>[\\][\\]		addstr ("\\\\");
 <qstring>[\\][\n]		line_num++; /* ignore escaped newlines */
+<qstring>[\n]			addstr ("\n"); line_num++;
 <qstring>([^"\\\n]*|[\\])		addstr(aagtext);
 [<]						BEGIN(hstring); html_nest = 1; beginstr();
 <hstring>[>]			html_nest--; if (html_nest) addstr(aagtext); else {BEGIN(INITIAL); endstr_html(); return (T_qatom);}

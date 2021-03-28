@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -57,10 +54,10 @@ char *obj2cmd (void *obj) {
     static char buf[32];
 
     switch (AGTYPE(obj)) {
-        case AGRAPH: sprintf(buf,"graph%p",obj); break;
-        case AGNODE: sprintf(buf,"node%p",obj); break;
+        case AGRAPH:    snprintf(buf, sizeof(buf), "graph%p", obj); break;
+        case AGNODE:    snprintf(buf, sizeof(buf), "node%p",  obj); break;
         case AGINEDGE: 
-        case AGOUTEDGE: sprintf(buf,"edge%p",obj); break;
+        case AGOUTEDGE: snprintf(buf, sizeof(buf), "edge%p",  obj); break;
     }
     return buf;
 }
@@ -130,7 +127,7 @@ static void myagxset(void *obj, Agsym_t *a, char *val)
     int len;
     char *hs;
 
-    if (a->name[0] == 'l' && val[0] == '<' && strcmp(a->name, "label") == 0) {
+    if (strcmp(a->name, "label") == 0 && val[0] == '<') {
         len = strlen(val);
         if (val[len-1] == '>') {
             hs = strdup(val+1);
@@ -254,11 +251,11 @@ void tcldot_layout(GVC_t *gvc, Agraph_t * g, char *engine)
  * doesn't yet include margins, scaling or page sizes because
  * those depend on the renderer being used. */
     if (GD_drawing(g)->landscape)
-	sprintf(buf, "%d %d %d %d",
+	snprintf(buf, sizeof(buf), "%d %d %d %d",
 		ROUND(GD_bb(g).LL.y), ROUND(GD_bb(g).LL.x),
 		ROUND(GD_bb(g).UR.y), ROUND(GD_bb(g).UR.x));
     else
-	sprintf(buf, "%d %d %d %d",
+	snprintf(buf, sizeof(buf), "%d %d %d %d",
 		ROUND(GD_bb(g).LL.x), ROUND(GD_bb(g).LL.y),
 		ROUND(GD_bb(g).UR.x), ROUND(GD_bb(g).UR.y));
     if (!(a = agattr(g, AGRAPH, "bb", NULL))) 

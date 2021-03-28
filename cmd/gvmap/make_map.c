@@ -1,6 +1,3 @@
-/* $Id$Revision: */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #define STANDALONE
@@ -29,7 +26,6 @@
 #else /* not SINGLE */
 #define REAL double
 #endif /* not SINGLE */
-/* #include "triangle.h" */
 
 #include <edgepaint/lab.h>
 #include <edgepaint/node_distinct_coloring.h>
@@ -116,7 +112,7 @@ static int get_poly_id(int ip, SparseMatrix point_poly_map){
   return point_poly_map->ja[point_poly_map->ia[ip]];
 }
  
-void improve_contiguity(int n, int dim, int *grouping, SparseMatrix poly_point_map, real *x, SparseMatrix graph, real *label_sizes){
+void improve_contiguity(int n, int dim, int *grouping, SparseMatrix poly_point_map, real *x, SparseMatrix graph){
  /* 
      grouping: which group each of the vertex belongs to
      poly_point_map: a matrix of dimension npolys x (n + nrandom), poly_point_map[i,j] != 0 if polygon i contains the point j.
@@ -177,38 +173,6 @@ void improve_contiguity(int n, int dim, int *grouping, SparseMatrix poly_point_m
   SparseMatrix_delete(D);
   SparseMatrix_delete(point_poly_map);
 }
-
-/*
-struct color_card{
-  int ncolor;
-  real *rgb;
-};
-
-color_card color_card_new(int ncolor, real *rgb){
-  color_card c;
-
-  c->ncolor = ncolor;
-  c->rgb = MALLOC(sizeof(real)*ncolor);
-  for (i = 0; i < ncolor*3; i++){
-    c->rgb[i] = rgb[i];
-  }
-  return c;
-}
-
-void color_card_delete(color_card c){
-  FREE(c->rgb);
-}
-
-color_card_blend(color_card c, real x){
-  real c1[3], c2[3];
-  int ista, isto;
-  if (x > 1) x = 1;
-  if (x < 0) x = 0;
-  ista = x*(ncolor-1);
-  
-}
-
-*/
 
 struct Triangle {
   int vertices[3];/* 3 points */
@@ -317,266 +281,7 @@ void plot_polys(int use_line, SparseMatrix polys, real *x_poly, int *polys_group
   printf("}]}]");
 }
 
-#if 0
-void ps_one_poly(psfile_t *f, int use_line, int border, int fill, int close, int is_river, int np, float *xp, float *yp){
-  if (use_line){
-    if (is_river){
-      /*river*/
-    } else {
-    }
-    ps_polygon(f, np, xp, yp, border, fill, close);
-  } else {
-    ps_polygon(f, np, xp, yp, border, fill, close);
-  }
-}
-
-void plot_ps_polygons(psfile_t *f, int use_line, SparseMatrix polys, real *x_poly, int *polys_groups){
-  int i, j, *ia = polys->ia, *ja = polys->ja, *a = (int*) polys->a, npolys = polys->m, nverts = polys->n, ipoly,first;
-  int np = 0, maxlen = 0;
-  float *xp, *yp;
-  int border = 0, fill = -1, close = 1;
-  int is_river;
-
-  for (i = 0; i < npolys; i++) maxlen = MAX(maxlen, ia[i+1]-ia[i]);
-
-  xp = MALLOC(sizeof(float)*maxlen);
-  yp = MALLOC(sizeof(float)*maxlen);
-
-  if (Verbose) fprintf(stderr,"npolys = %d\n",npolys);
-  first = ABS(a[0]); ipoly = first + 1;
-  for (i = 0; i < npolys; i++){
-    np = 0;
-    for (j = ia[i]; j < ia[i+1]; j++){
-      assert(ja[j] < nverts && ja[j] >= 0);
-      if (ABS(a[j]) != ipoly){/* the first poly, or a hole */
-	ipoly = ABS(a[j]);
-	is_river = (a[j] < 0);
-	ps_one_poly(f, use_line, border, fill, close, is_river, np, xp, yp);
-	np = 0;/* start a new polygon */
-
-      } 
-      xp[np] = x_poly[2*ja[j]]; yp[np++] = x_poly[2*ja[j]+1];
-    }
-    if (use_line) {
-      ps_one_poly(f, use_line, border, fill, close, is_river, np, xp, yp);
-    } else {
-      ps_one_poly(f, use_line, polys_groups[i], polys_groups[i], close, is_river, np, xp, yp);
-    }
-  }
-  FREE(xp);
-  FREE(yp);
-
-}
-
-static void plot_line(real *x, real *y){
-  printf("Line[{{%f,%f},{%f,%f}}]", x[0], x[1], y[0], y[1]);
-}
-static void plot_voronoi(int n, SparseMatrix A, struct Triangle *T){ 
-  int *val, i, j, nline = 0;
-  val = (int*) A->a;
-  
-  printf("Graphics[{");
-  for (i = 0; i < n; i++){
-    for (j = A->ia[i]; j < A->ia[i+1]; j++){
-      if (j < A->ia[n] - A->ia[0] - 1 && A->ja[j] == A->ja[j+1]){
-	if (nline > 0) printf(",");
-	nline++;
-	plot_line((T)[val[j]].center, (T)[val[j+1]].center);
-	j++;
-      }
-    }
-  }
-  printf("}]");
-}
-
-
-void plot_ps_labels(psfile_t *f, int n, int dim, real *x, char **labels, real *width, float *fsz){
-
-  int i;
-
-  for (i = 0; i < n; i++){
-    if (fsz){
-      ps_font(f, NULL, 3*fsz[i]); /* name can be NULL if the current font name is to be used */
-    } else {
-      ps_font(f, NULL, -7); /* name can be NULL if the current font name is to be used */
-    }
-    ps_textc(f, x[i*dim], x[i*dim+1], labels[i], 0);
-  }
-
-}
-
-static void plot_ps_edges(psfile_t *f, SparseMatrix A, int dim, real *x){
-  int i, *ia, *ja, n, j;
-  float xx[2], yy[2];
-  n = A->m;
-  ia = A->ia;
-  ja = A->ja;
-  for (i = 0; i < n; i++){
-    for (j = ia[i]; j < ia[i+1]; j++){
-      if (ja[j] == i) continue;
-      xx[0] = x[i*dim];
-      xx[1] = x[ja[j]*dim];
-      yy[0] = x[i*dim+1];
-      yy[1] = x[ja[j]*dim+1];
-      ps_polygon(f, 2, xx, yy, TRUE, -1, FALSE);
-    }
-  }
-}
-static void plot_triangles(int n, SparseMatrix A, int dim, real *x){
-  int i, j, ii, jj;
-  printf("Graphics[{Green");
-  for (i = 0; i < n; i++) {
-    for (j = A->ia[i]; j < A->ia[i+1]; j++){
-      ii = i;
-      jj = A->ja[j];
-      if (j < A->ia[n] - A->ia[0] - 1 && A->ja[j] == A->ja[j+1]) j++;
-      printf(",Line[{{%f,%f},{%f,%f}}]", x[ii*dim], x[ii*dim+1], x[jj*dim], x[jj*dim+1]);
-    }
-  }
-  printf("}]");
-}
-
-static void poly_bbox(SparseMatrix polys, real *x_poly, real *bbox){
-  /* get the bounding box of a polygon. 
-     bbox[0]: xmin
-     bbox[1]: xmax
-     bbox[2]: ymin 
-     bbox[3]: ymax
-  */
-  int i, j, *ia = polys->ia, *ja = polys->ja;
-  int npolys = polys->m;
-
-  bbox[0] = bbox[1] = x_poly[2*ja[ia[0]]];
-  bbox[2] = bbox[3] = x_poly[2*ja[ia[0]] + 1];
-  
-  for (i = 0; i < npolys; i++){
-    for (j = ia[i]; j < ia[i+1]; j++){
-      bbox[0] = MIN(bbox[0], x_poly[2*ja[j]]); 
-      bbox[1] = MAX(bbox[1], x_poly[2*ja[j]]); 
-      bbox[2] = MIN(bbox[2], x_poly[2*ja[j]+1]);
-      bbox[3] = MAX(bbox[3], x_poly[2*ja[j]+1]);
-    }
-  }
-}
-
-void plot_ps_map(int n, int dim, real *x, SparseMatrix polys, SparseMatrix poly_lines, real line_width, real *x_poly, int *polys_groups, char **labels, real *width,
-		 float *fsz, float *r, float *g, float *b, char *plot_label, real *bg_color, SparseMatrix A){
- 
-  psfile_t *f;
-  int i;
-  real xmin[2], xmax[2], w = 7, h = 10;
-  real asp;
-  real bbox[4];
-  float pad = 20, label_fsz = 10;
-  int MAX_GRP;
-  int IBG;/*back ground color number */
-  int plot_polyQ = TRUE;
-
-  if (!r || !g || !b) plot_polyQ = FALSE;
-
-  xmin[0] = xmax[0] = x[0];
-  xmin[1] = xmax[1] = x[1];
-
-  for (i = 0; i < n; i++){
-    xmin[0] = MIN(xmin[0], x[i*dim] - width[i*dim]);
-    xmax[0] = MAX(xmax[0], x[i*dim] + width[i*dim]);
-    xmin[1] = MIN(xmin[1], x[i*dim + 1] - width[i*dim+1]);
-    xmax[1] = MAX(xmax[1], x[i*dim + 1] + width[i*dim+1]);
-  }
-
-  if (polys){
-    poly_bbox(polys, x_poly, bbox);
-    xmin[0] = MIN(xmin[0], bbox[0]);
-    xmax[0] = MAX(xmax[0], bbox[1]);
-    xmin[1] = MIN(xmin[1], bbox[2]);
-    xmax[1] = MAX(xmax[1], bbox[3]);
-  }
-
-  if (poly_lines){
-    poly_bbox(poly_lines, x_poly, bbox);
-    xmin[0] = MIN(xmin[0], bbox[0]);
-    xmax[0] = MAX(xmax[0], bbox[1]);
-    xmin[1] = MIN(xmin[1], bbox[2]);
-    xmax[1] = MAX(xmax[1], bbox[3]);
-  }
-
-  pad = .08*MIN(xmax[0] - xmin[0], xmax[1] - xmin[1]);
-  label_fsz = pad/3;
-
-  xmin[0] -= pad;
-  xmax[0] += pad;
-  xmin[1] -= pad;
-  xmax[1] += pad;
-
-
- if ((xmax[1] - xmin[1]) < 0.001*(xmax[0] - xmin[0])){
-    asp = 0.001;
-  } else {
-    asp = (xmax[1] - xmin[1])/(xmax[0] - xmin[0]);
-  }
-  if (w*asp > h){
-    w = h/asp;
-  } else {
-    h = w*asp;
-  }
-  fprintf(stderr, "asp = %f, w = %f, h = %f\n",asp,w,h);
-
-  /*  f = ps_create_autoscale("test.ps", "title", 7, 7, 0);*/
-  f = ps_create_autoscale(NULL, "title", w, h, 0);
-  /*f = ps_create_epsf(NULL, "title", xmin[0], xmin[1], xmax[0] - xmin[0], xmax[1] - xmin[1]);*/
-
-  ps_line_width(f, 0.00001); // line width 1 point
-
-  ps_font(f, NULL, 10); /* name can be NULL if the current font name is to be used */
-
-  MAX_GRP = polys_groups[0];
-
-  for (i = 0; i < polys->m; i++){
-    if (r && g && b) ps_define_color_rgb(f, polys_groups[i], r[polys_groups[i]], g[polys_groups[i]], b[polys_groups[i]]);
-    MAX_GRP = MAX(MAX_GRP, polys_groups[i]);
-    assert(polys_groups[i] < PS_MAX_COLORS && polys_groups[i] >= 0);
-  }
-
-  /* set bg color */
-  IBG = MAX_GRP + 1;
-  assert(MAX_GRP + 1 < PS_MAX_COLORS);
-  if (bg_color) ps_define_color_rgb(f, IBG, bg_color[0], bg_color[1], bg_color[2]);
-
-  ps_color_model(f, PS_COLOR_MODEL_PALETTE);
-  if (bg_color) ps_rect(f, (float) xmin[0], (float) xmin[1], xmax[0] - xmin[0], xmax[1] - xmin[1], -1, IBG);
-
-
-  /* labels */
-  ps_color_model(f, PS_COLOR_MODEL_RGB);
-  ps_font(f, NULL, label_fsz); /* name can be NULL if the current font name is to be used */
-  ps_textc(f, (float)(.5*(xmin[0] + xmax[0])), (float) xmin[1] + pad, plot_label, 0);
-  
-  ps_color_model(f, PS_COLOR_MODEL_PALETTE);
-
-  /*polygons */
-  if (plot_polyQ) plot_ps_polygons(f, FALSE, polys, x_poly, polys_groups);
-  
-  ps_color_model(f, PS_COLOR_MODEL_RGB);
-  /* polylines*/
-  if (line_width >= 0){
-    ps_line_width(f, (float) line_width);
-    plot_ps_polygons(f, TRUE, poly_lines, x_poly, polys_groups);
-  }
-
-  /* edges*/
-  if (A) plot_ps_edges(f, A, dim, x);
-  
-  if (labels) plot_ps_labels(f, n, dim, x, labels, width, fsz);
-  
-  ps_done(f);
-  
-  
-}
- 
-#endif
-
-
-static void plot_dot_edges(FILE *f, SparseMatrix A, int dim, real *x){
+static void plot_dot_edges(FILE *f, SparseMatrix A){
   int i, *ia, *ja, j;
 
   
@@ -590,28 +295,8 @@ static void plot_dot_edges(FILE *f, SparseMatrix A, int dim, real *x){
     }
   }
 }
-#if 0
-static void plot_processing_edges(FILE *f, SparseMatrix A, int dim, real *x){
-  int i, *ia, *ja, j;
 
-  //fprintf(f,"stroke(.5);\n");
-  fprintf(f, "beginLines\n");
-  fprintf(f, "color(125,125,125)\n");
-  int n = A->m;
-  ia = A->ia;
-  ja = A->ja;
-  for (i = 0; i < n; i++){
-    for (j = ia[i]; j < ia[i+1]; j++){
-      if (ja[j] == i) continue;
-      //fprintf(f,"line(%f, %f, %f, %f);\n", x[i*dim], x[i*dim+1], x[ja[j]*dim], x[ja[j]*dim+1]);
-      fprintf(f,"%f %f %f %f\n", x[i*dim], x[i*dim+1], x[ja[j]*dim], x[ja[j]*dim+1]);
-    }
-  }
-  fprintf(f,"endLines\n");
-}
-#endif
-
-void plot_dot_labels(FILE *f, int n, int dim, real *x, char **labels, real *width, float *fsz){
+static void plot_dot_labels(FILE *f, int n, int dim, real *x, char **labels, float *fsz){
   int i;
 
   for (i = 0; i < n; i++){
@@ -624,48 +309,30 @@ void plot_dot_labels(FILE *f, int n, int dim, real *x, char **labels, real *widt
 
 }
 
-#if 0
-void plot_processing_labels(FILE *f, int n, int dim, real *x, char **labels, real *width, float *fsz){
-  int i;
-  //  fprintf(f, "PFont myFont; myFont = createFont(\"FFScala\",8); fill(0,0,0);\n");
-  for (i = 0; i < n; i++){
-    if (fsz){
-      //   fprintf(f, "textFont(myFont, %f); text(\"%s\", %f, %f);\n", fsz[i], labels[i], x[i*dim], x[i*dim+1]);
-      fprintf(f, "beginText\nfontSize(%f)\ntext(\"%s\")\nposition(%f, %f)\nendText\n", fsz[i], labels[i], x[i*dim], x[i*dim+1]);
-    } else {
-      fprintf(f, "beginText\ntext(\"%s\")\nposition(%f, %f)\nendText\n", labels[i], x[i*dim], x[i*dim+1]);
-    }
-  }
-
-}
-#endif
-
 static void dot_polygon(char **sbuff, int *len, int *len_max, int np, float *xp, float *yp, real line_width,  
-			int fill, int close, char *cstring){
+			int fill, char *cstring){
   int i;
   int ret = 0;
-  char buf[10000];
-  char swidth[10000];
-  int len_swidth;
+  size_t len_swidth = 0;
 
   if (np > 0){
     /* figure out the size needed */
     if (fill >= 0){/* poly*/
-      ret += snprintf(buf, sizeof(buf), " c %d -%s C %d -%s P %d ",(int) strlen(cstring), cstring, (int) strlen(cstring), cstring, np);
+      ret += snprintf(NULL, 0, " c %zu -%s C %zu -%s P %d ", strlen(cstring), cstring, strlen(cstring), cstring, np);
     } else {/* line*/
       assert(line_width >= 0);
       if (line_width > 0){
-	sprintf(swidth,"%f",line_width);
-	len_swidth = strlen(swidth);
-	sprintf(swidth,"S %d -setlinewidth(%f)",len_swidth+14, line_width);
-	ret += snprintf(buf, sizeof(buf), " c %d -%s %s L %d ",(int) strlen(cstring), cstring, swidth, np);
+	len_swidth = (size_t)snprintf(NULL, 0, "%f", line_width);
+	ret += snprintf(NULL, 0, " c %zu -%s S %zu -setlinewidth(%f) L %d ",
+	                strlen(cstring), cstring, len_swidth + 14, line_width, np);
       } else {
-	ret += snprintf(buf, sizeof(buf), " c %d -%s L %d ",(int) strlen(cstring), cstring, np);
+	ret += snprintf(NULL, 0, " c %zu -%s L %d ", strlen(cstring), cstring, np);
       }
     }
     for (i = 0; i < np; i++){
-      ret += sprintf(buf, " %f %f",xp[i], yp[i]);
+      ret += snprintf(NULL, 0, " %f %f",xp[i], yp[i]);
     }
+    ++ret; // account for terminating '\0'
 
     if (*len + ret > *len_max - 1){
       *len_max = *len_max + MAX(100, 0.2*(*len_max)) + ret;
@@ -674,15 +341,13 @@ static void dot_polygon(char **sbuff, int *len, int *len_max, int np, float *xp,
 
     /* do the actual string */
     if (fill >= 0){
-      ret = sprintf(&((*sbuff)[*len]), " c %d -%s C %d -%s P %d ",(int) strlen(cstring), cstring, (int) strlen(cstring), cstring, np);
+      ret = sprintf(&((*sbuff)[*len]), " c %zu -%s C %zu -%s P %d ", strlen(cstring), cstring, strlen(cstring), cstring, np);
     } else {
       if (line_width > 0){
-        sprintf(swidth,"%f",line_width);
-        len_swidth = strlen(swidth);
-        sprintf(swidth,"S %d -setlinewidth(%f)",len_swidth+14, line_width);
-	ret = sprintf(&((*sbuff)[*len]), " c %d -%s %s L %d ",(int) strlen(cstring), cstring, swidth, np);
+	ret = sprintf(&((*sbuff)[*len]), " c %zu -%s S %zu -setlinewidth(%f) L %d ",
+	              strlen(cstring), cstring, len_swidth + 14, line_width, np);
       } else {
-	ret = sprintf(&((*sbuff)[*len]), " c %d -%s L %d ",(int) strlen(cstring), cstring, np);
+	ret = sprintf(&((*sbuff)[*len]), " c %zu -%s L %d ", strlen(cstring), cstring, np);
       }
     }
     (*len) += ret;
@@ -695,7 +360,7 @@ static void dot_polygon(char **sbuff, int *len, int *len_max, int np, float *xp,
 
   }
 }
-static void processing_polygon(FILE *f, int np, float *xp, float *yp, real line_width, int fill, int close, 
+static void processing_polygon(FILE *f, int np, float *xp, float *yp, real line_width, int fill,
 			       float rr, float gg, float bb){
   int i;
 
@@ -724,33 +389,33 @@ static void processing_polygon(FILE *f, int np, float *xp, float *yp, real line_
   }
 }
 
-void dot_one_poly(char **sbuff, int *len, int *len_max, int use_line, real line_width, int fill, int close, int is_river, int np, float *xp, float *yp, char *cstring){
+static void dot_one_poly(char **sbuff, int *len, int *len_max, int use_line, real line_width, int fill, int is_river, int np, float *xp, float *yp, char *cstring){
   if (use_line){
     if (is_river){
       /*river*/
     } else {
     }
-    dot_polygon(sbuff, len, len_max, np, xp, yp, line_width, fill, close, cstring);
+    dot_polygon(sbuff, len, len_max, np, xp, yp, line_width, fill, cstring);
   } else {
-    dot_polygon(sbuff, len, len_max, np, xp, yp, line_width, fill, close, cstring);
+    dot_polygon(sbuff, len, len_max, np, xp, yp, line_width, fill, cstring);
   }
 }
 
-void processing_one_poly(FILE *f, int use_line, real line_width, int fill, int close, int is_river, int np, float *xp, float *yp, 
+static void processing_one_poly(FILE *f, int use_line, real line_width, int fill, int close, int is_river, int np, float *xp, float *yp, 
 		      float rr, float gg, float bb){
   if (use_line){
     if (is_river){
       /*river*/
     } else {
     }
-    processing_polygon(f, np, xp, yp, line_width, fill, close, rr, gg, bb);
+    processing_polygon(f, np, xp, yp, line_width, fill, rr, gg, bb);
   } else {
-    processing_polygon(f, np, xp, yp, line_width, fill, close, rr, gg, bb);
+    processing_polygon(f, np, xp, yp, line_width, fill, rr, gg, bb);
   }
 }
 
 
-void plot_dot_polygons(char **sbuff, int *len, int *len_max, real line_width, char *line_color, SparseMatrix polys, real *x_poly, int *polys_groups, float *r, float *g, float *b, char *opacity){
+static void plot_dot_polygons(char **sbuff, int *len, int *len_max, real line_width, char *line_color, SparseMatrix polys, real *x_poly, int *polys_groups, float *r, float *g, float *b, char *opacity){
   int i, j, *ia = polys->ia, *ja = polys->ja, *a = (int*) polys->a, npolys = polys->m, nverts = polys->n, ipoly,first;
   int np = 0, maxlen = 0;
   float *xp, *yp;
@@ -776,70 +441,26 @@ void plot_dot_polygons(char **sbuff, int *len, int *len_max, real line_width, ch
 	if (r && g && b) {
 	  rgb2hex(r[polys_groups[i]], g[polys_groups[i]], b[polys_groups[i]], cstring, opacity);
 	}
-	dot_one_poly(sbuff, len, len_max, use_line, line_width, fill, close, is_river, np, xp, yp, cstring);
+	dot_one_poly(sbuff, len, len_max, use_line, line_width, fill, is_river, np, xp, yp, cstring);
 	np = 0;/* start a new polygon */
       } 
       xp[np] = x_poly[2*ja[j]]; yp[np++] = x_poly[2*ja[j]+1];
     }
     if (use_line) {
-      dot_one_poly(sbuff, len, len_max, use_line, line_width, fill, close, is_river, np, xp, yp, line_color);
+      dot_one_poly(sbuff, len, len_max, use_line, line_width, fill, is_river, np, xp, yp, line_color);
     } else {
       /* why set fill to polys_groups[i]?*/
-      //dot_one_poly(sbuff, len, len_max, use_line, polys_groups[i], polys_groups[i], close, is_river, np, xp, yp, cstring);
-      dot_one_poly(sbuff, len, len_max, use_line, -1, 1, close, is_river, np, xp, yp, cstring);
+      //dot_one_poly(sbuff, len, len_max, use_line, polys_groups[i], polys_groups[i], is_river, np, xp, yp, cstring);
+      dot_one_poly(sbuff, len, len_max, use_line, -1, 1, is_river, np, xp, yp, cstring);
     }
   }
   FREE(xp);
   FREE(yp);
 
 }
-
-void plot_processing_polygons(FILE *f, real line_width, SparseMatrix polys, real *x_poly, int *polys_groups, float *r, float *g, float *b){
-  int i, j, *ia = polys->ia, *ja = polys->ja, *a = (int*) polys->a, npolys = polys->m, nverts = polys->n, ipoly,first;
-  int np = 0, maxlen = 0;
-  float *xp, *yp;
-  int fill = -1, close = 1;
-  int is_river = FALSE;
-  int use_line = (line_width >= 0);
-  float rr = 0, gg = 0, bb = 0;
-
-  for (i = 0; i < npolys; i++) maxlen = MAX(maxlen, ia[i+1]-ia[i]);
-
-  xp = MALLOC(sizeof(float)*maxlen);
-  yp = MALLOC(sizeof(float)*maxlen);
-
-  if (Verbose) fprintf(stderr,"npolys = %d\n",npolys);
-  first = abs(a[0]); ipoly = first + 1;
-  for (i = 0; i < npolys; i++){
-    np = 0;
-    for (j = ia[i]; j < ia[i+1]; j++){
-      assert(ja[j] < nverts && ja[j] >= 0);
-      if (abs(a[j]) != ipoly){/* the first poly, or a hole */
-	ipoly = abs(a[j]);
-	is_river = (a[j] < 0);
-	if (r && g && b) {
-	  rr = r[polys_groups[i]]; gg = g[polys_groups[i]]; bb = b[polys_groups[i]];
-	}
-	  processing_one_poly(f, use_line, line_width, fill, close, is_river, np, xp, yp, rr, gg, bb);
-	np = 0;/* start a new polygon */
-      } 
-      xp[np] = x_poly[2*ja[j]]; yp[np++] = x_poly[2*ja[j]+1];
-    }
-    if (use_line) {
-      processing_one_poly(f, use_line, line_width, fill, close, is_river, np, xp, yp, rr, gg, bb);
-    } else {
-      /* why set fill to polys_groups[i]?*/
-      processing_one_poly(f,  use_line, -1, 1, close, is_river, np, xp, yp, rr, gg, bb);
-    }
-  }
-  FREE(xp);
-  FREE(yp);
-
-}
-
 
 void plot_dot_map(Agraph_t* gr, int n, int dim, real *x, SparseMatrix polys, SparseMatrix poly_lines, real line_width, char *line_color, real *x_poly, int *polys_groups, char **labels, real *width,
-		  float *fsz, float *r, float *g, float *b, char* opacity, char *plot_label, real *bg_color, SparseMatrix A, FILE* f){
+		  float *fsz, float *r, float *g, float *b, char* opacity, real *bg_color, SparseMatrix A, FILE* f){
   /* if graph object exist, we just modify some attributes, otherwise we dump the whole graph */
   int plot_polyQ = TRUE;
   char *sbuff;
@@ -883,9 +504,9 @@ void plot_dot_map(Agraph_t* gr, int n, int dim, real *x, SparseMatrix polys, Spa
   }
 
   /* nodes */
-  if (!gr && labels) plot_dot_labels(f, n, dim, x, labels, width, fsz);
+  if (!gr && labels) plot_dot_labels(f, n, dim, x, labels, fsz);
   /* edges */
-  if (!gr && A) plot_dot_edges(f, A, dim, x);
+  if (!gr && A) plot_dot_edges(f, A);
 
   /* background color + plot label?*/
 
@@ -893,99 +514,6 @@ void plot_dot_map(Agraph_t* gr, int n, int dim, real *x, SparseMatrix polys, Spa
 
   FREE(sbuff);
 }
-
-#if 0
-static void get_polygon_bbox(SparseMatrix polys, real *x_poly, real *bbox_x, real *bbox_y){
-  /* find bounding box. bbox_x is the xmin and xmax, bbox_y is ymin and ymax */
-  int i, j, *ia = polys->ia, *ja = polys->ja, *a = (int*) polys->a, npolys = polys->m, nverts = polys->n, ipoly,first;
-  int NEW = TRUE;
-
-  first = ABS(a[0]); ipoly = first + 1;
-  for (i = 0; i < npolys; i++){
-    for (j = ia[i]; j < ia[i+1]; j++){
-      assert(ja[j] < nverts && ja[j] >= 0);
-      if (NEW){
-	bbox_x[0] = bbox_x[1] =  x_poly[2*ja[j]];
-	bbox_y[0] = bbox_y[1] =  x_poly[2*ja[j]+1];
-	NEW = FALSE;
-      } else {
-	bbox_x[0] = MIN(bbox_x[0], x_poly[2*ja[j]]);
-	bbox_x[1] = MAX(bbox_x[1], x_poly[2*ja[j]]);
-	bbox_y[0] = MIN(bbox_y[0], x_poly[2*ja[j]+1]);
-	bbox_y[1] = MAX(bbox_y[1], x_poly[2*ja[j]+1]);
-      }
-    }
-  }
-}
-#endif
-
-#if 0
-void plot_processing_map(Agraph_t* gr, int n, int dim, real *x, SparseMatrix polys, SparseMatrix poly_lines, real line_width, int nverts, real *x_poly, int *polys_groups, char **labels, real *width,
-		 float *fsz, float *r, float *g, float *b, char *plot_label, real *bg_color, SparseMatrix A){
-  /* if graph object exist, we just modify some attributes, otherwise we dump the whole graph */
-  int plot_polyQ = TRUE;
-  FILE *f = stdout;
-  real xmin[2], xwidth[2], scaling=1, bbox_x[2], bbox_y[2];
-  int i;
-
-  /* shift to make all coordinates position */
-  get_polygon_bbox(polys, x_poly, bbox_x, bbox_y);
-  xmin[0] = bbox_x[0]; xmin[1] = bbox_y[0]; 
-  xwidth[0] = (bbox_x[1] - bbox_x[0])*scaling;
-  xwidth[1] = (bbox_y[1] - bbox_y[0])*scaling;
-  for (i = 0; i < n; i++) {
-    xmin[0] = MIN(xmin[0], x[i*dim]);
-    xmin[1] = MIN(xmin[1], x[i*dim+1]);
-  }
-
-  fprintf(stderr,"xmin={%f, %f}\n", xmin[0], xmin[1]);
-
-  for (i = 0; i < n; i++) {
-    x[i*dim] = (x[i*dim] - xmin[0])*scaling;
-    x[i*dim+1] = (x[i*dim+1] - xmin[1])*scaling;
-    xwidth[0] = MAX(xwidth[0], x[i*dim]);
-    xwidth[1] = MAX(xwidth[1], x[i*dim+1]);
-  }
-  for (i = 0; i < nverts; i++) {
-    x_poly[i*dim] = (x_poly[i*dim] - xmin[0])*scaling;
-    x_poly[i*dim+1] = (x_poly[i*dim+1] - xmin[1])*scaling;
-  }
-  /*
-  fprintf(f,"//This file is for processing language. Syntax:\n//\n");
-  fprintf(f,"//beginPolygons\n//[color(r,g,b)]\n//x y\n...\n//endPolygons\n//\n");
-  fprintf(f,"//beginPolylines\n//[color(r,g,b)]\n//...\n//endPolylines\n\n");
-  fprintf(f,"//beginLines\n//[color(r,g,b)]\n//x1 y1 x2 y2\n//...\n endLines\n//\n");
-  fprintf(f,"//beginText\n//[fontSize(x)]\n//text(\"foo\")\n//position(x,y)\n\\endText\n//\n");
-  fprintf(f,"//\n");
-
-  fprintf(f, "size(%d, %d);\n", (int)(xwidth[0]+1), (int) (xwidth[1]+1));
-  */
-
-  if (!r || !g || !b) plot_polyQ = FALSE;
-
-  if (!gr) {
-    fprintf(f, "background(234, 242, 255)");
-  }
-
-  /*polygons */
-  if (plot_polyQ) {
-    plot_processing_polygons(f, -1., polys, x_poly, polys_groups, r, g, b);
-  }
-
-  /* polylines: line width is set here */
-  if (line_width >= 0){
-    plot_processing_polygons(f, line_width, poly_lines, x_poly, polys_groups, NULL, NULL, NULL);
-  }
-
-  /* edges */
-  if (A) plot_processing_edges(f, A, dim, x);
-
-  /* nodes */
-  if (labels) plot_processing_labels(f, n, dim, x, labels, width, fsz);
-
- 
-}
-#endif
 
 static void get_tri(int n, int dim, real *x, int *nt, struct Triangle **T, SparseMatrix *E, int *flag) {
    /* always contains a self edge and is symmetric.
@@ -1115,7 +643,7 @@ void plot_edges(int n, int dim, real *x, SparseMatrix A){
   printf("}(* end of edges of the graph*)]");
 
 }
-static SparseMatrix get_country_graph(int n, SparseMatrix A, int *groups, SparseMatrix *poly_point_map, int GRP_RANDOM, int GRP_BBOX){
+static SparseMatrix get_country_graph(int n, SparseMatrix A, int *groups, int GRP_RANDOM, int GRP_BBOX){
   /* form a graph each vertex is a group (a country), and a vertex is connected to another if the two countryes shares borders.
    since the group ID may not be contigous (e.g., only groups 2,3,5, -1), we will return NULL if one of the group has non-positive ID! */
   int *ia, *ja;
@@ -1743,7 +1271,7 @@ static void get_polygons(int exclude_random, int n, int nrandom, int dim, Sparse
     ============================================================*/
   get_polygon_solids(exclude_random, nt, E, ncomps, comps_ptr, comps, groups, mask, *x_poly, polys, polys_groups, GRP_RANDOM, GRP_BBOX);
 
-  B = get_country_graph(n, E, groups, poly_point_map, GRP_RANDOM, GRP_BBOX);
+  B = get_country_graph(n, E, groups, GRP_RANDOM, GRP_BBOX);
   *country_graph = B;
 
   FREE(groups);

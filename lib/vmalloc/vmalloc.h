@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,15 +5,14 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
+
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#ifndef _VMALLOC_H
-#define _VMALLOC_H	1
 
 /*	Public header file for the virtual malloc package.
 **
@@ -66,8 +62,7 @@ extern "C" {
 #ifndef vmfree
 #define vmfree(vm,d)		(*(_VM_(vm)->meth.freef))((vm),(void*)(d))
 #endif
-#define vmnewof(v,p,t,n,x)	(t*)vmresize((v), (p), sizeof(t)*(n)+(x))
-#endif				/* _VMALLOC_H */
+#define vmnewof(v,p,t,n,x)	vmresize((v), (p), sizeof(t)*(n)+(x))
 #ifdef __cplusplus
 }
 #endif

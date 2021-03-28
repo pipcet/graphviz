@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #ifdef __cplusplus
@@ -57,6 +54,7 @@ extern "C" {
 #undef  HAVE_SYS_IOCTL_H
 #endif
 
+#include	<limits.h>
 #include	<stdlib.h>
 #include	<string.h>
 #include	<stdint.h>
@@ -350,10 +348,6 @@ extern "C" {
 #define LEFTP		'('
 #define RIGHTP		')'
 #define QUOTE		'\''
-
-#ifndef CHAR_BIT
-#define CHAR_BIT	8
-#endif
 
 #define FMTSET(ft, frm,ags, fv, sz, flgs, wid,pr,bs, ts,ns) \
 	((ft->form = (char*)frm), va_copy(ft->args,ags), \
@@ -690,9 +684,6 @@ extern "C" {
 
 #endif /*HAVE_UNISTD_H*/
 #endif /* _WIN32 */
-
-    extern time_t time(time_t *);
-    extern int waitpid(int, int *, int);
 
 #ifdef HAVE_SYS_STAT_H
     extern int fstat(int, Stat_t *);

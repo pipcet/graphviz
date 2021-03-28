@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include "config.h"
@@ -84,7 +81,7 @@ static xdot_state_t* xd;
 
 static void xdot_str_xbuf (agxbuf* xb, char* pfx, char* s)
 {
-    agxbprint (xb, "%s%d -%s ", pfx, (int)strlen(s), s);
+    agxbprint (xb, "%s%zu -%s ", pfx, strlen(s), s);
 }
 
 static void xdot_str (GVJ_t *job, char* pfx, char* s)
@@ -168,9 +165,10 @@ color2str (unsigned char rgba[4])
     static char buf [10];
 
     if (rgba[3] == 0xFF)
-	sprintf (buf, "#%02x%02x%02x", rgba[0], rgba[1],  rgba[2]);
+	snprintf(buf, sizeof(buf), "#%02x%02x%02x", rgba[0], rgba[1],  rgba[2]);
     else
-	sprintf (buf, "#%02x%02x%02x%02x", rgba[0], rgba[1],  rgba[2], rgba[3]);
+	snprintf(buf, sizeof(buf), "#%02x%02x%02x%02x", rgba[0], rgba[1],  rgba[2],
+	         rgba[3]);
     return buf;
 }
 
@@ -198,7 +196,7 @@ static void xdot_style (GVJ_t *job)
     if (job->obj->penwidth != penwidth[job->obj->emit_state]) {
 	penwidth[job->obj->emit_state] = job->obj->penwidth;
 	agxbput (&xbuf, "setlinewidth(");
-	sprintf (buf, "%.3f", job->obj->penwidth);
+	snprintf(buf, sizeof(buf), "%.3f", job->obj->penwidth);
 	xdot_trim_zeros (buf, 0);
 	agxbprint(&xbuf, "%s)", buf);
         xdot_str (job, "S ", agxbuse(&xbuf));
@@ -608,7 +606,7 @@ static void xdot_color_stop (agxbuf* xb, float v, gvcolor_t* clr)
 {
     char buf[BUFSIZ];
 
-    sprintf (buf, "%.03f", v);
+    snprintf(buf, sizeof(buf), "%.03f", v);
     xdot_trim_zeros (buf, 1);
     xdot_str_xbuf (xb, buf, color2str (clr->u.rgba));
 }

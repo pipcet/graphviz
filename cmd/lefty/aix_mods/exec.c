@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /* Lefteris Koutsofios - AT&T Bell Laboratories */
@@ -20,6 +17,7 @@
 #include "str.h"
 #include "exec.h"
 #include "internal.h"
+#include <string.h>
 
 static lvar_t *lvarp;
 static int lvarn, llvari, flvari;
@@ -839,7 +837,7 @@ static int orderop(Tobj v1o, Ctype_t op, Tobj v2o)
     }
     t1 = Tgettype(v1o), t2 = Tgettype(v2o);
     if (t1 == T_STRING && t2 == T_STRING) {
-	r = Strcmp(Tgetstring(v1o), Tgetstring(v2o));
+	r = strcmp(Tgetstring(v1o), Tgetstring(v2o));
     } else if (t1 == T_INTEGER && t2 == T_INTEGER) {
 	i1 = Tgetinteger(v1o), i2 = Tgetinteger(v2o);
 	r = (i1 == i2) ? 0 : ((i1 < i2) ? -1 : 1);
@@ -941,7 +939,6 @@ static void err(int errnum, int level, Tobj co, int ci)
 
     if (level > Eerrlevel || !errdo)
 	return;
-    s = "";
     fprintf(stderr, "runtime error: %s\n", errnam[errnum]);
     if (!co)
 	return;
@@ -950,11 +947,17 @@ static void err(int errnum, int level, Tobj co, int ci)
     if (!sinfop[(si = sinfoi - 1)].fco && si > 0)
 	si--;
     if (Eshowbody > 0) {
-	if (co == sinfop[si].fco)
+	if (co == sinfop[si].fco) {
 	    s = Scfull(co, 0, ci);
-	else if (co == sinfop[si].co)
+	    printbody(s, Eshowbody);
+	    free(s);
+	} else if (co == sinfop[si].co) {
 	    s = Scfull(co, TCgetfp(co, 0), ci);
-	printbody(s, Eshowbody), free(s);
+	    printbody(s, Eshowbody);
+	    free(s);
+	} else {
+	    printbody("", Eshowbody);
+	}
 	if (Estackdepth == 1) {
 	    fprintf(stderr, "\n");
 	    errdo = FALSE;
@@ -983,7 +986,7 @@ static void printbody(char *s, int mode)
     }
     c = '\000';
     for (s1 = s; *s1; s1++)
-	if (*s1 == '>' && *(s1 + 1) && *(s1 + 1) == '>')
+	if (strncmp(s1, ">>", 2) == 0)
 	    break;
     if (!*s1)
 	return;

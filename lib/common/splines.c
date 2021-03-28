@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -40,7 +37,7 @@ static void showPoints(pointf ps[], int pn)
     Show_boxes[li++] = strdup ("%% self list");
     Show_boxes[li++] = strdup ("dbgstart");
     for (bi = 0; bi < pn; bi++) {
-	sprintf(buf, "%.5g %.5g point", ps[bi].x, ps[bi].y);
+	snprintf(buf, sizeof(buf), "%.5g %.5g point", ps[bi].x, ps[bi].y);
 	Show_boxes[li++] = strdup (buf);
     }
     Show_boxes[li++] = strdup ("grestore");
@@ -835,7 +832,6 @@ static void selfBottom (edge_t* edges[], int ind, int cnt,
 
     stepx = (sizex / 2.) / cnt;
     stepx = MAX(stepx,2.);
-    pointn = 0;
     np = ND_coord(n);
     tp = ED_tail_port(e).p;
     tp.x += np.x;
@@ -906,7 +902,6 @@ selfTop (edge_t* edges[], int ind, int cnt, double sizex, double stepy,
 
     stepx = (sizex / 2.) / cnt;
     stepx = MAX(stepx, 2.);
-    pointn = 0;
     np = ND_coord(n);
     tp = ED_tail_port(e).p;
     tp.x += np.x;
@@ -1011,7 +1006,6 @@ selfRight (edge_t* edges[], int ind, int cnt, double stepx, double sizey,
 
     stepy = (sizey / 2.) / cnt;
     stepy = MAX(stepy, 2.);
-    pointn = 0;
     np = ND_coord(n);
     tp = ED_tail_port(e).p;
     tp.x += np.x;
@@ -1084,7 +1078,6 @@ selfLeft (edge_t* edges[], int ind, int cnt, double stepx, double sizey,
 
     stepy = (sizey / 2.) / cnt;
     stepy = MAX(stepy,2.);
-    pointn = 0;
     np = ND_coord(n);
     tp = ED_tail_port(e).p;
     tp.x += np.x;

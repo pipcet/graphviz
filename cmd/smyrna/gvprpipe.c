@@ -1,6 +1,3 @@
-/* $Id$Revision: */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include "smyrnadefs.h"
@@ -110,7 +107,7 @@ int run_gvpr(Agraph_t * srcGraph, int argc, char *argv[])
     } else if (opts.n_outgraphs) 
     {
 	refreshViewport(0);
-	sprintf(buf, "<%d>", ++count);
+	snprintf(buf, sizeof(buf), "<%d>", ++count);
 	if (opts.outgraphs[0] != view->g[view->activeGraph])
 	    add_graph_to_viewport(opts.outgraphs[0], buf);
 	if (opts.n_outgraphs > 1)

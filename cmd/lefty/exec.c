@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */ 
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /* Lefteris Koutsofios - AT&T Labs Research */
@@ -20,6 +17,7 @@
 #include "str.h"
 #include "exec.h"
 #include "internal.h"
+#include <string.h>
 
 static lvar_t *lvarp;
 static int lvarn, llvari, flvari;
@@ -946,7 +944,6 @@ static void err (int errnum, int level, Tobj co, int ci) {
 
     if (level > Eerrlevel || !errdo)
         return;
-    s = "";
     fprintf (stderr, "runtime error: %s\n", errnam[errnum]);
     if (!co)
         return;
@@ -955,11 +952,17 @@ static void err (int errnum, int level, Tobj co, int ci) {
     if (!sinfop[(si = sinfoi - 1)].fco && si > 0)
         si--;
     if (Eshowbody > 0) {
-        if (co == sinfop[si].fco)
+        if (co == sinfop[si].fco) {
             s = Scfull (co, 0, ci);
-        else if (co == sinfop[si].co)
+            printbody (s, Eshowbody);
+            free (s);
+        } else if (co == sinfop[si].co) {
             s = Scfull (co, TCgetfp (co, 0), ci);
-        printbody (s, Eshowbody), free (s);
+            printbody (s, Eshowbody);
+            free (s);
+        } else {
+            printbody ("", Eshowbody);
+        }
         if (Estackdepth == 1) {
             fprintf (stderr, "\n");
             errdo = FALSE;
@@ -987,7 +990,7 @@ static void printbody (char *s, int mode) {
     }
     c = '\000';
     for (s1 = s; *s1; s1++)
-        if (*s1 == '>' && *(s1 + 1) && *(s1 + 1) == '>')
+        if (strncmp(s1, ">>", 2) == 0)
             break;
     if (!*s1)
         return;

@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <sparse/general.h>
@@ -51,9 +48,6 @@ UniformStressSmoother UniformStressSmoother_new(int dim, SparseMatrix A, real *x
   /* Lw and Lwd have diagonals */
   sm->Lw = SparseMatrix_new(m, m, A->nz + m, MATRIX_TYPE_REAL, FORMAT_CSR);
   sm->Lwd = SparseMatrix_new(m, m, A->nz + m, MATRIX_TYPE_REAL, FORMAT_CSR);
-  iw = sm->Lw->ia; jw = sm->Lw->ja;
-  id = sm->Lwd->ia; jd = sm->Lwd->ja;
-  w = (real*) sm->Lw->a; d = (real*) sm->Lwd->a;
 
   if (!(sm->Lw) || !(sm->Lwd)) {
     StressMajorizationSmoother_delete(sm);

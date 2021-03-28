@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /*
@@ -93,7 +90,7 @@ static void auto_output_filename(GVJ_t *job)
     size_t len;
 
     if (job->graph_index)
-        sprintf(gidx, ".%d", job->graph_index + 1);
+        snprintf(gidx, sizeof(gidx), ".%d", job->graph_index + 1);
     else
         gidx[0] = '\0';
     if (!(fn = job->input_filename))
@@ -384,12 +381,7 @@ void gvdevice_finalize(GVJ_t * job)
 	gvdevice_close(job);
     }
 }
-/* gvprintf:
- * Unless vsnprintf is available, this function is unsafe due to the fixed buffer size.
- * It should only be used when the caller is sure the input will not
- * overflow the buffer. In particular, it should be avoided for
- * input coming from users.
- */
+
 void gvprintf(GVJ_t * job, const char *format, ...)
 {
     char buf[BUFSIZ];
@@ -398,11 +390,10 @@ void gvprintf(GVJ_t * job, const char *format, ...)
     char* bp = buf;
 
     va_start(argp, format);
-#ifdef HAVE_VSNPRINTF
     {
 	va_list argp2;
 	va_copy(argp2, argp);
-	len = vsnprintf((char *)buf, BUFSIZ, format, argp2);
+	len = vsnprintf(buf, BUFSIZ, format, argp2);
 	va_end(argp2);
     }
     if (len < 0) {
@@ -417,9 +408,6 @@ void gvprintf(GVJ_t * job, const char *format, ...)
 	bp = gmalloc(len + 1);
 	len = vsprintf(bp, format, argp);
     }
-#else
-    len = vsprintf((char *)buf, format, argp);
-#endif
     va_end(argp);
 
     gvwrite(job, bp, len);

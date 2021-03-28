@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <cgraph/cghdr.h>
@@ -292,7 +289,7 @@ static void insert_outside_subg(Agraph_t * g, Agnode_t * node,
 	graphrec = (Agcmpgraph_t *) aggetrec(g, Descriptor_id, FALSE);
 	if (graphrec
 	    &&
-	    ((n = (Agnode_t *) dtsearch(graphrec->hidden_node_set, node))))
+	    ((n = dtsearch(graphrec->hidden_node_set, node))))
 	    dtinsert(g->n_dict, n);
 
 	subglist = agsubglist(g);
@@ -379,7 +376,7 @@ Agnode_t *agfindhidden(Agraph_t * g, char *name)
     graphrec = (Agcmpgraph_t *) aggetrec(g, Descriptor_id, FALSE);
     if (graphrec) {
 	key.name = name;
-	return (Agnode_t *) dtsearch(graphrec->hidden_node_set, &key);
+	return dtsearch(graphrec->hidden_node_set, &key);
     } else
 	return NULL;
 }

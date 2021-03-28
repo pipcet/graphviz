@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */ 
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /* Lefteris Koutsofios - AT&T Labs Research */
@@ -17,6 +14,7 @@
 #include "g.h"
 #include "gcommon.h"
 #include "mem.h"
+#include <string.h>
 
 Gwidget_t *Gwidgets;
 int Gwidgetn;
@@ -590,7 +588,7 @@ int Gtext (
         return -1;
     }
     widget = &Gwidgets[wi];
-    if (string[0] == '\000')
+    if (strcmp(string, "") == 0)
         return 0;
     n = unpackstring (string);
     if (!justs[0] || !justs[1])
@@ -625,7 +623,7 @@ int Ggettextsize (int wi, char *string, char *fn, double fs, Gsize_t *gsp) {
         Gerr (POS, G_ERRNOTACANVAS, wi);
         return -1;
     }
-    if (string[0] == '\000') {
+    if (strcmp(string, "") == 0) {
         gsp->x = gsp->y = 0.0;
         return 0;
     }

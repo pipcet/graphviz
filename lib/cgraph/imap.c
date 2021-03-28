@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <cgraph/cghdr.h>
@@ -105,7 +102,7 @@ int aginternalmaplookup(Agraph_t * g, int objtype, char *str,
     if ((d = g->clos->lookup_by_name[objtype])) {
 	if ((search_str = agstrbind(g, str))) {
 	    template.str = search_str;
-	    sym = (IMapEntry_t *) dtsearch(d, &template);
+	    sym = dtsearch(d, &template);
 	    if (sym) {
 		*result = sym->id;
 		return TRUE;
@@ -147,7 +144,7 @@ static IMapEntry_t *find_isym(Agraph_t * g, int objtype, IDTYPE id)
 	objtype = AGEDGE;
     if ((d = g->clos->lookup_by_id[objtype])) {
 	itemplate.id = id;
-	isym = (IMapEntry_t *) dtsearch(d, &itemplate);
+	isym = dtsearch(d, &itemplate);
     } else
 	isym = NULL;
     return isym;

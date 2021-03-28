@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -89,11 +86,11 @@ static char* nname(node_t* v)
         static char buf[1000];
 	if (ND_node_type(v)) {
 		if (ND_ranktype(v) == CLUSTER)
-			sprintf (buf, "v%s_%p", agnameof(ND_clust(v)), v);
+			snprintf(buf, sizeof(buf), "v%s_%p", agnameof(ND_clust(v)), v);
 		else
-			sprintf (buf, "v_%p", v);
+			snprintf(buf, sizeof(buf), "v_%p", v);
 	} else
-		sprintf (buf, "%s", agnameof(v));
+		snprintf(buf, sizeof(buf), "%s", agnameof(v));
 	return buf;
 }
 static void dumpg (graph_t* g)
@@ -305,7 +302,7 @@ checkLabelOrder (graph_t* g)
 	    u = rk->v[j];
 	    if ((e = (edge_t*)ND_alg(u))) {
 		if (!lg) lg = agopen ("lg", Agstrictdirected, 0);
-		sprintf (buf, "%d", j);
+		snprintf(buf, sizeof(buf), "%d", j);
 		n = agnode(lg, buf, 1);
 		agbindrec(n, "info", sizeof(info_t), 1);
 		lo = ND_order(aghead(ND_out(u).list[0]));
@@ -844,7 +841,6 @@ static int mincross(graph_t * g, int startpass, int endpass, int doBalance)
 		save_best(g);
 		best_cross = cur_cross;
 	    }
-	    trying = 0;
 	} else {
 	    maxthispass = MaxIter;
 	    if (cur_cross > best_cross)
@@ -1628,14 +1624,6 @@ static void mincross_step(graph_t * g, int pass)
 	reverse = TRUE;
     else
 	reverse = FALSE;
-    if (pass % 2) {
-	r = GD_maxrank(g) - 1;
-	dir = -1;
-    } /* up pass */
-    else {
-	r = 1;
-	dir = 1;
-    }				/* down pass */
 
     if (pass % 2 == 0) {	/* down pass */
 	first = GD_minrank(g) + 1;

@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /*
@@ -25,6 +22,7 @@
 
 #include <ast/ast.h>
 #include <ast/error.h>
+#include <stddef.h>
 #include <string.h>
 #include <errno.h>
 
@@ -92,7 +90,7 @@ void error(int level, const char *s, ...)
     va_list ap;
 
     va_start(ap, s);
-    errorv(NiL, level, s, ap);
+    errorv(NULL, level, s, ap);
     va_end(ap);
 }
 

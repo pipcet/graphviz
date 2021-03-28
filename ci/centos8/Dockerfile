@@ -1,11 +1,12 @@
 FROM centos:8
 
-# Development tools
-RUN yum -y groupinstall 'Development Tools'
-RUN dnf config-manager --set-enabled PowerTools
+COPY requirements.txt ./requirements.txt
 
+# Development tools
+RUN yum -y groupinstall 'Development Tools' \
+&& dnf config-manager --set-enabled powertools \
 # Centos build utilities
-RUN yum -y install \
+&& yum -y install \
 libtool-ltdl-devel \
 libedit-devel \
 ksh \
@@ -67,7 +68,10 @@ libSM-devel \
 libXaw-devel \
 tk-devel \
 # Test utilities
-python2-pytest \
-python3-pytest \
+python3-pip \
+python3-setuptools \
+# install Python dependencies
+&& python3 -m pip install --user --upgrade pip \
+&& python3 -m pip install --user --requirement requirements.txt \
 # Clean up
 && yum clean all && rm -rf /var/cache/yum

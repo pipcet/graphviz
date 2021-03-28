@@ -1,5 +1,3 @@
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -7,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <xdot/xdot.h>
@@ -25,8 +23,6 @@ typedef struct {
     int dyna;			/* true if buffer is malloc'ed */
 } agxbuf;
 
-#define agxbputc(X,C) ((((X)->ptr >= (X)->eptr) ? agxbmore(X,1) : 0), \
-          (void)(*(X)->ptr++ = ((unsigned char)C)))
 #define agxbuse(X) (agxbputc(X,'\0'),(char*)((X)->ptr = (X)->buf))
 
 static void agxbinit(agxbuf * xb, unsigned int hint, unsigned char *init)
@@ -77,6 +73,16 @@ static int agxbput(char *s, agxbuf * xb)
     memcpy(xb->ptr, s, ssz);
     xb->ptr += ssz;
     return ssz;
+}
+
+static int agxbputc(agxbuf * xb, char c) {
+  if (xb->ptr >= xb->eptr) {
+    if (agxbmore(xb, 1) != 0) {
+      return -1;
+    }
+  }
+  *xb->ptr++ = (unsigned char)c;
+  return 0;
 }
 
 /* agxbfree:
@@ -194,15 +200,15 @@ static char *parseString(char *s, char **sp)
     char *c;
     char *p;
     s = parseInt(s, &i);
-    if (!s || (i <= 0)) return 0;
-    while (*s && (*s != '-')) s++;
+    if (!s || i <= 0) return 0;
+    while (*s && *s != '-') s++;
     if (*s) s++;
     else {
 	return 0;
     }
     c = N_NEW(i + 1, char);
     p = c;
-    while ((i > 0) && *s) {
+    while (i > 0 && *s) {
 	*p++ = *s++;
 	i--;
     }
@@ -436,7 +442,7 @@ xdot *parseXDotFOn (char *s, drawfunc_t fns[], int sz, xdot* x)
 	ops = (char*)(x->ops);
 	bufsz = initcnt + XDBSIZE;
 	ops = realloc(ops, bufsz * sz);
-	memset(ops + (initcnt*sz), '\0', (bufsz - initcnt)*sz);
+	memset(ops + initcnt*sz, '\0', (bufsz - initcnt)*sz);
     }
 
     while ((s = parseOp(&op, s, fns, &error))) {
@@ -444,9 +450,9 @@ xdot *parseXDotFOn (char *s, drawfunc_t fns[], int sz, xdot* x)
 	    oldsz = bufsz;
 	    bufsz *= 2;
 	    ops = realloc(ops, bufsz * sz);
-	    memset(ops + (oldsz*sz), '\0', (bufsz - oldsz)*sz);
+	    memset(ops + oldsz*sz, '\0', (bufsz - oldsz)*sz);
 	}
-	*(xdot_op *) (ops + (x->cnt * sz)) = op;
+	*(xdot_op *) (ops + x->cnt * sz) = op;
 	x->cnt++;
     }
     if (error)
@@ -500,16 +506,16 @@ static void printRect(xdot_rect * r, pf print, void *info)
 {
     char buf[128];
 
-    sprintf(buf, " %.02f", r->x);
+    snprintf(buf, sizeof(buf), " %.02f", r->x);
     trim(buf);
     print(buf, info);
-    sprintf(buf, " %.02f", r->y);
+    snprintf(buf, sizeof(buf), " %.02f", r->y);
     trim(buf);
     print(buf, info);
-    sprintf(buf, " %.02f", r->w);
+    snprintf(buf, sizeof(buf), " %.02f", r->w);
     trim(buf);
     print(buf, info);
-    sprintf(buf, " %.02f", r->h);
+    snprintf(buf, sizeof(buf), " %.02f", r->h);
     trim(buf);
     print(buf, info);
 }
@@ -519,13 +525,13 @@ static void printPolyline(xdot_polyline * p, pf print, void *info)
     int i;
     char buf[512];
 
-    sprintf(buf, " %d", p->cnt);
+    snprintf(buf, sizeof(buf), " %d", p->cnt);
     print(buf, info);
     for (i = 0; i < p->cnt; i++) {
-	sprintf(buf, " %.02f", p->pts[i].x);
+	snprintf(buf, sizeof(buf), " %.02f", p->pts[i].x);
 	trim(buf);
 	print(buf, info);
-	sprintf(buf, " %.02f", p->pts[i].y);
+	snprintf(buf, sizeof(buf), " %.02f", p->pts[i].y);
 	trim(buf);
 	print(buf, info);
     }
@@ -535,7 +541,7 @@ static void printString(char *p, pf print, void *info)
 {
     char buf[30];
 
-    sprintf(buf, " %d -", (int) strlen(p));
+    snprintf(buf, sizeof(buf), " %zu -", strlen(p));
     print(buf, info);
     print(p, info);
 }
@@ -544,7 +550,7 @@ static void printInt(int i, pf print, void *info)
 {
     char buf[30];
 
-    sprintf(buf, " %d", i);
+    snprintf(buf, sizeof(buf), " %d", i);
     print(buf, info);
 }
 
@@ -553,9 +559,9 @@ static void printFloat(float f, pf print, void *info, int space)
     char buf[128];
 
     if (space)
-	sprintf(buf, " %.02f", f);
+	snprintf(buf, sizeof(buf), " %.02f", f);
     else
-	sprintf(buf, "%.02f", f);
+	snprintf(buf, sizeof(buf), "%.02f", f);
     trim (buf);
     print(buf, info);
 }
@@ -710,7 +716,8 @@ static void jsonRect(xdot_rect * r, pf print, void *info)
 {
     char buf[128];
 
-    sprintf(buf, "[%.06f,%.06f,%.06f,%.06f]", r->x, r->y, r->w, r->h);
+    snprintf(buf, sizeof(buf), "[%.06f,%.06f,%.06f,%.06f]", r->x, r->y, r->w,
+             r->h);
     print(buf, info);
 }
 
@@ -721,7 +728,7 @@ static void jsonPolyline(xdot_polyline * p, pf print, void *info)
 
     print("[", info);
     for (i = 0; i < p->cnt; i++) {
-	sprintf(buf, "%.06f,%.06f", p->pts[i].x, p->pts[i].y);
+	snprintf(buf, sizeof(buf), "%.06f,%.06f", p->pts[i].x, p->pts[i].y);
 	print(buf, info);
 	if (i < p->cnt-1) print(",", info);
     }
@@ -730,20 +737,18 @@ static void jsonPolyline(xdot_polyline * p, pf print, void *info)
 
 static void jsonString(char *p, pf print, void *info)
 {
-    unsigned char c, buf[BUFSIZ];
-    agxbuf xb;
+    char c;
 
-    agxbinit(&xb, BUFSIZ, buf);
-    agxbputc(&xb, '"');
+    print("\"", info);
     while ((c = *p++)) {
-	if (c == '"') agxbput("\\\"", &xb);
-	else if (c == '\\') agxbput("\\\\", &xb);
-	/* else if (c > 127) handle UTF-8 */
-	else agxbputc(&xb, c);
+	if (c == '"') print("\\\"", info);
+	else if (c == '\\') print("\\\\", info);
+	else {
+		char buf[2] = { c, '\0' };
+		print(buf, info);
+	}
     }
-    agxbputc(&xb, '"');
-    print(agxbuse(&xb), info);
-    agxbfree(&xb);
+    print("\"", info);
 }
 
 static void jsonXDot_Op(xdot_op * op, pf print, void *info, int more)
@@ -850,7 +855,7 @@ static void _printXDot(xdot * x, pf print, void *info, print_op ofn)
     char *base = (char *) (x->ops);
     for (i = 0; i < x->cnt; i++) {
 	op = (xdot_op *) (base + i * x->sz);
-	ofn(op, print, info, (i < x->cnt - 1));
+	ofn(op, print, info, i < x->cnt - 1);
     }
 }
 
@@ -1148,10 +1153,3 @@ void freeXDotColor (xdot_color* cp)
 	free (cp->u.ring.stops);
     }
 }
-
-#if 0
-static void execOp(xdot_op * op, int param)
-{
-    op->drawfunc(op, param);
-}
-#endif

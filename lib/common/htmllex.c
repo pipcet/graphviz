@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -735,7 +735,7 @@ static void characterData(void *user, const char *s, int length)
 	    c = *s++;
 	    if (c >= ' ') {
 		cnt++;
-		agxbputc(state.xb, c);
+		agxbputc(state.xb, (char)c);
 	    }
 	}
 	if (cnt) state.tok = T_string;

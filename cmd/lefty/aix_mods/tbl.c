@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /* Lefteris Koutsofios - AT&T Bell Laboratories */
@@ -27,7 +24,7 @@ Tobj Ttrue, Tfalse;
 #define ISEQRK(rk, ko) \
     (T_ISNUMBER (ko) && Tgetnumber (ko) == (rk))
 #define ISEQSK(sk, ko) \
-    (T_ISSTRING (ko)  && Strcmp (((Tstring_t *) (ko))->s, (sk)) == 0)
+    (T_ISSTRING (ko)  && strcmp (((Tstring_t *) (ko))->s, (sk)) == 0)
 
 #define GETIKINDEX(tp, ik) (unsigned long) ik  % tp->ln
 #define GETRKINDEX(tp, rk) (unsigned long) rk  % tp->ln

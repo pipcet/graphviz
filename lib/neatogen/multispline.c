@@ -1,6 +1,3 @@
-/* $Id$Revision: */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <neatogen/multispline.h>
@@ -149,7 +146,7 @@ static int findMap(Dt_t * map, int a, int b)
     }
     it.a[0] = a;
     it.a[1] = b;
-    ip = (item *) dtsearch(map, &it);
+    ip = dtsearch(map, &it);
     assert(ip);
     return ip->t;
 }
@@ -211,7 +208,7 @@ static void vmapAdd(Dt_t * map, int i, int j)
 static int vMap(Dt_t * map, int i)
 {
     Ipair *ip;
-    ip = (Ipair *) dtmatch(map, &i);
+    ip = dtmatch(map, &i);
     return ip->j;
 }
 
@@ -674,11 +671,11 @@ prTriGraph (router_t* rtr, int n)
         pointf b = pts[rtr->tris[3*i+1]];
         pointf c = pts[rtr->tris[3*i+2]];
 	psTri (a, b,c);
-	sprintf (buf, "%d", i);
+	snprintf(buf, sizeof(buf), "%d", i);
         psTxt (buf, nodes[i].ctr);
     }
     for (i=rtr->tn;i < n; i++) {
-	sprintf (buf, "%d", i);
+	snprintf(buf, sizeof(buf), "%d", i);
         psTxt (buf, nodes[i].ctr);
     }
     psColor ("1 0 0");

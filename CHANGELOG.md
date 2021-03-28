@@ -6,12 +6,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Windows build thinks xdg-open can be used to open a web browser #1954
+- lab_gamut_data misses a value #1974
+- xdot man page does not document some functions #1957
+- Superfluous empty `@param` in documentation #1977
+- PIC renderer does not work and probably never has #131
+
+## [2.47.0] - 2021-03-15
+
+### Changed
+- The edges in JSON output are ordered now !1728
+- remove regex usage #1919
+- RxSpencer is no longer a dependency on Windows
+- gvmap.sh is compatible with POSIX shells in addition to ksh
+- sed is no longer a build dependency on Windows
+- SHA256 checksum generation? #1955
+
+### Fixed
+- Fix gvpr -? to actually print usage and exit non-zero
+- gvpr is not built by CMake #1878
+- typos in gpcanvas.c #1927
+- memory leak in libmingle
+- private inheritance in IncVPSC #1874
+- broken sorting in nearest_neighbor_graph_ann.cpp #1938
+- memory leak in ANN bridge
+- gvpr on Windows does not support absolute paths #1780
+- buffer overflow in unflatten
+- agxbputc macro does not bracket its arguments #1814
+
+## [2.46.1] - 2021-02-13
+
 ### Added
 - Support for building against Guile 2.2
+- Portable source is now also offered as a .tar.xz
 
 ### Changed
 - CentOS/RHEL 6 is no longer supported
 - Vestiges of Qt4 support have been removed
+- C++11 support is now required of the C++ compiler used to build Graphviz
+- C99 support is now required of the C compiler used to build Graphviz
+- Question about userout() function in agerror.c #1924
+- The minimum version of Python required to run the test suite is 3.6
 
 ### Fixed
 - memory leak in label construction
@@ -19,6 +56,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - incorrect HTML BR attribute parsing code #1913
 - broken overflow checks in RectArea #1906
 - various memory leaks !1699
+- Fix bad free in lefty !1709
+- typo in pathcross #1926
+- Out-of-bounds write caused by incorrect error handling of malloc in genUserdata #1928
+- Offer .tar.xz files too #454
+- Header file graphviz_version.h has no include guards #1929
+- regression: newlines embedded in quoted labels / node names are not preserved in 2.46.0 #1931
+- Properly fill graphviz_version.h !1706
 
 ## [2.46.0] - 2021-01-18
 
@@ -1323,7 +1367,9 @@ March 13, 2000: Use AM_PROG_LIBTOOL instead of AC_PROG_LIBTOOL
    in configure.in.  John Ellson <ellson@graphviz.org>
 ```
 
-[Unreleased]: https://gitlab.com/graphviz/graphviz/compare/2.46.0...master
+[Unreleased]: https://gitlab.com/graphviz/graphviz/compare/2.47.0...master
+[2.47.0]: https://gitlab.com/graphviz/graphviz/compare/2.46.1...2.47.0
+[2.46.1]: https://gitlab.com/graphviz/graphviz/compare/2.46.0...2.46.1
 [2.46.0]: https://gitlab.com/graphviz/graphviz/compare/2.44.1...2.46.0
 [2.44.1]: https://gitlab.com/graphviz/graphviz/compare/2.44.0...2.44.1
 [2.44.0]: https://gitlab.com/graphviz/graphviz/compare/2.42.4...2.44.0

@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -848,7 +845,7 @@ static void weak(graph_t * g, node_t * t, node_t * h, edge_t * orig)
 	}
     }
     if (!e) {
-	sprintf (buf, "_weak_%d", id++);
+	snprintf(buf, sizeof(buf), "_weak_%d", id++);
 	v = makeXnode(g, buf);
 	e = agedge(g, v, t, 0, 1);
 	f = agedge(g, v, h, 0, 1);

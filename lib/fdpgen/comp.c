@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -75,7 +72,7 @@ graph_t **findCComp(graph_t * g, int *cnt, int *pinned)
     /* Create component based on port nodes */
     subg = 0;
     if ((pp = PORTS(g))) {
-	sprintf(name, "cc%s_%d", agnameof(g), c_cnt++ + C_cnt);
+	snprintf(name, sizeof(name), "cc%s_%d", agnameof(g), c_cnt++ + C_cnt);
 	subg = agsubg(g, name,1);
 	agbindrec(subg, "Agraphinfo_t", sizeof(Agraphinfo_t), TRUE);
 	GD_alg(subg) = NEW(gdata);
@@ -96,7 +93,7 @@ graph_t **findCComp(graph_t * g, int *cnt, int *pinned)
 	if (ND_pinned(n) != P_PIN)
 	    continue;
 	if (!subg) {
-	    sprintf(name, "cc%s_%d", agnameof(g), c_cnt++ + C_cnt);
+	    snprintf(name, sizeof(name), "cc%s_%d", agnameof(g), c_cnt++ + C_cnt);
 	    subg = agsubg(g, name,1);
 		agbindrec(subg, "Agraphinfo_t", sizeof(Agraphinfo_t), TRUE);
 	    GD_alg(subg) = NEW(gdata);
@@ -111,7 +108,7 @@ graph_t **findCComp(graph_t * g, int *cnt, int *pinned)
     for (n = agfstnode(g); n; n = agnxtnode(g, n)) {
 	if (MARK(n))
 	    continue;
-	sprintf(name, "cc%s+%d", agnameof(g), c_cnt++ + C_cnt);
+	snprintf(name, sizeof(name), "cc%s+%d", agnameof(g), c_cnt++ + C_cnt);
 	subg = agsubg(g, name,1);
 	agbindrec(subg, "Agraphinfo_t", sizeof(Agraphinfo_t), TRUE);	//node custom data
 	GD_alg(subg) = NEW(gdata);

@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,12 +5,15 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include	<sfio/sfhdr.h>
 #include	<stddef.h>
 #include <stdint.h>
+#ifndef _WIN32
+#include <sys/wait.h>
+#endif
 static char *Version = "\n@(#)sfio (AT&T Labs - kpv) 2001-02-01\0\n";
 
 /*	Functions to set a given stream to some desired mode

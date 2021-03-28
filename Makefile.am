@@ -1,4 +1,3 @@
-# $Id$ $Revision$
 ## Process this file with automake to produce Makefile.in
 
 ACLOCAL_AMFLAGS = -I m4
@@ -36,7 +35,8 @@ dist-hook:
 BUILT_SOURCES = $(top_builddir)/graphviz_version.h
 
 $(top_builddir)/graphviz_version.h: config.h
-	$(EGREP) 'PACKAGE|VERSION|GVPLUGIN' config.h > $(top_builddir)/graphviz_version.h
+	printf '#pragma once\n' > $(top_builddir)/graphviz_version.h
+	$(EGREP) 'PACKAGE|VERSION|GVPLUGIN' config.h >> $(top_builddir)/graphviz_version.h
 
 EXTRA_DIST = $(txt) $(html) graphviz.spec \
 	autogen.sh config/depcomp config/config.rpath \

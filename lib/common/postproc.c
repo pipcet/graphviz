@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -680,9 +677,9 @@ void gv_postprocess(Agraph_t * g, int allowTranslation)
     if (Show_boxes) {
 	char buf[BUFSIZ];
 	if (Flip)
-	    sprintf(buf, M2, Offset.x, Offset.y, Offset.x, Offset.y);
+	    snprintf(buf, sizeof(buf), M2, Offset.x, Offset.y, Offset.x, Offset.y);
 	else
-	    sprintf(buf, M1, Offset.y, Offset.x, Offset.y, Offset.x,
+	    snprintf(buf, sizeof(buf), M1, Offset.y, Offset.x, Offset.y, Offset.x,
 		    -Offset.x, -Offset.y);
 	Show_boxes[0] = strdup(buf);
     }

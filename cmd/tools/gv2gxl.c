@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -280,7 +277,7 @@ static char *createGraphId(Dt_t * ids)
     char buf[SMALLBUF];
 
     do {
-	sprintf(buf, "G_%d", graphIdCounter++);
+	snprintf(buf, sizeof(buf), "G_%d", graphIdCounter++);
     } while (idexists(ids, buf));
     return addid(ids, buf);
 }
@@ -291,7 +288,7 @@ static char *createNodeId(Dt_t * ids)
     char buf[SMALLBUF];
 
     do {
-	sprintf(buf, "N_%d", nodeIdCounter++);
+	snprintf(buf, sizeof(buf), "N_%d", nodeIdCounter++);
     } while (idexists(ids, buf));
     return addid(ids, buf);
 }
@@ -413,13 +410,12 @@ writeDict(Agraph_t * g, FILE * gxlFile, char *name, Dict_t * dict,
     Agsym_t *sym, *psym;
 
     view = dtview(dict, NULL);
-    for (sym = (Agsym_t *) dtfirst(dict); sym;
-	 sym = (Agsym_t *) dtnext(dict, sym)) {
+    for (sym = dtfirst(dict); sym; sym = dtnext(dict, sym)) {
 	if (!isGxlGrammar(sym->name)) {
 	    if (EMPTY(sym->defval)) {	/* try to skip empty str (default) */
 		if (view == NULL)
 		    continue;	/* no parent */
-		psym = (Agsym_t *) dtsearch(view, sym);
+		psym = dtsearch(view, sym);
 		/* assert(psym); */
 		if (EMPTY(psym->defval))
 		    continue;	/* also empty in parent */
@@ -459,7 +455,7 @@ writeDict(Agraph_t * g, FILE * gxlFile, char *name, Dict_t * dict,
 		if (EMPTY(sym->defval)) {
 		    if (view == NULL)
 			continue;
-		    psym = (Agsym_t *) dtsearch(view, sym);
+		    psym = dtsearch(view, sym);
 		    if (EMPTY(psym->defval))
 			continue;
 		}
@@ -620,8 +616,7 @@ writeNondefaultAttr(void *obj, FILE * gxlFile, Dict_t * defdict)
     }
     data = (Agattr_t *) agattrrec(obj);
     if (data) {
-	for (sym = (Agsym_t *) dtfirst(defdict); sym;
-	     sym = (Agsym_t *) dtnext(defdict, sym)) {
+	for (sym = dtfirst(defdict); sym; sym = dtnext(defdict, sym)) {
 	    if (!isGxlGrammar(sym->name)) {
 		if ((AGTYPE(obj) == AGINEDGE)
 		    || (AGTYPE(obj) == AGOUTEDGE)) {

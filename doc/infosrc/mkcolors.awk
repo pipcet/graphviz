@@ -6,16 +6,14 @@ function value (r, g, b) {
 }
 function putColor (n, r, g, b, v)
 {
-  if (length(n) > 4) p = "";
-  else p = "&nbsp;&nbsp;&nbsp;";
-  printf ("<td bgcolor=#%02x%02x%02x><a title=#%02x%02x%02x>",r,g,b,r,g,b); 
-  if (v < 0.51) printf ("<font color=white>%s%s%s</font>", p,n,p);
-  else printf ("%s%s%s", p,n,p);
-  printf ("</a></td>\n");
+  printf ("<td style=\"background-color: #%02x%02x%02x;\" title=\"#%02x%02x%02x\">",r,g,b,r,g,b);
+  if (v < 0.51) printf ("<span style=\"color: white;\">%s</span>", n);
+  else printf ("%s", n);
+  printf ("</td>\n");
 }
 BEGIN {
   colorsPerRow = 5;
-  if (ARGV[1] == "-s") {
+  if (ARGV[1] == "--single-line") {
     ARGV[1] = "";
     name = ARGV[2];
     singleRow = 1;
@@ -28,15 +26,16 @@ BEGIN {
     sub(".*/","",name);
     printf ("%s color scheme<BR>\n", name);
   }
-  printf ("<table border=1 align=center>\n");
+  printf ("<table border=\"1\" align=\"center\" class=\"gv-colors\">\n");
 }
 {
   if (singleRow) idx = NR;
   else idx = NR % colorsPerRow;
-  if (idx == 1) printf ("<tr align=center>\n");
+  if (idx == 1) printf ("<tr align=\"center\">\n");
   putColor($1,$2,$3,$4,value($2/255.0,$3/255.0,$4/255.0));
   if (idx == 0) printf ("</tr>\n");
 }
 END {
-  printf ("</table><HR>\n");
+  if (idx != 0) printf ("</tr>\n");
+  printf ("</table>\n");
 }

@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /*
@@ -541,7 +538,6 @@ parseSegs (char* clrs, int nseg, colorsegs_t** psegs)
     }
     
     /* Make sure last positive segment is followed by a sentinel. */
-    nseg = 0;
     for (i = cnum-1; i >= 0; i--) {
 	if (s[i].t > 0) break;
     }
@@ -1180,10 +1176,9 @@ static int chkOrder(graph_t * g)
 {
     char *p = agget(g, "outputorder");
     if (p) {
-        char c = *p;
-        if ((c == 'n') && !strcmp(p + 1, "odesfirst"))
+        if (!strcmp(p, "nodesfirst"))
             return EMIT_SORTED;
-        if ((c == 'e') && !strcmp(p + 1, "dgesfirst"))
+        if (!strcmp(p, "edgesfirst"))
             return EMIT_EDGE_SORTED;
     }
     return 0;

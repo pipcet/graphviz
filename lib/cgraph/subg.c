@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <cgraph/cghdr.h>
@@ -20,7 +17,7 @@ static Agraph_t *agfindsubg_by_id(Agraph_t * g, IDTYPE id)
 
     agdtdisc(g, g->g_dict, &Ag_subgraph_id_disc);
     AGID(&template) = id;
-    return (Agraph_t *) dtsearch(g->g_dict, &template);
+    return dtsearch(g->g_dict, &template);
 }
 
 static Agraph_t *localsubg(Agraph_t * g, IDTYPE id)
@@ -72,7 +69,7 @@ Agraph_t *agsubg(Agraph_t * g, char *name, int cflag)
 
 Agraph_t *agfstsubg(Agraph_t * g)
 {
-    return (Agraph_t *) dtfirst(g->g_dict);
+    return dtfirst(g->g_dict);
 }
 
 Agraph_t *agnxtsubg(Agraph_t * subg)
@@ -80,7 +77,7 @@ Agraph_t *agnxtsubg(Agraph_t * subg)
     Agraph_t *g;
 
     g = agparent(subg);
-    return g? (Agraph_t *) dtnext(g->g_dict, subg) : 0;
+    return g? dtnext(g->g_dict, subg) : 0;
 }
 
 Agraph_t *agparent(Agraph_t * g)

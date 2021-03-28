@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -431,7 +428,7 @@ tclGdCreateCmd(Tcl_Interp * interp, int argc, Tcl_Obj * CONST objv[])
 	    im = gdImageCreate(w, h);
 	if (im == NULL) {
 	    char buf[255];
-	    sprintf(buf, "GD unable to allocate %d X %d image", w, h);
+	    snprintf(buf, sizeof(buf), "GD unable to allocate %d X %d image", w, h);
 	    Tcl_SetResult(interp, buf, TCL_VOLATILE);
 	    return TCL_ERROR;
 	}
@@ -443,7 +440,7 @@ tclGdCreateCmd(Tcl_Interp * interp, int argc, Tcl_Obj * CONST objv[])
 	im = gdImageCreateTrueColor(w, h);
 	if (im == NULL) {
 	    char buf[255];
-	    sprintf(buf, "GD unable to allocate %d X %d image", w, h);
+	    snprintf(buf, sizeof(buf), "GD unable to allocate %d X %d image", w, h);
 	    Tcl_SetResult(interp, buf, TCL_VOLATILE);
 	    return TCL_ERROR;
 	}

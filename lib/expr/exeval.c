@@ -1,5 +1,3 @@
-/* vim:set shiftwidth=4 ts=4: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -7,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /*
@@ -246,7 +244,7 @@ prformat(Sfio_t* sp, void* vp, Sffmt_t* dp)
 			fmt->value = exeval(fmt->expr, node, fmt->env);
 		else
 		{
-			node = excast(fmt->expr, node, to, NiL, 0);
+			node = excast(fmt->expr, node, to, NULL, 0);
 			fmt->value = exeval(fmt->expr, node, fmt->env);
 			node->data.operand.left = 0;
 			exfree(fmt->expr, node);
@@ -287,7 +285,7 @@ prformat(Sfio_t* sp, void* vp, Sffmt_t* dp)
 		else
 		{
 			sfprintf(fmt->tmp, "%.*s", dp->n_str, dp->t_str);
-			txt = exstash(fmt->tmp, NiL);
+			txt = exstash(fmt->tmp, NULL);
 		}
 	}
 	else
@@ -347,7 +345,7 @@ prformat(Sfio_t* sp, void* vp, Sffmt_t* dp)
 	case 't':
 	case 'T':
 		if ((tm = *((Sflong_t*)vp)) == -1)
-			tm = time(NiL);
+			tm = time(NULL);
         if (!txt)
             txt = "%?%K";
         s = fmtbuf(TIME_LEN);
@@ -395,7 +393,7 @@ print(Expr_t* ex, Exnode_t* expr, void* env, Sfio_t* sp)
 	if (!sp)
 	{
 		v = eval(ex, expr->data.print.descriptor, env);
-		if (v.integer < 0 || v.integer >= elementsof(ex->file) || (!(sp = ex->file[v.integer]) && !(sp = ex->file[v.integer] = sfnew(NiL, NiL, SF_UNBOUND, v.integer, SF_READ|SF_WRITE))))
+		if (v.integer < 0 || v.integer >= elementsof(ex->file) || (!(sp = ex->file[v.integer]) && !(sp = ex->file[v.integer] = sfnew(NULL, NULL, SF_UNBOUND, v.integer, SF_READ|SF_WRITE))))
 		{
 			exerror("printf: %d: invalid descriptor", v.integer);
 			return -1;
@@ -519,7 +517,7 @@ scan(Expr_t* ex, Exnode_t* expr, void* env, Sfio_t* sp)
 		}
 		else
 			v.integer = 0;
-		if ((v.integer < 0) || (v.integer >= elementsof(ex->file)) || (!(sp = ex->file[v.integer]) && !(sp = ex->file[v.integer] = sfnew(NiL, NiL, SF_UNBOUND, v.integer, SF_READ|SF_WRITE))))
+		if ((v.integer < 0) || (v.integer >= elementsof(ex->file)) || (!(sp = ex->file[v.integer]) && !(sp = ex->file[v.integer] = sfnew(NULL, NULL, SF_UNBOUND, v.integer, SF_READ|SF_WRITE))))
 		{
 			exerror("scanf: %d: invalid descriptor", v.integer);
 			return 0;
@@ -1136,7 +1134,7 @@ eval(Expr_t* ex, Exnode_t* expr, void* env)
 		if (expr->data.generate.array->op == DYNAMIC)
 		{
 			n = expr->data.generate.index->type == STRING;
-			for (assoc = (Exassoc_t*)dtfirst((Dt_t*)expr->data.generate.array->data.variable.symbol->local.pointer); assoc; assoc = (Exassoc_t*)dtnext((Dt_t*)expr->data.generate.array->data.variable.symbol->local.pointer, assoc))
+			for (assoc = dtfirst((Dt_t*)expr->data.generate.array->data.variable.symbol->local.pointer); assoc; assoc = dtnext((Dt_t*)expr->data.generate.array->data.variable.symbol->local.pointer, assoc))
 			{
 				v.integer++;
 				if (n)
@@ -1170,10 +1168,10 @@ eval(Expr_t* ex, Exnode_t* expr, void* env)
 		v.integer = 0;
 		if (expr->data.generate.array->op == DYNAMIC) {
 			n = expr->data.generate.index->type == STRING;
-			for (assoc = (Exassoc_t *) dtlast((Dt_t *) expr->data.generate.array->
+			for (assoc = dtlast((Dt_t *) expr->data.generate.array->
 						   data.variable.symbol->local.
 						   pointer); assoc;
-		 		assoc = (Exassoc_t *) dtprev((Dt_t *) expr->data.generate.array->
+		 		assoc = dtprev((Dt_t *) expr->data.generate.array->
 						  data.variable.symbol->local.pointer,
 						  assoc)) {
 				v.integer++;
@@ -1268,7 +1266,7 @@ eval(Expr_t* ex, Exnode_t* expr, void* env)
 		v.integer = prints(ex, expr, env, sfstdout);
 		return v;
 	case PRINTF:
-		v.integer = print(ex, expr, env, NiL);
+		v.integer = print(ex, expr, env, NULL);
 		return v;
 	case RETURN:
 		ex->loopret = eval(ex, x, env);
@@ -1277,7 +1275,7 @@ eval(Expr_t* ex, Exnode_t* expr, void* env)
 		return ex->loopret;
 	case SCANF:
 	case SSCANF:
-		v.integer = scan(ex, expr, env, NiL);
+		v.integer = scan(ex, expr, env, NULL);
 		return v;
 	case SPRINTF:
 		print(ex, expr, env, ex->tmp);

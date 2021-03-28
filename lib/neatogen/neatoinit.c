@@ -1,6 +1,3 @@
-/* Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -992,7 +989,7 @@ setSeed (graph_t * G, int dflt, long* seedp)
 #else
 	    seed = (unsigned) getpid() ^ (unsigned) time(NULL);
 #endif
-	    sprintf(smallbuf, "%ld", seed);
+	    snprintf(smallbuf, sizeof(smallbuf), "%ld", seed);
 	    agset(G, "start", smallbuf);
 	}
 	*seedp = seed;
@@ -1379,7 +1376,7 @@ static void addZ (Agraph_t* g)
 
     if ((Ndim >= 3) && N_z) {
 	for (n = agfstnode(g); n; n = agnxtnode(g, n)) {
-	    sprintf(buf, "%lf", POINTS_PER_INCH * (ND_pos(n)[2]));
+	    snprintf(buf, sizeof(buf), "%lf", POINTS_PER_INCH * (ND_pos(n)[2]));
 	    agxset(n, N_z, buf);
 	}
     }

@@ -1,5 +1,3 @@
-/* vim:set shiftwidth=4 ts=4: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -7,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /*
@@ -18,6 +16,7 @@
  */
 
 #include <expr/exlib.h>
+#include <stddef.h>
 
 /*
  * return the expression for name or sym coerced to type
@@ -29,11 +28,11 @@ exexpr(Expr_t* ex, const char* name, Exid_t* sym, int type)
 	if (ex)
 	{
 		if (!sym)
-			sym = name ? (Exid_t*)dtmatch(ex->symbols, name) : &ex->main;
+			sym = name ? dtmatch(ex->symbols, name) : &ex->main;
 		if (sym && sym->lex == PROCEDURE && sym->value)
 		{
 			if (type != DELETE_T)
-				return excast(ex, sym->value->data.procedure.body, type, NiL, 0);
+				return excast(ex, sym->value->data.procedure.body, type, NULL, 0);
 			exfreenode(ex, sym->value);
 			sym->lex = NAME;
 			sym->value = 0;

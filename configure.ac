@@ -310,7 +310,11 @@ dnl checks for compilers
 
 AM_PROG_CC_C_O
 AC_PROG_CC_C99
+if test "x$ac_cv_prog_cc_c99" = "xno"; then
+  AC_MSG_ERROR([C compiler does not support C99])
+fi
 AC_PROG_CXX
+AX_CXX_COMPILE_STDCXX_11(noext,mandatory)
 AC_PROG_OBJC
 
 AC_C_INLINE
@@ -329,11 +333,12 @@ then
   # Enable specific warning flags not included by -Wall or -Wextra
   CFLAGS="${CFLAGS} -Wmissing-include-dirs -Wswitch-default -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wconversion -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs"
 
- # if C99, then enable additional warnings
+  # Enable additional C99 warnings
+  CFLAGS="${CFLAGS} -Wtrampolines -Wlogical-op"
 # if [test "${ac_cv_prog_cc_c99}" != "no"]
 # then
     # FIXME - not available on centos[56]: gcc-4.1.2, gcc-4.4.7
-    # CFLAGS="${CFLAGS} -Wdouble-promotion -Wtrampolines -Wlogical-op"
+    # CFLAGS="${CFLAGS} -Wdouble-promotion"
 #  fi
 fi
 # Workaround for native compilers
@@ -461,8 +466,8 @@ LIBS=$save_LIBS
 
 # Checks for library functions
 AC_CHECK_FUNCS([lrand48 drand48 srand48 setmode setenv getenv \
-	cbrt vsnprintf mallopt mallinfo mstats getpagesize \
-  ftruncate lseek64 stat64 vfork unlink waitpid select])
+	cbrt getpagesize \
+  ftruncate lseek64 stat64 vfork unlink select])
 
 AC_REPLACE_FUNCS([strcasestr])
 
@@ -2408,11 +2413,7 @@ if test "x$with_qt" != "xyes"; then
 else
 
   # required for linking with QT5
-  AX_CHECK_COMPILE_FLAG([-std=c++11], [
-	CXXFLAGS="${CXXFLAGS} -fPIE -fPIC -std=c++11"
-     ],[
-	CXXFLAGS="${CXXFLAGS} -fPIE -fPIC"
-     ])
+  CXXFLAGS="${CXXFLAGS} -fPIE -fPIC"
   AC_CHECK_PROGS(QMAKE,qmake-qt5 qmake,false)
   if test "$QMAKE" != "false"; then
     PKG_CHECK_MODULES(QTCORE, [Qt5Core],[

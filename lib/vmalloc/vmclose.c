@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <vmalloc/vmhdr.h>
@@ -18,15 +18,14 @@
  * @returns 0 on success
  */
 int vmclose(Vmalloc_t *vm) {
-  int r;
 
-  /* clear the region */
-  r = vmclear(vm);
+  // clear the region
+  int r = vmclear(vm);
   if (r != 0) {
     return r;
   }
 
-  /* free the allocator itself */
+  // free the allocator itself
   free(vm);
 
   return 0;

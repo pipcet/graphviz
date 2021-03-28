@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /*
@@ -19,6 +16,7 @@
  */
 
 #include <ast/ast.h>
+#include <stddef.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -142,7 +140,7 @@ char *fmtquote(const char *as, const char *qb, const char *qe, size_t n,
 
 char *fmtesq(const char *as, const char *qs)
 {
-    return fmtquote(as, NiL, qs, strlen(as), 0);
+    return fmtquote(as, NULL, qs, strlen(as), 0);
 }
 
 /*
@@ -151,5 +149,5 @@ char *fmtesq(const char *as, const char *qs)
 
 char *fmtesc(const char *as)
 {
-    return fmtquote(as, NiL, NiL, strlen(as), 0);
+    return fmtquote(as, NULL, NULL, strlen(as), 0);
 }

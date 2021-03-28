@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include "config.h"
@@ -130,9 +127,10 @@ static int gvloadimage_process_surface(GVJ_t *job, usershape_t *us, gs_t *gs, vo
 
     cr = cairo_create(gs->surface);  /* temp context for gs */
 
-    sprintf(width_height, "-g%dx%d", us->x + us->w, us->y + us->h);
-    sprintf(dpi, "-r%d", us->dpi);
-    sprintf(cairo_context, "-sCairoContext=%p", cr);
+    snprintf(width_height, sizeof(width_height), "-g%dx%d", us->x + us->w,
+             us->y + us->h);
+    snprintf(dpi, sizeof(dpi), "-r%d", us->dpi);
+    snprintf(cairo_context, sizeof(cairo_context), "-sCairoContext=%p", cr);
 
     rc = gsapi_init_with_args(instance, GS_ARGC, gs_args);
 

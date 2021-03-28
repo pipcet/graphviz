@@ -1,5 +1,3 @@
-/* vim:set shiftwidth=4 ts=4: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -7,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /*
@@ -698,7 +696,7 @@ excc(Excc_t* cc, const char* name, Exid_t* sym, int type)
 	if (!cc)
 		return -1;
 	if (!sym)
-		sym = name ? (Exid_t*)dtmatch(cc->expr->symbols, name) : &cc->expr->main;
+		sym = name ? dtmatch(cc->expr->symbols, name) : &cc->expr->main;
 	if (sym && sym->lex == PROCEDURE && sym->value)
 	{
 		t = extype(type);
@@ -732,7 +730,7 @@ exdump(Expr_t* expr, Exnode_t* node, Sfio_t* sp)
 	if (node)
 		gen(cc, node);
 	else
-		for (sym = (Exid_t*)dtfirst(expr->symbols); sym; sym = (Exid_t*)dtnext(expr->symbols, sym))
+		for (sym = dtfirst(expr->symbols); sym; sym = dtnext(expr->symbols, sym))
 			if (sym->lex == PROCEDURE && sym->value)
 			{
 				sfprintf(sp, "%s:\n", sym->name);

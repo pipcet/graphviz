@@ -1,6 +1,3 @@
-/* $Id$Revision:  */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <sparse/SparseMatrix.h>
@@ -139,7 +136,6 @@ SparseMatrix SparseMatrix_import_matrix_market(FILE * f, int format)
 		I = REALLOC(I, 2 * sizeof(int) * nz);
 		J = REALLOC(J, 2 * sizeof(int) * nz);
 		val = REALLOC(val, 2 * sizeof(real) * nz);
-		vp = (void *) val;
 		nzold = nz;
 		for (i = 0; i < nzold; i++) {
 		    assert(I[i] != J[i]);	/* skew symm has no diag */
@@ -175,7 +171,6 @@ SparseMatrix SparseMatrix_import_matrix_market(FILE * f, int format)
 		I = REALLOC(I, 2 * sizeof(int) * nz);
 		J = REALLOC(J, 2 * sizeof(int) * nz);
 		vali = REALLOC(vali, 2 * sizeof(int) * nz);
-		vp = (void *) val;
 		nzold = nz;
 		for (i = 0; i < nzold; i++) {
 		    assert(I[i] != J[i]);	/* skew symm has no diag */
@@ -235,7 +230,6 @@ SparseMatrix SparseMatrix_import_matrix_market(FILE * f, int format)
 		I = REALLOC(I, 2 * sizeof(int) * nz);
 		J = REALLOC(J, 2 * sizeof(int) * nz);
 		val = REALLOC(val, 4 * sizeof(real) * nz);
-		vp = (void *) val;
 		nzold = nz;
 		for (i = 0; i < nzold; i++) {
 		    assert(I[i] != J[i]);	/* skew symm has no diag */
@@ -250,7 +244,6 @@ SparseMatrix SparseMatrix_import_matrix_market(FILE * f, int format)
 		I = REALLOC(I, 2 * sizeof(int) * nz);
 		J = REALLOC(J, 2 * sizeof(int) * nz);
 		val = REALLOC(val, 4 * sizeof(real) * nz);
-		vp = (void *) val;
 		nzold = nz;
 		for (i = 0; i < nzold; i++) {
 		    if (I[i] != J[i]) {

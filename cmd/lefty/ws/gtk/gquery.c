@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -32,11 +29,11 @@ int GQcreatewidget(Gwidget_t * parent, Gwidget_t * widget,
     for (ai = 0; ai < attrn; ai++) {
 	switch (attrp[ai].id) {
 	case G_ATTRMODE:
-	    if (Strcmp("string", attrp[ai].u.t) == 0)
+	    if (strcmp("string", attrp[ai].u.t) == 0)
 		WQU->mode = G_QWSTRING;
-	    else if (Strcmp("file", attrp[ai].u.t) == 0)
+	    else if (strcmp("file", attrp[ai].u.t) == 0)
 		WQU->mode = G_QWFILE;
-	    else if (Strcmp("choice", attrp[ai].u.t) == 0)
+	    else if (strcmp("choice", attrp[ai].u.t) == 0)
 		WQU->mode = G_QWCHOICE;
 	    else {
 		Gerr(POS, G_ERRBADATTRVALUE, attrp[ai].u.t);

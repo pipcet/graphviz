@@ -1,6 +1,3 @@
-/* $id: shapes.c,v 1.82 2007/12/24 04:50:36 ellson Exp $ $Revision: 1.1 $ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <common/render.h>
@@ -3341,7 +3338,7 @@ static field_t *parse_reclbl(node_t * n, int LR, int flag, char *text)
 		    reclblp++;
 		}
 	    }
-	    /* falling through ... */
+	    /* fall through */
 	default:
 	  dotext:
 	    if ((mode & HASTABLE) && *reclblp != ' ')

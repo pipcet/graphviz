@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -224,7 +221,7 @@ static void color(Agraph_t * g)
 	    s = Defcolor[1];
 	    b = Defcolor[2];
 	}
-	sprintf(buf, "%f %f %f", h, s, b);
+	snprintf(buf, sizeof(buf), "%f %f %f", h, s, b);
 	agset(n, "color", buf);
     }
     free (nlist);

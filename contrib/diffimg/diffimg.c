@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at http://www.graphviz.org/
  *************************************************************************/
 
 /*
@@ -30,28 +27,17 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifndef _WIN32
-//#include <unistd.h>
-#endif
 
 #ifdef _WIN32
 #define EX_USAGE		64
 #define EX_DATAERR		65
 #define EX_NOINPUT		66
 #define EX_UNAVAILABLE	69
-#define bool int
-#define false 0
 #else
 #include <sysexits.h>
 #endif
 #include <gd.h>
 #include <stdbool.h>
-
-#define NOT(v) (!(v))
-#ifndef false
-#define false 0
-#define true NOT(false)
-#endif
 
 static char *pstopng="gs -dNOPAUSE -sDEVICE=pngalpha -sOutputFile=- -q -";
 

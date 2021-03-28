@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2015 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include "config.h"
@@ -33,6 +30,8 @@
 #include <gvc/gvc.h>
 #include <gvc/gvio.h>
 #include <gvc/gvcint.h>
+
+#include <common/memory.h>
 
 typedef enum {
 	FORMAT_JSON,
@@ -83,7 +82,7 @@ static char* stoj (char* ins, state_t* sp)
     char* s;
     char* input;
     static agxbuf xb;
-    unsigned char c;
+    char c;
 
     if (sp->isLatin)
 	input = latin1ToUTF8 (ins);
@@ -212,23 +211,20 @@ static void write_xdot (xdot_op * op, GVJ_t * job, state_t* sp)
     switch (op->kind) {
     case xd_filled_ellipse :
     case xd_unfilled_ellipse :
-	gvprintf(job, "\"op\": \"%c\",\n", 
-	    (op->kind == xd_filled_ellipse ? 'E' : 'e')); 
+	gvprintf(job, "\"op\": \"%c\",\n", op->kind == xd_filled_ellipse ? 'E' : 'e');
  	indent(job, sp->Level);
 	gvprintf(job, "\"rect\": [%.03f,%.03f,%.03f,%.03f]\n", 
 	    op->u.ellipse.x, op->u.ellipse.y, op->u.ellipse.w, op->u.ellipse.h);
 	break;
     case xd_filled_polygon :
     case xd_unfilled_polygon :
-	gvprintf(job, "\"op\": \"%c\",\n",
-	    (op->kind == xd_filled_polygon ? 'P' : 'p')); 
+	gvprintf(job, "\"op\": \"%c\",\n", op->kind == xd_filled_polygon ? 'P' : 'p');
  	indent(job, sp->Level);
 	write_polyline (job, &op->u.polygon);
 	break;
     case xd_filled_bezier :
     case xd_unfilled_bezier :
-	gvprintf(job, "\"op\": \"%c\",\n",
-	    (op->kind == xd_filled_bezier ? 'B' : 'b')); 
+	gvprintf(job, "\"op\": \"%c\",\n", op->kind == xd_filled_bezier ? 'B' : 'b');
  	indent(job, sp->Level);
 	write_polyline (job, &op->u.bezier);
 	break;
@@ -243,8 +239,8 @@ static void write_xdot (xdot_op * op, GVJ_t * job, state_t* sp)
 	gvprintf(job, "\"pt\": [%.03f,%.03f],\n", op->u.text.x, op->u.text.y); 
  	indent(job, sp->Level);
 	gvprintf(job, "\"align\": \"%c\",\n",
-	    (op->u.text.align == xd_left? 'l' : 
-	    (op->u.text.align == xd_center ? 'c' : 'r'))); 
+	    op->u.text.align == xd_left? 'l' :
+	    (op->u.text.align == xd_center ? 'c' : 'r'));
  	indent(job, sp->Level);
 	gvprintf(job, "\"width\": %.03f,\n", op->u.text.width); 
  	indent(job, sp->Level);
@@ -252,8 +248,7 @@ static void write_xdot (xdot_op * op, GVJ_t * job, state_t* sp)
 	break;
     case xd_fill_color :
     case xd_pen_color :
-	gvprintf(job, "\"op\": \"%c\",\n", 
-	    (op->kind == xd_fill_color ? 'C' : 'c')); 
+	gvprintf(job, "\"op\": \"%c\",\n", op->kind == xd_fill_color ? 'C' : 'c');
  	indent(job, sp->Level);
 	gvprintf(job, "\"grad\": \"none\",\n"); 
  	indent(job, sp->Level);
@@ -261,8 +256,7 @@ static void write_xdot (xdot_op * op, GVJ_t * job, state_t* sp)
 	break;
     case xd_grad_pen_color :
     case xd_grad_fill_color :
-	gvprintf(job, "\"op\": \"%c\",\n", 
-	    (op->kind == xd_grad_fill_color ? 'C' : 'c')); 
+	gvprintf(job, "\"op\": \"%c\",\n", op->kind == xd_grad_fill_color ? 'C' : 'c');
  	indent(job, sp->Level);
 	if (op->u.grad_color.type == xd_none) {
 	    gvprintf(job, "\"grad\": \"none\",\n"); 
@@ -312,9 +306,8 @@ static void write_xdots (char * val, GVJ_t * job, state_t* sp)
 {
     xdot* cmds;
     int i;
-    int not_first = 0;
 
-    if (!val || (*val == '\0')) return;
+    if (!val || *val == '\0') return;
 
     cmds = parseXDot(val);
     if (!cmds) {
@@ -326,10 +319,8 @@ static void write_xdots (char * val, GVJ_t * job, state_t* sp)
     indent(job, sp->Level++);
     gvputs(job, "[\n");
     for (i = 0; i < cmds->cnt; i++) {
-	if (not_first) 
+	if (i > 0)
 	    gvputs(job, ",\n");
-	else
-	    not_first = 1;
 	write_xdot (cmds->ops+i, job, sp);
     }
     sp->Level--;
@@ -341,10 +332,10 @@ static void write_xdots (char * val, GVJ_t * job, state_t* sp)
 
 static int isXDot (char* name)
 {
-  return ((*name++ == '_') &&
+  return *name++ == '_' &&
           (streq(name,"draw_") || streq(name,"ldraw_") ||
           streq(name,"hdraw_") || streq(name,"tdraw_") ||
-          streq(name,"hldraw_") || streq(name,"tldraw_")));
+          streq(name,"hldraw_") || streq(name,"tldraw_"));
 }
 
 static void write_attrs(Agobj_t * obj, GVJ_t * job, state_t* sp)
@@ -357,7 +348,7 @@ static void write_attrs(Agobj_t * obj, GVJ_t * job, state_t* sp)
 
     for (; sym; sym = agnxtattr(g, type, sym)) {
 	if (!(attrval = agxget(obj, sym))) continue;
-	if ((*attrval == '\0') && !streq(sym->name, "label")) continue;
+	if (*attrval == '\0' && !streq(sym->name, "label")) continue;
 	gvputs(job, ",\n");
 	indent(job, sp->Level);
 	gvprintf(job, "\"%s\": ", stoj(sym->name, sp));
@@ -379,9 +370,9 @@ static void write_hdr(Agraph_t * g, GVJ_t * job, int top, state_t* sp)
     if (top) {
 	gvputs(job, ",\n");
 	indent(job, sp->Level);
-	gvprintf(job, "\"directed\": %s,\n", (agisdirected(g)?"true":"false"));
+	gvprintf(job, "\"directed\": %s,\n", agisdirected(g)?"true":"false");
 	indent(job, sp->Level);
-	gvprintf(job, "\"strict\": %s", (agisstrict(g)?"true":"false"));
+	gvprintf(job, "\"strict\": %s", agisstrict(g)?"true":"false");
     }
 }
 
@@ -398,37 +389,9 @@ static void write_subg(Agraph_t * g, GVJ_t * job, state_t* sp)
     }
 }
 
-/*
 static int write_subgs(Agraph_t * g, GVJ_t * job, int top, state_t* sp)
 {
     Agraph_t* sg;
-    int not_first = 0;
-
-    sg = agfstsubg(g);
-    if (!sg) return 0;
-   
-    gvputs(job, ",\n");
-    indent(job, sp->Level++);
-    gvputs(job, "\"subgraphs\": [\n");
-    for (; sg; sg = agnxtsubg(sg)) {
-	if (not_first) 
-	    gvputs(job, ",\n");
-	else
-	    not_first = 1;
-	write_subg (sg, job, top, sp);
-    }
-    sp->Level--;
-    gvputs(job, "\n");
-    indent(job, sp->Level);
-    gvputs(job, "]");
-    return 1;
-}
-*/
-
-static int write_subgs(Agraph_t * g, GVJ_t * job, int top, state_t* sp)
-{
-    Agraph_t* sg;
-    int not_first = 0;
 
     sg = agfstsubg(g);
     if (!sg) return 0;
@@ -441,15 +404,14 @@ static int write_subgs(Agraph_t * g, GVJ_t * job, int top, state_t* sp)
 	gvputs(job, "\"subgraphs\": [\n");
 	indent(job, sp->Level);
     }
+    const char *separator = "";
     for (; sg; sg = agnxtsubg(sg)) {
-	if (not_first) 
-	    gvputs(job, ",\n");
-	else
-	    not_first = 1;
+	gvputs(job, separator);
         if (top)
 	    write_subg (sg, job, sp);
 	else
 	    gvprintf(job, "%d", GD_gid(sg));
+	separator = ",\n";
     }
     if (!top) {
 	sp->Level--;
@@ -459,6 +421,22 @@ static int write_subgs(Agraph_t * g, GVJ_t * job, int top, state_t* sp)
     }
 
     return 1;
+}
+
+static int agseqasc(Agedge_t **lhs, Agedge_t **rhs)
+{
+    Agedge_t *e1 = *lhs;
+    Agedge_t *e2 = *rhs;
+
+    if (AGSEQ(e1) < AGSEQ(e2)) {
+        return -1;
+    }
+    else if (AGSEQ(e1) > AGSEQ(e2)) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 static void write_edge(Agedge_t * e, GVJ_t * job, int top, state_t* sp)
@@ -485,39 +463,47 @@ static void write_edge(Agedge_t * e, GVJ_t * job, int top, state_t* sp)
 
 static int write_edges(Agraph_t * g, GVJ_t * job, int top, state_t* sp)
 {
-    Agnode_t* np;
-    Agedge_t* ep;
-    int not_first = 0;
+    size_t count = 0;
 
-    np = agfstnode(g);
-    if (!np) return 0;
-    ep = NULL;
-    /* find a first edge */
-    for (; np; np = agnxtnode(g,np)) {
-	for (ep = agfstout(g, np); ep; ep = agnxtout(g,ep)) {
-	    if (ep) break;
-	}
-	if (ep) break;
+    for (Agnode_t *np = agfstnode(g); np; np = agnxtnode(g, np)) {
+        for (Agedge_t *ep = agfstout(g, np); ep; ep = agnxtout(g, ep)) {
+            ++count;
+        }
     }
-    if (!ep) return 0;
+
+    if (count == 0) {
+        return 0;
+    }
+
+    Agedge_t **edges = gcalloc(count, sizeof(Agedge_t *));
+
+    size_t i = 0;
+    for (Agnode_t *np = agfstnode(g); np; np = agnxtnode(g, np)) {
+        for (Agedge_t *ep = agfstout(g, np); ep; ep = agnxtout(g, ep)) {
+            edges[i] = ep;
+            ++i;
+        }
+    }
+
+    qsort(edges, count, sizeof(Agedge_t *), (qsort_cmpf)agseqasc);
 
     gvputs(job, ",\n");
     indent(job, sp->Level++);
     gvputs(job, "\"edges\": [\n");
     if (!top)
         indent(job, sp->Level);
-    for (; np; np = agnxtnode(g,np)) {
-	for (ep = agfstout(g, np); ep; ep = agnxtout(g,ep)) {
-	    if (not_first) 
-                if (top)
-		    gvputs(job, ",\n");
-                else
-		    gvputs(job, ",");
-	    else
-		not_first = 1;
-	    write_edge(ep, job, top, sp);
-	}
+    for (size_t j = 0; j < count; ++j) {
+        if (j > 0) {
+            if (top)
+                gvputs(job, ",\n");
+            else
+                gvputs(job, ",");
+        }
+        write_edge(edges[j], job, top, sp);
     }
+
+    free(edges);
+
     sp->Level--;
     gvputs(job, "\n");
     indent(job, sp->Level);
@@ -548,7 +534,6 @@ static void write_node(Agnode_t * n, GVJ_t * job, int top, state_t* sp)
 static int write_nodes(Agraph_t * g, GVJ_t * job, int top, int has_subgs, state_t* sp)
 {
     Agnode_t* n;
-    int not_first = 0;
 
     n = agfstnode(g);
     if (!n) {
@@ -572,16 +557,12 @@ static int write_nodes(Agraph_t * g, GVJ_t * job, int top, int has_subgs, state_
 	gvputs(job, "\"nodes\": [\n");
 	indent(job, sp->Level);
     }
+    const char *separator = "";
     for (; n; n = agnxtnode(g, n)) {
 	if (IS_CLUST_NODE(n)) continue;
-	if (not_first) 
-            if (top)
-	        gvputs(job, ",\n");
-            else
-	        gvputs(job, ",");
-	else
-	    not_first = 1;
+	gvputs(job, separator);
 	write_node (n, job, top, sp);
+	separator = top ? ",\n" : ",";
     }
     sp->Level--;
     gvputs(job, "\n");
@@ -598,6 +579,8 @@ typedef struct {
 
 static void freef(Dt_t * dt, intm * obj, Dtdisc_t * disc)
 {
+    (void)dt;
+    (void)disc;
     free(obj->id);
     free(obj);
 }
@@ -614,25 +597,23 @@ static Dtdisc_t intDisc = {
     0
 };
 
-#define NEW(t)          calloc(1,sizeof(t))
-
 static int lookup (Dt_t* map, char* name)
 {
-    intm* ip = (intm*)dtmatch(map, name);    
+    intm* ip = dtmatch(map, name);
     if (ip) return ip->v;
     else return -1;
 }
  
 static void insert (Dt_t* map, char* name, int v)
 {
-    intm* ip = (intm*)dtmatch(map, name);    
+    intm* ip = dtmatch(map, name);
 
     if (ip) {
 	if (ip->v != v)
 	    agerr(AGWARN, "Duplicate cluster name \"%s\"\n", name);
 	return;
     }
-    ip = NEW(intm);
+    ip = calloc(1, sizeof(intm));
     ip->id = strdup(name);
     ip->v = v;
     dtinsert (map, ip);
@@ -728,8 +709,8 @@ static void json_end_graph(GVJ_t *job)
 
     set_attrwf(g, TRUE, FALSE);
     sp.Level = 0;
-    sp.isLatin = (GD_charset(g) == CHAR_LATIN1);
-    sp.doXDot = ((job->render.id == FORMAT_JSON) || (job->render.id == FORMAT_XDOT_JSON));
+    sp.isLatin = GD_charset(g) == CHAR_LATIN1;
+    sp.doXDot = job->render.id == FORMAT_JSON || job->render.id == FORMAT_XDOT_JSON;
     sp.Attrs_not_written_flag = 0;
     write_graph(g, job, TRUE, &sp);
     /* agwrite(g, (FILE*)job); */

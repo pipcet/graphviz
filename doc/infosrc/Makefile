@@ -11,16 +11,8 @@
 #  python is used to run:
 #  - jconvert.py, which converts the json schema graphviz_json_schema.json to html.
 #    This also relies on the python package json2html.
-#  - mkoutput.py, which converts templates/output.html.j2 to output.html
-#    This requires the jinja2 python package.
 #
-# The main products are web pages:
-#    arrows.html  - arrow_grammar
-#    colors.html  - color_names svgcolor_names brewer_colors
-#    command.html - raw HTML
-#    lang.html    - grammar
-#    output.html  - outputs
-#    shapes.html  - shapelist, html_grammar
+# The main products are web pages.
 #
 # The files listed after each give the main data files used to
 # generate the page.
@@ -86,9 +78,16 @@ A2GIF= aa_box.gif aa_lbox.gif aa_rbox.gif aa_obox.gif aa_olbox.gif aa_orbox.gif\
 
 GIF = $(SGIF) $(AGIF) $(MGIF) $(A2GIF) $(XGIF)
 DOTS = html2.gv html3.gv html4.gv tee.gv
-HTML = colors.html command.html lang.html output.html shapes.html \
-       arrows.html schema.html
-MISC = graphviz_json_schema.json w3data.js
+HTML = \
+	grammar.html \
+	html_grammar.html \
+	schema.html \
+	arrow_grammar.html \
+	arrow_table.html \
+	brewer_colors.html \
+	svg_colors.html \
+	x11_colors.html
+MISC = graphviz_json_schema.json
 INSTALL_FILES = $(HTML) $(DOTS) $(SGIF) $(AGIF) $(A2GIF) $(MGIF) $(XGIF) $(MPNG) $(MISC)
 
 .SUFFIXES: .gv .gif .dot .png
@@ -118,57 +117,36 @@ sdlshapes.ps : sdlshapes.dot
 sdlshapes.png : sdlshapes.ps
 	./ps_to_png.sh sdlshapes.ps sdlshapes.png
 
-colors.html : colors.1 colors.n ../../lib/common/color_names ../../lib/common/svgcolor_names ../../lib/common/brewer_colors mkcolors.awk brewer.awk svg.awk
+x11_colors.html : mkcolors.awk ../../lib/common/color_names
+	awk -f mkcolors.awk ../../lib/common/color_names > x11_colors.html
+
+svg_colors.html : mkcolors.awk svg.awk ../../lib/common/svgcolor_names
+	awk -f svg.awk ../../lib/common/svgcolor_names | awk -f mkcolors.awk > svg_colors.html
+
+brewer_colors.html : mkcolors.awk brewer.awk ../../lib/common/brewer_colors
 	mkdir -p colortmp
 	awk -f brewer.awk ../../lib/common/brewer_colors
-	cat colors.1 > colors.html
-	awk -f mkcolors.awk ../../lib/common/color_names >> colors.html
-	echo '<H2><A NAME="svg">The SVG color scheme</A></H2>' >> colors.html
-	awk -f svg.awk ../../lib/common/svgcolor_names > svg
-	awk -f mkcolors.awk svg >> colors.html
-	rm -rf svg
-	echo '<H2><A NAME="brewer">Brewer color schemes</A></H2>' >> colors.html
-	(for f in $$(ls colortmp); do awk -f mkcolors.awk -s colortmp/$$f >> colors.html; done)
-	cat colors.n >> colors.html
+	(for f in $$(ls colortmp); do awk -f mkcolors.awk --single-line colortmp/$$f; done) > brewer_colors.html
 	rm -rf colortmp
-
-
-output.html : outputs mkoutput.py plugins.png schema.html templates/output.html.j2
-	./mkoutput.py < outputs > output.html
 
 schema.html : jconvert.py graphviz_json_schema.json
 	./jconvert.py graphviz_json_schema.json schema.html
-
-html.html : html.1 html_grammar html.2 html.3 html1.gif html2.gif html3.gif html4.gif mklang
-	./mklang html_grammar gramtmp
-	cat html.1 > html.html
-	cat gramtmp >> html.html
-	cat html.2 >> html.html
-	cat html1.dot >> html.html
-	cat html.3 >> html.html
-	rm gramtmp
 
 shapes : shapelist mkshapes.sh
 	./mkshapes.sh
 	touch shapes
  
-shapes.html : shapes mkshhtml.py html.html record.gif record2.gif sdlshapes.png templates/shapes.html.j2 shapelist
-	./mkshhtml.py html.html < shapelist > shapes.html
+html_grammar.html : mklang html_grammar
+	./mklang html_grammar html_grammar.html
 
-lang.html : grammar lang.1 lang.2 mklang
-	./mklang grammar gramtmp
-	cat lang.1 > lang.html
-	cat gramtmp >> lang.html
-	cat lang.2 >> lang.html
-	rm gramtmp
+grammar.html : grammar mklang
+	./mklang grammar grammar.html
 
-arrows.html : arrow_grammar arrows.1 arrows.2 mkarrowtbl.sh mklang $(AGIF) $(A2GIF)
-	./mklang arrow_grammar gramtmp
-	cat arrows.1 > arrows.html
-	cat gramtmp >> arrows.html
-	cat arrows.2 >> arrows.html
-	./mkarrowtbl.sh $(A2GIF) >> arrows.html
-	rm gramtmp
+arrow_grammar.html: mklang arrow_grammar
+	./mklang arrow_grammar arrow_grammar.html
+
+arrow_table.html: mkarrowtbl.sh $(A2GIF)
+	./mkarrowtbl.sh $(A2GIF) > arrow_table.html
 
 mklang : mklang.y
 	yacc mklang.y
@@ -198,21 +176,20 @@ $(SPLINEPNG) : mksplines.sh
 
 .PHONY: clean
 clean :
-	rm -f mklang sdlshapes.ps sdlshapes.ppm html.html
+	rm -f mklang sdlshapes.ps sdlshapes.ppm
 
 .PHONY: distclean
 distclean : clean
-	rm -f colors.html output.html shapes.html lang.html arrows.html schema.html
+	rm -f $(HTML)
 	rm -f $(A2GIF) $(AGIF) $(SGIF) $(MPJG) $(MGIF) $(MPNG) $(XGIF) shapes
 	(for s in $$(cat shapelist); do rm -f $$s.gif; done)
 
 EXTRA_DIST = $(XGIF) mklang.y mkarrows.sh mkshapes.sh mkstyles.sh mktapers.sh \
-             mkarrowtbl.sh mkoutput.py mkshhtml.py \
+             mkarrowtbl.sh mkshhtml.py \
 	           ps_to_png.sh arrow_grammar grammar html_grammar \
-             shapelist colors.1 colors.n \
-             output.1 output.2 html.1 html.2 html1.dot html.3 \
-             shapes.1 shapes.2 shapes.3 lang.1 lang.2 arrows.1 arrows.2 \
+             shapelist \
+             lang.1 lang.2 \
              brewer.awk mkcolors.awk svg.awk sz.awk \
              colorlist.dot html1.dot html4.dot round.dot constraint.dot \
              html2.dot mrecord.dot sdlshapes.dot fill.dot html3.dot record.dot \
-             X11 outputs eqn.gif plugins.gv
+             X11 eqn.gif plugins.gv

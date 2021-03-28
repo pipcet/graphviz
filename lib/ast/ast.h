@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #ifdef __cplusplus
@@ -25,12 +22,8 @@ extern "C" {
 #include <string.h>
 #endif
 
-#define NiL 0
 #ifndef PATH_MAX
 #define PATH_MAX    1024
-#endif
-#ifndef CHAR_BIT
-#define CHAR_BIT    8
 #endif
 
 #define PATH_PHYSICAL   01
@@ -69,8 +62,8 @@ extern "C" {
 #define elementsof(x)   (sizeof(x)/sizeof(x[0]))
 #define newof(p,t,n,x)  ((p)?(t*)realloc((char*)(p),sizeof(t)*(n)+(x)):(t*)calloc(1,sizeof(t)*(n)+(x)))
 #define oldof(p,t,n,x)  ((p)?(t*)realloc((char*)(p),sizeof(t)*(n)+(x)):(t*)malloc(sizeof(t)*(n)+(x)))
-#define streq(a,b)  (*(a)==*(b)&&!strcmp(a,b))
-#define strneq(a,b,n)     (*(a)==*(b)&&!strncmp(a,b,n))
+#define streq(a,b)  (!strcmp(a,b))
+#define strneq(a,b,n)     (!strncmp(a,b,n))
 #define memzero(b,n)    memset(b,0,n)
 
     extern char *pathpath(char *, const char *, const char *, int);
@@ -97,7 +90,6 @@ extern "C" {
     extern int strmatch(const char *, const char *);
     extern int strgrpmatch(const char *, const char *, int *, int, int);
     extern int stresc(char *);
-    extern long strton(const char *, char **, char *, int);
     extern char *strcopy(char *s, const char *t);
 
 #endif

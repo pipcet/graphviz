@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -27,6 +24,7 @@
 #endif
 #include "builddate.h"
 #include <gvpr/gprstate.h>
+#include <cgraph/agxbuf.h>
 #include <cgraph/cgraph.h>
 #include <common/globals.h>
 #include <ingraphs/ingraphs.h>
@@ -187,17 +185,17 @@ static int parseArgs(char *s, int argc, char ***argv)
 #define LISTSEP ':'
 #endif
 
-static Sfio_t*
-concat (char* pfx, char* sfx, char** sp)
+static char*
+concat (char* pfx, char* sfx)
 {
-    Sfio_t *pathp;
-    if (!(pathp = sfstropen())) {
-	error(ERROR_ERROR, "Could not open buffer");
+    char *sp = malloc(strlen(pfx) + strlen(sfx) + 1);
+    if (sp == NULL) {
+	error(ERROR_ERROR, "Out of memory");
 	return 0;
     }
-    sfprintf(pathp, "%s%s", pfx, sfx);
-    *sp = sfstruse(pathp);
-    return pathp;
+    strcpy(sp, pfx);
+    strcat(sp, sfx);
+    return sp;
 }
 
 /* resolve:
@@ -215,15 +213,11 @@ static char *resolve(char *arg, int Verbose)
     char *cp;
     char c;
     char *fname = 0;
-    Sfio_t *fp;
-    Sfio_t *pathp = NULL;
+    agxbuf fp;
+    char *pathp = NULL;
     size_t sz;
 
-#ifdef WIN32_DLL
-    if (!pathisrelative(arg))
-#else
-    if (strchr(arg, '/'))
-#endif
+    if (strchr(arg, PATHSEP))
 	return strdup(arg);
 
     path = getenv("GVPRPATH");
@@ -231,20 +225,17 @@ static char *resolve(char *arg, int Verbose)
 	path = getenv("GPRPATH");  // deprecated
     if (path && (c = *path)) {
 	if (c == LISTSEP) {
-	    pathp = concat(DFLT_GVPRPATH, path, &path); 
+	    pathp = path = concat(DFLT_GVPRPATH, path);
 	}
 	else if ((c = path[strlen(path)-1]) == LISTSEP) {
-	    pathp = concat(path, DFLT_GVPRPATH, &path); 
+	    pathp = path = concat(path, DFLT_GVPRPATH);
 	}
     }
     else
 	path = DFLT_GVPRPATH;
     if (Verbose)
 	fprintf (stderr, "PATH: %s\n", path);
-    if (!(fp = sfstropen())) {
-	error(ERROR_ERROR, "Could not open buffer");
-	return 0;
-    }
+    agxbinit(&fp, 0, NULL);
 
     while (*path && !fname) {
 	if (*path == LISTSEP) {	/* skip colons */
@@ -254,15 +245,14 @@ static char *resolve(char *arg, int Verbose)
 	cp = strchr(path, LISTSEP);
 	if (cp) {
 	    sz = (size_t) (cp - path);
-	    sfwrite(fp, path, sz);
+	    agxbput_n(&fp, path, sz);
 	    path = cp + 1;	/* skip past current colon */
 	} else {
-	    sz = sfprintf(fp, path);
+	    sz = agxbput(&fp, path);
 	    path += sz;
 	}
-	sfputc(fp, PATHSEP);
-	sfprintf(fp, arg);
-	s = sfstruse(fp);
+	agxbprint(&fp, "%c%s", PATHSEP, arg);
+	s = agxbuse(&fp);
 
 	if (access(s, R_OK) == 0) {
 	    fname = strdup(s);
@@ -272,9 +262,8 @@ static char *resolve(char *arg, int Verbose)
     if (!fname)
 	error(ERROR_ERROR, "Could not find file \"%s\" in GVPRPATH", arg);
 
-    sfclose(fp);
-    if (pathp)
-	sfclose(pathp);
+    agxbfree(&fp);
+    free(pathp);
     if (Verbose)
 	fprintf (stderr, "file %s resolved to %s\n", arg, fname);
     return fname;
@@ -359,7 +348,11 @@ doFlags(char* arg, int argi, int argc, char** argv, options* opts)
 	    return 0;
 	    break;
 	case '?':
-	    error(ERROR_USAGE|ERROR_WARNING, "%s", usage);
+	    if (optopt == '\0' || optopt == '?')
+		fprintf(stderr, "Usage: gvpr%s", usage);
+	    else {
+		error(ERROR_USAGE|ERROR_WARNING, "%s", usage);
+	    }
 	    return 0;
 	    break;
 	default :

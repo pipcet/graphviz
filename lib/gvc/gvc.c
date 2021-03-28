@@ -1,6 +1,3 @@
- /* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include "config.h"
@@ -69,13 +66,13 @@ int gvLayout(GVC_t *gvc, graph_t *g, const char *engine)
  * doesn't yet include margins, scaling or page sizes because
  * those depend on the renderer being used. */
     if (GD_drawing(g)->landscape)
-        sprintf(buf, "%d %d %d %d",
-                ROUND(GD_bb(g).LL.y), ROUND(GD_bb(g).LL.x),
-                ROUND(GD_bb(g).UR.y), ROUND(GD_bb(g).UR.x));
+        snprintf(buf, sizeof(buf), "%d %d %d %d",
+                 ROUND(GD_bb(g).LL.y), ROUND(GD_bb(g).LL.x),
+                 ROUND(GD_bb(g).UR.y), ROUND(GD_bb(g).UR.x));
     else
-        sprintf(buf, "%d %d %d %d",
-                ROUND(GD_bb(g).LL.x), ROUND(GD_bb(g).LL.y),
-                ROUND(GD_bb(g).UR.x), ROUND(GD_bb(g).UR.y));
+        snprintf(buf, sizeof(buf), "%d %d %d %d",
+                 ROUND(GD_bb(g).LL.x), ROUND(GD_bb(g).LL.y),
+                 ROUND(GD_bb(g).UR.x), ROUND(GD_bb(g).UR.y));
     agsafeset(g, "bb", buf, "");
 
     return 0;

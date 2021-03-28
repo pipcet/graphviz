@@ -1,5 +1,3 @@
-/* vim:set shiftwidth=4 ts=8: */
-
   /* By default, Flex emits a lexer using symbols prefixed with "yy". Graphviz
    * contains multiple Flex-generated lexers, so we alter this prefix to avoid
    * symbol clashes.
@@ -131,12 +129,10 @@ L_ID      [a-zA-Z_][_a-zA-Z0-9]*
 
 void gmlerror(char *str)
 {
-    char    buf[BUFSIZ];
     if (errors)
 	return;
     errors = 1;
-    sprintf(buf," %s in line %d near '%s'\n", str,line_num,yytext);
-    agerr(AGWARN, "%s", buf);
+    agerr(AGWARN, " %s in line %d near '%s'\n", str,line_num,yytext);
 }
 
 int gmlerrors()

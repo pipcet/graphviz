@@ -1,6 +1,3 @@
-/* $Id$Revision: */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <stdio.h>
@@ -210,7 +207,7 @@ static void finishNode(node_t * n)
     if (N_fontsize) {
 	char* str = agxget(n, N_fontsize);
 	if (*str == '\0') {
-	    sprintf (buf, "%.03f", ND_ht(n)*0.7); 
+	    snprintf(buf, sizeof(buf), "%.03f", ND_ht(n)*0.7);
 	    agxset(n, N_fontsize, buf);
 	}
     }

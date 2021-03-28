@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /**
  * Authors:
  *   Tim Dwyer <tgdwyer@gmail.com>
@@ -18,7 +15,7 @@
 
 /**********************************************************
 *      Written by Tim Dwyer for the graphviz package      *
-*                http://www.graphviz.org/                 *
+*                  https://graphviz.org                   *
 *                                                         *
 **********************************************************/
 

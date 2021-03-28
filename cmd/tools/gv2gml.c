@@ -1,9 +1,6 @@
-/* $Id$Revision: */
-/* vim:set shiftwidth=4 ts=8: */
-
 /**********************************************************
 *      This software is part of the graphviz package      *
-*                http://www.graphviz.org/                 *
+*                  https://graphviz.org                   *
 *                                                         *
 *            Copyright (c) 1994-2004 AT&T Corp.           *
 *                and is licensed under the                *
@@ -121,11 +118,7 @@ parseStyle (char* s)
     char* ip;
     char* sep = " \t,";
 
-#ifdef _WIN32 
-	s = _strdup(s);
-#else
 	s = strdup(s);
-#endif
     for (ip = strtok (s, sep); ip; ip = strtok (NULL, sep)) {
 	if (streq(ip,"invis")) flags |= INVIS;
 	else if (streq(ip,"filled")) flags |= FILL;

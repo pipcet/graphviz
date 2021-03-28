@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #ifdef __cplusplus
@@ -81,10 +78,6 @@ extern "C" {
     extern void closeGPRState(Gpr_t* state);
     extern void initGPRState(Gpr_t *, Vmalloc_t *);
     extern int validTVT(int);
-
-#ifdef _WIN32
-    extern int pathisrelative (char* path);
-#endif
 
 #endif
 

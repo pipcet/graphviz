@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /* Lefteris Koutsofios - AT&T Labs Research */
@@ -136,7 +133,6 @@ void GFXinit (void) {
     gfxnoden = GFXNODEINCR;
     for (ni = 0; ni < gfxnoden; ni++)
         gfxnodes[ni].inuse = FALSE;
-    ni = 0;
     gpp = Marrayalloc ((long) GPINCR * GPSIZE);
     gpn = GPINCR;
     wattrp = Marrayalloc ((long) WATTRINCR * WATTRSIZE);
@@ -1195,11 +1191,11 @@ int GFXdisplaymenu (int argc, lvar_t *argv) {
             entries[0] = Tgetstring (meo);
             break;
         case T_INTEGER:
-            sprintf (buf, "%d", (int) Tgetnumber (meo));
+            snprintf(buf, sizeof(buf), "%d", (int) Tgetnumber (meo));
             entries[0] = &buf[0];
             break;
         case T_REAL:
-            sprintf (buf, "%f", Tgetnumber (meo));
+            snprintf(buf, sizeof(buf), "%f", Tgetnumber (meo));
             entries[0] = &buf[0];
             break;
         }

@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -112,8 +109,7 @@ int sizeNodeset(nodeset_t * ns)
 void printNodeset(nodeset_t * ns)
 {
     nsitem_t *ip;
-    for (ip = (nsitem_t *) dtfirst(ns); ip;
-	 ip = (nsitem_t *) dtnext(ns, ip)) {
+    for (ip = dtfirst(ns); ip; ip = dtnext(ns, ip)) {
 	fprintf(stderr, "%s", agnameof(ip->np));
     }
     fputs("\n", stderr);

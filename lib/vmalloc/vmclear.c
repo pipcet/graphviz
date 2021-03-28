@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <vmalloc/vmhdr.h>
@@ -21,14 +21,13 @@
  * @returns 0 on success
  */
 int vmclear(Vmalloc_t *vm) {
-  size_t i;
 
-  /* free all allocated pointers */
-  for (i = 0; i < vm->size; ++i) {
+  // free all allocated pointers
+  for (size_t i = 0; i < vm->size; ++i) {
     free(vm->allocated[i]);
   }
 
-  /* reset our metadata */
+  // reset our metadata
   free(vm->allocated);
   vm->allocated = NULL;
   vm->size = vm->capacity = 0;

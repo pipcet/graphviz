@@ -1,6 +1,3 @@
-/* $Id$Revision: */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <sparse/general.h>
@@ -361,7 +358,7 @@ int validQ_int_string(char *to_convert, int *v){
       to_convert == p || // conversion failed (no characters consumed)
       *p != 0
       ) return 0;
-  if (val > INT_MAX || val < INT_MIN) return 0;
+  if (val > (uint64_t)INT_MAX) return 0;
   *v = (int) val;
   return 1;
 }

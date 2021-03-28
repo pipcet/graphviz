@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 #ifdef _WIN32
 #include <windows.h>
@@ -887,7 +884,7 @@ static void movenode(void *obj, float dx, float dy)
 
     if ((AGTYPE(obj) == AGNODE) && (pos = agattrsym(obj, "pos"))) {
 	sscanf(agxget(obj, pos), "%lf,%lf", &x, &y);
-	sprintf(buf, "%lf,%lf", x - dx, y - dy);
+	snprintf(buf, sizeof(buf), "%lf,%lf", x - dx, y - dy);
 	agxset(obj, pos, buf);
     }
 }

@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /* Lefteris Koutsofios - AT&T Labs Research */
@@ -16,6 +13,7 @@
 #include "common.h"
 #include "g.h"
 #include "gcommon.h"
+#include <string.h>
 
 #define WBU widget->u.b
 
@@ -83,7 +81,7 @@ int GBcreatewidget (
             return -1;
         }
     }
-    if (!s || s[0] == '\000') {
+    if (!s || strcmp(s, "") == 0) {
         ADD2ARGS (XtNwidth, ps.x);
         ADD2ARGS (XtNheight, ps.y);
     } else {

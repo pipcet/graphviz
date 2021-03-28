@@ -1,20 +1,19 @@
 FROM centos:7
 
-# Development tools
-RUN yum -y groupinstall 'Development Tools'
+COPY requirements.txt ./requirements.txt
 
-RUN yum install -y \
+# Development tools
+RUN yum -y groupinstall 'Development Tools' \
+&& yum install -y \
 # Install epel-release rpm (Needed for cmake3. Must be a separate step)
 https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-7-12.noarch.rpm \
 # Install ius-release rpm (Needed for git version 2. Must be a separate step)
 https://repo.ius.io/ius-release-el7.rpm \
-&& yum clean all && rm -rf /var/cache/yum
-
+&& yum clean all && rm -rf /var/cache/yum \
 # Remove old version of git
-RUN yum -y remove git
-
+&& yum -y remove git \
 # Centos build utilities
-RUN yum -y install \
+&& yum -y install \
 libtool-ltdl-devel \
 libedit-devel \
 ksh \
@@ -79,13 +78,16 @@ libSM-devel \
 libXaw-devel \
 tk-devel \
 # Test utilities
-python-pytest \
+python3-pip \
+python3-setuptools \
 && rpm --install https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/p/python36-py-1.4.32-2.el7.noarch.rpm \
-&& rpm --install https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/p/python36-pytest-2.9.2-4.el7.noarch.rpm \
 && alternatives --install /usr/local/bin/cmake cmake /usr/bin/cmake3 20 \
 --slave /usr/local/bin/ctest ctest /usr/bin/ctest3 \
 --slave /usr/local/bin/cpack cpack /usr/bin/cpack3 \
 --slave /usr/local/bin/ccmake ccmake /usr/bin/ccmake3 \
 --family cmake \
+# install Python dependencies
+&& python3 -m pip install --user --upgrade pip \
+&& python3 -m pip install --user --requirement requirements.txt \
 # Clean up
 && yum clean all && rm -rf /var/cache/yum

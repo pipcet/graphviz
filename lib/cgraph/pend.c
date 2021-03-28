@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <cgraph/cghdr.h>
@@ -140,7 +137,7 @@ static pending_cb_t *lookup(Dict_t * dict, Agobj_t * obj)
     pending_cb_t key, *rv;
 
     key.key = genkey(obj);
-    rv = (pending_cb_t *) dtsearch(dict, &key);
+    rv = dtsearch(dict, &key);
     return rv;
 }
 
@@ -242,7 +239,7 @@ static void cb(Dict_t * dict, int callback_kind)
     Agcbstack_t *stack;
 
     if (dict)
-	while ((pcb = (pending_cb_t *) dtfirst(dict))) {
+	while ((pcb = dtfirst(dict))) {
 	    g = pcb->g;
 	    stack = g->clos->cb;
 	    switch (callback_kind) {

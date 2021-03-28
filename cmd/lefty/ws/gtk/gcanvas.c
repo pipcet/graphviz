@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,13 +5,14 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
 #include "common.h"
 #include "g.h"
 #include "gcommon.h"
+#include <string.h>
 
 #define WCU widget->u.c
 #define WINDOW widget->u.c->window
@@ -110,7 +108,7 @@ int GCcreatewidget(Gwidget_t * parent, Gwidget_t * widget,
 	    break;
 #ifdef FEATURE_GMAP
 	case G_ATTRMODE:
-	    if (Strcmp("gmap", attrp[ai].u.t) == 0) {
+	    if (strcmp("gmap", attrp[ai].u.t) == 0) {
 		gmapmode = TRUE;
 	    } else {
 		Gerr(POS, G_ERRBADATTRVALUE, attrp[ai].u.t);
@@ -214,7 +212,7 @@ int GCcreatewidget(Gwidget_t * parent, Gwidget_t * widget,
     for (ai = 0; ai < attrn; ai++) {
 	switch (attrp[ai].id) {
 	case G_ATTRCURSOR:
-	    if (Strcmp(attrp[ai].u.t, "default") == 0) {
+	    if (strcmp(attrp[ai].u.t, "default") == 0) {
 		curcursori = -1;
 	    }
 	    break;
@@ -272,7 +270,7 @@ int GCsetwidgetattr(Gwidget_t * widget, int attrn, Gwattr_t * attrp)
 	case G_ATTRBORDERWIDTH:
 	    break;
 	case G_ATTRCURSOR:
-	    if (Strcmp(attrp[ai].u.t, "watch") == 0) {
+	    if (strcmp(attrp[ai].u.t, "watch") == 0) {
 		gdk_window_set_cursor(widget->w->window,
 				      gdk_cursor_new(GDK_WATCH));
 	    } else {
@@ -649,12 +647,12 @@ static GdkFont *findfont(char *name, int size)
     GdkFont *font;
     int fi, n, i;
 
-    if (name[0] == '\000')
+    if (strcmp(name, "") == 0)
 	return Gfontp[0].font;
 
     sprintf(&Gbufp[0], name, size);
     for (fi = 0; fi < Gfontn; fi++)
-	if (Strcmp(&Gbufp[0], Gfontp[fi].name) == 0)
+	if (strcmp(&Gbufp[0], Gfontp[fi].name) == 0)
 	    return Gfontp[fi].font;
 
     if (!(font = gdk_font_load(&Gbufp[0]))) {

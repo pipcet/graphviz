@@ -5,11 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
-#ifndef INK_H
-#define INK_H
+#pragma once
 
 #include <mingle/edge_bundling.h>
 
@@ -33,5 +32,3 @@ double ink(pedge* edges, int numEdges, int *pick, double *ink0, point_t *meet1, 
 double ink1(pedge e);
 
 extern double ink_count;
-
-#endif /* INK_H */

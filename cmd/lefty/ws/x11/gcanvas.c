@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */ 
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /* Lefteris Koutsofios - AT&T Labs Research */
@@ -20,6 +17,7 @@
 #ifdef FEATURE_GMAP
 #include <gmap.h>
 #endif
+#include <string.h>
 
 #define WCU widget->u.c
 #define WINDOW widget->u.c->window
@@ -869,7 +867,7 @@ static XFontStruct *findfont (char *name, int size) {
     XFontStruct *font;
     int fi, n, i;
 
-    if (name[0] == '\000')
+    if (strcmp(name, "") == 0)
         return Gfontp[0].font;
 
     sprintf (&Gbufp[0], name, size);

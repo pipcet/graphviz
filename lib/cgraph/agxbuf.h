@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #ifdef __cplusplus
@@ -91,7 +88,15 @@ extern "C" {
  * Add character to buffer.
  *  int agxbputc(agxbuf*, char)
  */
-#define agxbputc(X,C) ((((X)->ptr >= (X)->eptr) ? agxbmore(X,1) : 0), (void)(*(X)->ptr++ = ((unsigned char)C)))
+static inline int agxbputc(agxbuf * xb, char c) {
+  if (xb->ptr >= xb->eptr) {
+    if (agxbmore(xb, 1) != 0) {
+      return -1;
+    }
+  }
+  *xb->ptr++ = (unsigned char)c;
+  return 0;
+}
 
 /* agxbuse:
  * Null-terminates buffer; resets and returns pointer to data. The buffer is

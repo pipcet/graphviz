@@ -4,11 +4,6 @@
 #include "builddate.h"
 #include "version.h"
 
-/* Command to open a browser on a URL */
-#define BROWSER "xdg-open"
-
-#define HAVE_ARGZ_APPEND 0
-
 /* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
    systems. This function is required for `alloca.c' support on those systems.
    */
@@ -256,9 +251,6 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 //#define HAVE_UNISTD_H 1
-
-/* Define to 1 if you have the `vsnprintf' function. */
-#define HAVE_VSNPRINTF 1
 
 /* Define to 1 if you have the <X11/Intrinsic.h> header file. */
 /* #undef HAVE_X11_INTRINSIC_H */

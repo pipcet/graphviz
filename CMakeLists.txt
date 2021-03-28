@@ -94,7 +94,6 @@ endif ()
 
 if (WIN32)
     # Find Windows specific dependencies
-    find_package(RxSpencer REQUIRED)
 
     # Find DLLs on Windows
     find_program(EXPAT_RUNTIME_LIBRARIES NAMES libexpat.dll expat.dll)
@@ -104,8 +103,6 @@ if (WIN32)
 endif()
 
 # ============================ Set Graphviz version ============================
-configure_file(graphviz_version.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/graphviz_version.h @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/graphviz_version.h DESTINATION ${HEADER_INSTALL_DIR})
 
 if (DEFINED VERSION)
     set(GRAPHVIZ_VERSION_STRING "${VERSION}")
@@ -155,6 +152,9 @@ string(REGEX REPLACE "[^.]*\\.[^.]*\\.(.*)$"
 set(GRAPHVIZ_VERSION_FULL "${GRAPHVIZ_VERSION_STRING}")
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/builddate.h "#define BUILDDATE \"${GRAPHVIZ_VERSION_BUILD}\"")
 
+configure_file(graphviz_version.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/graphviz_version.h @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/graphviz_version.h DESTINATION ${HEADER_INSTALL_DIR})
+
 message(STATUS "Graphviz version: ${GRAPHVIZ_VERSION_FULL}")
 
 include(config_checks)
@@ -173,6 +173,13 @@ add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
 # =========================== Compiler configuration ===========================
+
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
     # MSVC warning C4996 mostly fires on completely valid code. The changes
     # proposed in the warning text often seriously compromise the code

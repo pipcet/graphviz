@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 /* Lefteris Koutsofios - AT&T Labs Research */
@@ -17,6 +14,7 @@
 #include "g.h"
 #include "gcommon.h"
 #include "mem.h"
+#include <string.h>
 
 #define PSDPI 300.0
 #define PSMAXPIXW (8.0  * PSDPI)
@@ -518,7 +516,7 @@ int GPtext (
 static char *findfont (char *name) {
     char *font;
 
-    if (name[0] == '\000' || strcmp (name, "default") == 0)
+    if (strcmp(name, "") == 0 || strcmp (name, "default") == 0)
         font = "Times-Roman";
     else
         font = name;
@@ -700,11 +698,11 @@ int GPbitblt (
             bitmap->u.bits + 3 * ((int) bitmap->size.x * (br.o.y + y) + br.o.x)
         );
         for (x = 0; x < bs.x; x++) {
-            hi = (*s >> 4) & 15, lo = *s++ && 15;
+            hi = (*s >> 4) & 15, lo = *s++ & 15;
             fprintf (FP, "%x%x", hi, lo);
-            hi = (*s >> 4) & 15, lo = *s++ && 15;
+            hi = (*s >> 4) & 15, lo = *s++ & 15;
             fprintf (FP, "%x%x", hi, lo);
-            hi = (*s >> 4) & 15, lo = *s++ && 15;
+            hi = (*s >> 4) & 15, lo = *s++ & 15;
             fprintf (FP, "%x%x", hi, lo);
         }
         fprintf (FP, "\n");

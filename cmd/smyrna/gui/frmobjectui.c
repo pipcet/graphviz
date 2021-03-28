@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <stdio.h>
@@ -762,7 +759,8 @@ attr_list *load_attr_list(Agraph_t * g)
     sel_edge = edgeCnt;
     sel_graph = 1;
 
-    sprintf(buf, "%d Nodes and %d edges selected", nodeCnt, edgeCnt);
+    snprintf(buf, sizeof(buf), "%d Nodes and %d edges selected", nodeCnt,
+             edgeCnt);
     gtk_label_set_text((GtkLabel *) glade_xml_get_widget(xml, "label124"),
 		       buf);
     gtk_entry_set_text((GtkEntry *) glade_xml_get_widget(xml, "txtAttr"),

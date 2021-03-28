@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -41,10 +38,10 @@ static Agraph_t *clone_graph(Agraph_t * ing, Agraph_t ** xg)
     char gname[SMALLBUF];
     static int id = 0;
 
-    sprintf(gname, "_clone_%d", id++);
+    snprintf(gname, sizeof(gname), "_clone_%d", id++);
     clone = agsubg(ing, gname,1);
     agbindrec(clone, "Agraphinfo_t", sizeof(Agraphinfo_t), TRUE);	//node custom data
-    sprintf(gname, "_clone_%d", id++);
+    snprintf(gname, sizeof(gname), "_clone_%d", id++);
     xclone = agopen(gname, ing->desc,NULL);
     for (n = agfstnode(ing); n; n = agnxtnode(ing, n)) {
 	agsubnode(clone,n,1);
@@ -363,7 +360,7 @@ static Agraph_t *spanning_tree(Agraph_t * g)
     char gname[SMALLBUF];
     static int id = 0;
 
-    sprintf(gname, "_span_%d", id++);
+    snprintf(gname, sizeof(gname), "_span_%d", id++);
     tree = agsubg(g, gname,1);
     agbindrec(tree, "Agraphinfo_t", sizeof(Agraphinfo_t), TRUE);	//node custom data
 
@@ -424,9 +421,8 @@ static int count_all_crossings(nodelist_t * list, Agraph_t * subg)
 		edgelistitem *eitem;
 		Agedge_t *ep;
 
-		for (eitem = (edgelistitem *) dtfirst(openEdgeList); eitem;
-		     eitem =
-		     (edgelistitem *) dtnext(openEdgeList, eitem)) {
+		for (eitem = dtfirst(openEdgeList); eitem;
+		     eitem = dtnext(openEdgeList, eitem)) {
 		    ep = eitem->edge;
 		    if (EDGEORDER(ep) > EDGEORDER(e)) {
 			if ((aghead(ep) != n) && (agtail(ep) != n))

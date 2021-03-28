@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -103,7 +100,7 @@ void removeDeglist(deglist_t * list, Agnode_t * n)
     Agnode_t *prev;
 
     key.deg = DEGREE(n);
-    ip = (degitem *) dtsearch(list, &key);
+    ip = dtsearch(list, &key);
     assert(ip);
     if (ip->np == n) {
 	ip->np = ND_next(n);
@@ -131,7 +128,7 @@ Agnode_t *firstDeglist(deglist_t * list)
     degitem *ip;
     Agnode_t *np;
 
-    ip = (degitem *) dtfirst(list);
+    ip = dtfirst(list);
     if (ip) {
 	np = ip->np;
 	ip->np = ND_next(np);
@@ -148,7 +145,7 @@ void printDeglist(deglist_t * dl)
     degitem *ip;
     node_t *np;
     fprintf(stderr, " dl:\n");
-    for (ip = (degitem *) dtfirst(dl); ip; ip = (degitem *) dtnext(dl, ip)) {
+    for (ip = dtfirst(dl); ip; ip = dtnext(dl, ip)) {
 	np = ip->np;
 	if (np)
 	    fprintf(stderr, " (%d)", ip->deg);

@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <stdio.h>
@@ -231,7 +228,7 @@ static inkpot_status_t inkpot_cache_get( inkpot_t *inkpot )
 
 	cache_name_idx = inkpot->cache[i].name_idx;
 	cache_color = &TAB_STRINGS[TAB_NAMES[cache_name_idx].string_idx];
-	if (cache_color[0] != color[0] || (strcmp(cache_color, color) != 0))
+	if (strcmp(cache_color, color) != 0)
 	    continue;
 
 	/* found */
@@ -451,7 +448,7 @@ inkpot_status_t inkpot_put ( inkpot_t *inkpot, const char *color )
 	for (i=0; i < inkpot->active_schemes; i++) {
 	    j = inkpot->scheme_list[i];
 	    p = &TAB_STRINGS[TAB_ICOLORS[j].string_idx];
-	    if (*p != *s || strcmp(p, s) != 0) 
+	    if (strcmp(p, s) != 0)
 		continue;
 	    /* FIXME - deal with subschemes */
 	    first = TAB_ICOLORS[j].range_idx;
@@ -643,7 +640,8 @@ inkpot_status_t inkpot_write_rgba16 ( inkpot_t *inkpot )
 
     rc = inkpot_get_rgba_i ( inkpot, rgba );
     if (rc == INKPOT_SUCCESS) {
-        len = sprintf(buf, "%04x%04x%04x%04x", rgba[0], rgba[1], rgba[2], rgba[3]);
+        len = snprintf(buf, sizeof(buf), "%04x%04x%04x%04x", rgba[0], rgba[1],
+                       rgba[2], rgba[3]);
 	assert(len==16);
         inkpot->write_disc.writer(inkpot->write_closure, buf, len);
     }
@@ -659,7 +657,8 @@ inkpot_status_t inkpot_write_rgb16 ( inkpot_t *inkpot )
 
     rc = inkpot_get_rgba_i ( inkpot, rgba );
     if (rc == INKPOT_SUCCESS) {
-        len = sprintf(buf, "%04x%04x%04x", rgba[0], rgba[1], rgba[2]);
+        len = snprintf(buf, sizeof(buf), "%04x%04x%04x", rgba[0], rgba[1],
+                       rgba[2]);
 	assert(len==12);
         inkpot->write_disc.writer(inkpot->write_closure, buf, len);
     }
@@ -675,7 +674,8 @@ inkpot_status_t inkpot_write_rgba8 ( inkpot_t *inkpot )
 
     rc = inkpot_get_rgba_i ( inkpot, rgba );
     if (rc == INKPOT_SUCCESS) {
-        len = sprintf(buf, "%02x%02x%02x%02x", rgba[0]>>8, rgba[1]>>8, rgba[2]>>8, rgba[3]>>8);
+        len = snprintf(buf, sizeof(buf), "%02x%02x%02x%02x", rgba[0]>>8,
+                       rgba[1]>>8, rgba[2]>>8, rgba[3]>>8);
 	assert(len==8);
         inkpot->write_disc.writer(inkpot->write_closure, buf, len);
     }
@@ -691,7 +691,7 @@ inkpot_status_t inkpot_write_rgb8 ( inkpot_t *inkpot )
 
     rc = inkpot_get_rgba_i ( inkpot, rgba );
     if (rc == INKPOT_SUCCESS) {
-        len = sprintf(buf, "%02x%02x%02x", rgba[0]>>8, rgba[1]>>8, rgba[2]>>8);
+        len = snprintf(buf, "%02x%02x%02x", rgba[0]>>8, rgba[1]>>8, rgba[2]>>8);
 	assert(len==6);
         inkpot->write_disc.writer(inkpot->write_closure, buf, len);
     }

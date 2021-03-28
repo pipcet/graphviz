@@ -182,9 +182,9 @@ static void init(int argc, char *argv[], opts_t* opts)
 				fprintf (stderr, "-r arg %s must be a non-negative integer - ignored\n", optarg); 
 			break;
 		case 'T':
-			if ((*optarg == 'g') && ((*(optarg+1) == 'v'))) 
+			if (!strcmp(optarg, "gv"))
 				opts->fmt = FMT_GV;
-			else if ((*optarg == 's') && (!strcmp(optarg+1,"imple"))) 
+			else if (!strcmp(optarg,"simple"))
 				opts->fmt = FMT_SIMPLE;
 			else
 				fprintf (stderr, "-T arg %s must be \"gv\" or \"simple\" - ignored\n", optarg); 
@@ -459,7 +459,7 @@ bundle (Agraph_t* g, opts_t* opts)
 	if (Verbose)
 		fprintf(stderr,"n = %d nz = %d\n",A->m, nz);
 
-	B = nearest_neighbor_graph(nz, MIN(opts->nneighbors, nz), dim, xx, eps);
+	B = nearest_neighbor_graph(nz, MIN(opts->nneighbors, nz), xx, eps);
 
 	SparseMatrix_delete(A);
 	A = B;

@@ -1,18 +1,25 @@
 stages:
+    - build_docker_images
+    - push_docker_images
     - source
     - build
     - test
     - deploy
 
 portable-source:
+    # Doesn't have to wait for all the previous stages, only a docker image of
+    # ubuntu-18.04 is required
+    needs:
+      - docker_build_ubuntu-18.04
     stage: source
     tags:
         - linux
-    image: "graphviz/graphviz:ubuntu-18.04"
+    image: "$CI_REGISTRY_IMAGE/ubuntu-18.04:$CI_COMMIT_SHA"
     script:
         - ./autogen.sh
         - ./configure --enable-man-pdfs
         - make dist
+        - make dist-xz
     artifacts:
         when: on_success
         expire_in: 1 week
@@ -21,6 +28,7 @@ portable-source:
             - DATE
             - COLLECTION
             - graphviz-*.tar.gz
+            - graphviz-*.tar.xz
     except:
         - tags
 
@@ -43,6 +51,7 @@ portable-source:
             metrics: metrics.txt
     except:
         - tags
+    image: "$CI_REGISTRY_IMAGE/$IMAGE:$CI_COMMIT_SHA"
 
 .build_template: &deb_build_definition
     stage: build
@@ -63,6 +72,7 @@ portable-source:
             metrics: metrics.txt
     except:
         - tags
+    image: "$CI_REGISTRY_IMAGE/$IMAGE:$CI_COMMIT_SHA"
 
 .build_template: &macos_build_definition
     stage: build
@@ -92,6 +102,15 @@ portable-source:
             metrics: metrics.txt
     except:
         - tags
+    # Most submitters don't have access to the macOS runners, and if they try
+    # to run macOS pipeline jobs, the jobs will hang forever.  This variable is
+    # only set on repos that have access to macOS runners, in GitLab repo
+    # settings.
+    # https://gitlab.com/graphviz/graphviz/-/settings/ci_cd
+    only:
+        variables:
+          - $ENABLE_GRAPHVIZ_MACOS_CI
+
 
 .build_template: &windows_build_definition
     stage: build
@@ -107,7 +126,7 @@ portable-source:
             $TARGET_ARCH = "x86";
           }
         # Retrieve submodules, dependencies are stored there.
-        - git submodule update --init
+        - git submodule update --init --depth 1
         # Install and set PATH
         - $Env:graphviz_install_dir = "C:\Graphviz"
         # Build
@@ -198,71 +217,114 @@ portable-source:
     except:
         - tags
 
+.linux_test_template: &linux_test_definition
+    <<: *test_definition
+    image: "$CI_REGISTRY_IMAGE/$IMAGE:$CI_COMMIT_SHA"
+
 centos7-build:
     <<: *rpm_build_definition
+    needs:
+        - job: docker_build_centos7
+          artifacts: false
+        - job: portable-source
+          artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:centos7"
+    variables:
+      IMAGE: centos7
 
 centos8-build:
     <<: *rpm_build_definition
+    needs:
+        - job: docker_build_centos8
+          artifacts: false
+        - job: portable-source
+          artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:centos8"
-
-fedora31-build:
-    <<: *rpm_build_definition
-    tags:
-        - linux
-    image: "graphviz/graphviz:fedora31"
+    variables:
+      IMAGE: centos8
 
 fedora32-build:
     <<: *rpm_build_definition
+    needs:
+        - job: docker_build_fedora32
+          artifacts: false
+        - job: portable-source
+          artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:fedora32"
+    variables:
+      IMAGE: fedora32
 
 fedora33-build:
     <<: *rpm_build_definition
+    needs:
+        - job: docker_build_fedora33
+          artifacts: false
+        - job: portable-source
+          artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:fedora33"
+    variables:
+      IMAGE: fedora33
 
 ubuntu18-04-build:
     <<: *deb_build_definition
+    needs:
+        - job: docker_build_ubuntu-18.04
+          artifacts: false
+        - job: portable-source
+          artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:ubuntu-18.04"
+    variables:
+      IMAGE: ubuntu-18.04
 
 ubuntu20-04-debug-build:
     <<: *deb_build_definition
+    needs:
+        - job: docker_build_ubuntu-20.04
+          artifacts: false
+        - job: portable-source
+          artifacts: true
     before_script:
         - export CFLAGS="-DDEBUG"
         - export CXXFLAGS="-DDEBUG"
     tags:
         - linux
-    image: "graphviz/graphviz:ubuntu-20.04"
-
-ubuntu19-10-build:
-    <<: *deb_build_definition
-    tags:
-        - linux
-    image: "graphviz/graphviz:ubuntu-19.10"
+    variables:
+      IMAGE: ubuntu-20.04
 
 ubuntu20-04-build:
     <<: *deb_build_definition
+    needs:
+        - job: docker_build_ubuntu-20.04
+          artifacts: false
+        - job: portable-source
+          artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:ubuntu-20.04"
+    variables:
+      IMAGE: ubuntu-20.04
 
 ubuntu20-10-build:
     <<: *deb_build_definition
+    needs:
+        - job: docker_build_ubuntu-20.10
+          artifacts: false
+        - job: portable-source
+          artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:ubuntu-20.10"
+    variables:
+      IMAGE: ubuntu-20.10
 
 macos-autotools-build:
     <<: *macos_build_definition
+    needs:
+        - job: portable-source
+          artifacts: true
     before_script:
         - export build_system="autotools"
     tags:
@@ -270,6 +332,11 @@ macos-autotools-build:
 
 ubuntu18-04-cmake-build:
     <<: *deb_build_definition
+    needs:
+        - job: docker_build_ubuntu-18.04
+          artifacts: false
+        - job: portable-source
+          artifacts: true
     before_script:
         - export build_system="cmake"
         # fail on any compiler warnings
@@ -278,10 +345,16 @@ ubuntu18-04-cmake-build:
         - echo experimental > COLLECTION
     tags:
         - linux
-    image: "graphviz/graphviz:ubuntu-18.04"
+    variables:
+      IMAGE: ubuntu-18.04
 
 ubuntu20-10-cmake-build:
     <<: *deb_build_definition
+    needs:
+        - job: docker_build_ubuntu-20.10
+          artifacts: false
+        - job: portable-source
+          artifacts: true
     before_script:
         - export build_system="cmake"
         # fail on any compiler warnings
@@ -290,10 +363,16 @@ ubuntu20-10-cmake-build:
         - echo experimental > COLLECTION
     tags:
         - linux
-    image: "graphviz/graphviz:ubuntu-20.10"
+    variables:
+      IMAGE: ubuntu-20.10
 
 centos7-cmake-build:
     <<: *rpm_build_definition
+    needs:
+        - job: docker_build_centos7
+          artifacts: false
+        - job: portable-source
+          artifacts: true
     before_script:
         - export build_system="cmake"
         # fail on any compiler warnings
@@ -302,10 +381,16 @@ centos7-cmake-build:
         - echo experimental > COLLECTION
     tags:
         - linux
-    image: "graphviz/graphviz:centos7"
+    variables:
+      IMAGE: centos7
 
-fedora31-cmake-build:
+fedora32-cmake-build:
     <<: *rpm_build_definition
+    needs:
+        - job: docker_build_fedora32
+          artifacts: false
+        - job: portable-source
+          artifacts: true
     before_script:
         - export build_system="cmake"
         # fail on any compiler warnings
@@ -314,10 +399,14 @@ fedora31-cmake-build:
         - echo experimental > COLLECTION
     tags:
         - linux
-    image: "graphviz/graphviz:fedora31"
+    variables:
+      IMAGE: fedora32
 
 macos-cmake-build:
     <<: *macos_build_definition
+    needs:
+        - job: portable-source
+          artifacts: true
     before_script:
         - export build_system="cmake"
         # fail on any compiler warnings
@@ -387,7 +476,7 @@ meta-data:
         - tags
 
 ubuntu18-04-test:
-    <<: *test_definition
+    <<: *linux_test_definition
     before_script:
         - export build_system="autotools"
     needs:
@@ -397,23 +486,11 @@ ubuntu18-04-test:
           artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:ubuntu-18.04"
-
-ubuntu19-10-test:
-    <<: *test_definition
-    before_script:
-        - export build_system="autotools"
-    needs:
-        - job: portable-source
-          artifacts: true
-        - job: "ubuntu19-10-build"
-          artifacts: true
-    tags:
-        - linux
-    image: "graphviz/graphviz:ubuntu-19.10"
+    variables:
+      IMAGE: ubuntu-18.04
 
 ubuntu20-04-test:
-    <<: *test_definition
+    <<: *linux_test_definition
     before_script:
         - export build_system="autotools"
     needs:
@@ -423,10 +500,11 @@ ubuntu20-04-test:
           artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:ubuntu-20.04"
+    variables:
+      IMAGE: ubuntu-20.04
 
 ubuntu20-10-test:
-    <<: *test_definition
+    <<: *linux_test_definition
     before_script:
         - export build_system="autotools"
     needs:
@@ -436,10 +514,11 @@ ubuntu20-10-test:
           artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:ubuntu-20.10"
+    variables:
+      IMAGE: ubuntu-20.10
 
 centos7-test:
-    <<: *test_definition
+    <<: *linux_test_definition
     before_script:
         - export build_system="autotools"
     needs:
@@ -449,10 +528,11 @@ centos7-test:
           artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:centos7"
+    variables:
+      IMAGE: centos7
 
 centos8-test:
-    <<: *test_definition
+    <<: *linux_test_definition
     before_script:
         - export build_system="autotools"
     needs:
@@ -462,23 +542,11 @@ centos8-test:
           artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:centos8"
-
-fedora31-test:
-    <<: *test_definition
-    before_script:
-        - export build_system="autotools"
-    needs:
-        - job: portable-source
-          artifacts: true
-        - job: "fedora31-build"
-          artifacts: true
-    tags:
-        - linux
-    image: "graphviz/graphviz:fedora31"
+    variables:
+      IMAGE: centos8
 
 fedora32-test:
-    <<: *test_definition
+    <<: *linux_test_definition
     before_script:
         - export build_system="autotools"
     needs:
@@ -488,10 +556,11 @@ fedora32-test:
           artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:fedora32"
+    variables:
+      IMAGE: fedora32
 
 fedora33-test:
-    <<: *test_definition
+    <<: *linux_test_definition
     before_script:
         - export build_system="autotools"
     needs:
@@ -501,12 +570,13 @@ fedora33-test:
           artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:fedora33"
+    variables:
+      IMAGE: fedora33
 
 macos-autotools-test:
     <<: *test_definition
     before_script:
-        - pip3 install pytest
+        - python3 -m pip install --requirement requirements.txt
         - export build_system="autotools"
         - echo experimental > COLLECTION
     needs:
@@ -516,9 +586,17 @@ macos-autotools-test:
           artifacts: true
     tags:
         - macos
+    # Most submitters don't have access to the macOS runners, and if they try
+    # to run macOS pipeline jobs, the jobs will hang forever.  This variable is
+    # only set on repos that have access to macOS runners, in GitLab repo
+    # settings.
+    # https://gitlab.com/graphviz/graphviz/-/settings/ci_cd
+    only:
+        variables:
+          - $ENABLE_GRAPHVIZ_MACOS_CI
 
 ubuntu18-04-cmake-test:
-    <<: *test_definition
+    <<: *linux_test_definition
     before_script:
         - export build_system="cmake"
         - echo experimental > COLLECTION
@@ -529,10 +607,11 @@ ubuntu18-04-cmake-test:
           artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:ubuntu-18.04"
+    variables:
+      IMAGE: ubuntu-18.04
 
 ubuntu20-10-cmake-test:
-    <<: *test_definition
+    <<: *linux_test_definition
     before_script:
         - export build_system="cmake"
         - echo experimental > COLLECTION
@@ -543,10 +622,11 @@ ubuntu20-10-cmake-test:
           artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:ubuntu-20.10"
+    variables:
+      IMAGE: ubuntu-20.10
 
 centos7-cmake-test:
-    <<: *test_definition
+    <<: *linux_test_definition
     before_script:
         - export build_system="cmake"
         - echo experimental > COLLECTION
@@ -559,26 +639,28 @@ centos7-cmake-test:
           artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:centos7"
+    variables:
+      IMAGE: centos7
 
-fedora31-cmake-test:
-    <<: *test_definition
+fedora32-cmake-test:
+    <<: *linux_test_definition
     before_script:
         - export build_system="cmake"
         - echo experimental > COLLECTION
     needs:
         - job: portable-source
           artifacts: true
-        - job: "fedora31-cmake-build"
+        - job: "fedora32-cmake-build"
           artifacts: true
     tags:
         - linux
-    image: "graphviz/graphviz:fedora31"
+    variables:
+      IMAGE: fedora32
 
 macos-cmake-test:
     <<: *test_definition
     before_script:
-        - pip3 install pytest
+        - python3 -m pip install --requirement requirements.txt
         - export build_system="cmake"
         - echo experimental > COLLECTION
     needs:
@@ -588,6 +670,14 @@ macos-cmake-test:
           artifacts: true
     tags:
         - macos
+    # Most submitters don't have access to the macOS runners, and if they try
+    # to run macOS pipeline jobs, the jobs will hang forever.  This variable is
+    # only set on repos that have access to macOS runners, in GitLab repo
+    # settings.
+    # https://gitlab.com/graphviz/graphviz/-/settings/ci_cd
+    only:
+        variables:
+          - $ENABLE_GRAPHVIZ_MACOS_CI
 
 deployment:
     stage: deploy
@@ -603,3 +693,133 @@ deployment:
     # do not run this job for MRs, developer’s forks, etc.
     only:
         - master@graphviz/graphviz
+
+.docker_template: &docker_definition
+  image: docker:stable
+  services:
+    - docker:dind
+  before_script:
+    # Docker prefers passwords passed on stdin rather than as arguments,
+    # presumably because stdin isn't visible to other processes.
+    # $CI_JOB_TOKEN is documented at
+    # https://docs.gitlab.com/ee/user/project/new_ci_build_permissions_model.html#job-token
+    - echo -n $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
+  # do not re-run this job for new Git tags of previously seen commits
+  except:
+    - tags
+
+.docker_build_template: &docker_build_definition
+  <<: *docker_definition
+  stage: build_docker_images
+  script:
+    # fetches the :latest image (not failing if image is not found) for caching
+    - docker pull $CI_REGISTRY_IMAGE/$IMAGE:latest || true
+    # Build and push with git commit SHA tag, reusing layers from the :latest image if possible
+    - DOCKER_BUILDKIT=1 docker build -t $CI_REGISTRY_IMAGE/$IMAGE:$CI_COMMIT_SHA --cache-from $CI_REGISTRY_IMAGE/$IMAGE:latest -f ci/$IMAGE/Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $CI_REGISTRY_IMAGE/$IMAGE:$CI_COMMIT_SHA
+
+.docker_push_template: &docker_push_definition
+  <<: *docker_definition
+  stage: push_docker_images
+  variables:
+    # Docker pull and push doesn't need GitLab to clone the source code.
+    # Skipping code checkout should speed up execution a little.
+    GIT_STRATEGY: none
+  only:
+    refs:
+      # Only master should be pushed to :latest, not unmerged merge-requests.
+      # It's ok for this to run on other repos (not just graphviz/graphviz) as
+      # they have their own container registries.
+      - master
+  script:
+    - docker pull $CI_REGISTRY_IMAGE/$IMAGE:$CI_COMMIT_SHA
+    # Re-tag, push to :latest tag
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE/$IMAGE:latest
+    - docker push     $CI_REGISTRY_IMAGE/$IMAGE:latest
+
+docker_build_centos7:
+  <<: *docker_build_definition
+  variables:
+    IMAGE: centos7
+
+docker_build_centos8:
+  <<: *docker_build_definition
+  variables:
+    IMAGE: centos8
+
+docker_build_fedora32:
+  <<: *docker_build_definition
+  variables:
+    IMAGE: fedora32
+
+docker_build_fedora33:
+  <<: *docker_build_definition
+  variables:
+    IMAGE: fedora33
+
+docker_build_ubuntu-18.04:
+  <<: *docker_build_definition
+  variables:
+    IMAGE: ubuntu-18.04
+
+docker_build_ubuntu-20.04:
+  <<: *docker_build_definition
+  variables:
+    IMAGE: ubuntu-20.04
+
+docker_build_ubuntu-20.10:
+  <<: *docker_build_definition
+  variables:
+    IMAGE: ubuntu-20.10
+
+docker_push_centos7:
+  <<: *docker_push_definition
+  variables:
+    IMAGE: centos7
+
+docker_push_centos8:
+  <<: *docker_push_definition
+  variables:
+    IMAGE: centos8
+
+docker_push_fedora32:
+  <<: *docker_push_definition
+  variables:
+    IMAGE: fedora32
+
+docker_push_fedora33:
+  <<: *docker_push_definition
+  variables:
+    IMAGE: fedora33
+
+docker_push_ubuntu-18.04:
+  <<: *docker_push_definition
+  variables:
+    IMAGE: ubuntu-18.04
+
+docker_push_ubuntu-20.04:
+  <<: *docker_push_definition
+  variables:
+    IMAGE: ubuntu-20.04
+
+docker_push_ubuntu-20.10:
+  <<: *docker_push_definition
+  variables:
+    IMAGE: ubuntu-20.10
+
+lint_pylint:
+  image: "$CI_REGISTRY_IMAGE/ubuntu-20.10:$CI_COMMIT_SHA"
+  stage: test
+  needs:
+    - docker_build_ubuntu-20.10
+  script:
+    - logfile=`mktemp`
+    - python3 -m pylint --rcfile=.pylintrc `find . -name '*.py' | xargs` --exit-zero |& tee $logfile
+    - echo "$CI_JOB_NAME-warnings `egrep -c '\<[CEW][[:digit:]]{4}\>' $logfile`" > metrics.txt
+    - rm $logfile
+    - cat metrics.txt
+  artifacts:
+    when: on_success
+    expire_in: 1 week
+    reports:
+        metrics: metrics.txt

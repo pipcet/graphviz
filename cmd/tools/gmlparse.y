@@ -1,6 +1,3 @@
-/* $Id$Revision: */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 %require "3.0"
@@ -572,12 +569,12 @@ addNodeGraphics (Agnode_t* np, Dt_t* alist, agxbuf* xb, agxbuf* unk)
 	}
 	else if (ap->sort == WVAL) {
 	    d = atof (ap->u.value);
-	    sprintf (buf, "%.04f", d/72.0);
+	    snprintf(buf, sizeof(buf), "%.04f", d/72.0);
 	    agsafeset (np, "width", buf, "");
 	}
 	else if (ap->sort == HVAL) {
 	    d = atof (ap->u.value);
-	    sprintf (buf, "%.04f", d/72.0);
+	    snprintf(buf, sizeof(buf), "%.04f", d/72.0);
 	    agsafeset (np, "height", buf, "");
 	}
 	else if (ap->sort == TYPE) {

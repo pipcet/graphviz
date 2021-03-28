@@ -17,7 +17,7 @@ import shutil
 import stat
 import subprocess
 import sys
-from typing import Optional
+from typing import Generator, List, Optional
 
 # logging output stream, setup in main()
 log = None
@@ -52,8 +52,8 @@ def upload(version: str, path: str, name: Optional[str] = None) -> str:
     '--upload-file', path, target], stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT, universal_newlines=True)
   log.info('Curl response:')
-  for i, line in enumerate(proc.stdout.split('\n')):
-    log.info(f' {(i + 1):3}: {line}')
+  for i, line in enumerate(proc.stdout.split('\n'), 1):
+    log.info(f' {i:3}: {line}')
   proc.check_returncode()
 
   resp = proc.stdout.split('\n')[-1]
@@ -62,7 +62,40 @@ def upload(version: str, path: str, name: Optional[str] = None) -> str:
 
   return target
 
-def main(args: [str]) -> int:
+def checksum(path: str) -> Generator[str, None, None]:
+  '''
+  generate checksum(s) for the given file
+  '''
+
+  assert os.path.exists(path)
+
+  log.info(f'MD5 summing {path}')
+  check = f'{path}.md5'
+  with open(check, 'wt') as f:
+    with open(path, 'rb') as data:
+      f.write(f'{hashlib.md5(data.read()).hexdigest()}  {path}\n')
+  yield check
+
+  log.info(f'SHA256 summing {path}')
+  check = f'{path}.sha256'
+  with open(check, 'wt') as f:
+    with open(path, 'rb') as data:
+      f.write(f'{hashlib.sha256(data.read()).hexdigest()}  {path}\n')
+  yield check
+
+def is_macos_artifact(path: str) -> bool:
+  '''
+  is this a deployment artifact for macOS?
+  '''
+  return re.search(r'\bDarwin\b', path) is not None
+
+def is_windows_artifact(path: str) -> bool:
+  '''
+  is this a deployment artifact for Windows?
+  '''
+  return re.search(r'\bwindows\b', path) is not None
+
+def main(args: List[str]) -> int:
 
   # setup logging to print to stderr
   global log
@@ -93,20 +126,14 @@ def main(args: [str]) -> int:
   if os.path.exists('/etc/os-release'):
     with open('/etc/os-release') as f:
       log.info('/etc/os-release:')
-      for i, line in enumerate(f):
-        log.info(f' {i + 1}: {line[:-1]}')
+      for i, line in enumerate(f, 1):
+        log.info(f' {i}: {line[:-1]}')
 
   # bail out early if we do not have release-cli to avoid uploading assets that
   # become orphaned when we fail to create the release
   if not shutil.which('release-cli'):
     log.error('release-cli not found')
     return -1
-
-  # the generic package version has to be \d+.\d+.\d+ but it does not need to
-  # correspond to the release version (which may not conform to this pattern if
-  # this is a dev release), so generate a compliant generic package version
-  package_version = f'0.0.{int(os.environ["CI_COMMIT_SHA"], 16)}'
-  log.info(f'using generated generic package version {package_version}')
 
   # retrieve version name left by prior CI tasks
   log.info('reading VERSION')
@@ -118,23 +145,31 @@ def main(args: [str]) -> int:
   if options.version is None:
     options.version = gv_version
 
-  tarball = f'graphviz-{gv_version}.tar.gz'
-  if not os.path.exists(tarball):
-    log.error(f'source {tarball} not found')
-    return -1
-
-  # generate a checksum for the source tarball
-  log.info(f'MD5 summing {tarball}')
-  checksum = f'{tarball}.md5'
-  with open(checksum, 'wt') as f:
-    with open(tarball, 'rb') as data:
-      f.write(f'{hashlib.md5(data.read()).hexdigest()}  {tarball}\n')
+  # the generic package version has to be \d+.\d+.\d+ but it does not need to
+  # correspond to the release version (which may not conform to this pattern if
+  # this is a dev release)
+  if re.match(r'\d+\.\d+\.\d+$', options.version) is None:
+    # generate a compliant version
+    package_version = f'0.0.{int(os.environ["CI_COMMIT_SHA"], 16)}'
+  else:
+    # we can use a version corresponding to the release version
+    package_version = options.version
+  log.info(f'using generic package version {package_version}')
 
   # list of assets we have uploaded
-  assets: [str] = []
+  assets: List[str] = []
 
-  assets.append(upload(package_version, tarball))
-  assets.append(upload(package_version, checksum))
+  for tarball in (f'graphviz-{gv_version}.tar.gz',
+                  f'graphviz-{gv_version}.tar.xz'):
+
+    if not os.path.exists(tarball):
+      log.error(f'source {tarball} not found')
+      return -1
+
+    # accrue the source tarball and accompanying checksum(s)
+    assets.append(upload(package_version, tarball))
+    for check in checksum(tarball):
+      assets.append(upload(package_version, check))
 
   for stem, _, leaves in os.walk('Packages'):
     for leaf in leaves:
@@ -147,6 +182,12 @@ def main(args: [str]) -> int:
       os.chmod(path, mode & ~stat.S_IRWXO & ~stat.S_IWGRP & ~stat.S_IXGRP)
 
       assets.append(upload(package_version, path, path[len('Packages/'):]))
+
+      # if this is a standalone Windows or macOS package, also provide
+      # checksum(s)
+      if is_macos_artifact(path) or is_windows_artifact(path):
+        for c in checksum(path):
+          assets.append(upload(package_version, c, c[len('Packages/'):]))
 
   # we only create Gitlab releases for stable version numbers
   if not options.force:

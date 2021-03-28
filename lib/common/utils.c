@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include <common/render.h>
@@ -1079,7 +1076,7 @@ static item *mapEdge(Dt_t * map, edge_t * e)
 
     key[0] = agtail(e);
     key[1] = aghead(e);
-    return (item *) dtmatch(map, &key);
+    return dtmatch(map, &key);
 }
 
 /* checkCompound:
@@ -1518,12 +1515,12 @@ char* htmlEntityUTF8 (char* s, graph_t* g)
 		    if (v < 0x7F) /* entity needs 1 byte in UTF8 */
 			c = v;
 		    else if (v < 0x07FF) { /* entity needs 2 bytes in UTF8 */
-			agxbputc(&xb, (v >> 6) | 0xC0);
+			agxbputc(&xb, (char)((v >> 6) | 0xC0));
 			c = (v & 0x3F) | 0x80;
 		    }
 		    else { /* entity needs 3 bytes in UTF8 */
-			agxbputc(&xb, (v >> 12) | 0xE0);
-			agxbputc(&xb, ((v >> 6) & 0x3F) | 0x80);
+			agxbputc(&xb, (char)((v >> 12) | 0xE0));
+			agxbputc(&xb, (char)(((v >> 6) & 0x3F) | 0x80));
 			c = (v & 0x3F) | 0x80;
 		    }
 		    }
@@ -1531,7 +1528,7 @@ char* htmlEntityUTF8 (char* s, graph_t* g)
         else /* copy n byte UTF8 characters */
             for (ui = 0; ui < uc; ++ui)
                 if ((*s & 0xC0) == 0x80) {
-                    agxbputc(&xb, c);
+                    agxbputc(&xb, (char)c);
                     c = *(unsigned char*)s++;
                 }
                 else {
@@ -1542,7 +1539,7 @@ char* htmlEntityUTF8 (char* s, graph_t* g)
 		            c = cvtAndAppend (c, &xb);
                     break;
 	            }
-	    agxbputc(&xb, c);
+        agxbputc(&xb, (char)c);
     }
     ns = agxbdisown(&xb);
     agxbfree(&xb);
@@ -1571,15 +1568,15 @@ char* latin1ToUTF8 (char* s)
 	    if (!v) v = '&';
         }
 	if (v < 0x7F)
-	    agxbputc(&xb, v);
+	    agxbputc(&xb, (char)v);
 	else if (v < 0x07FF) {
-	    agxbputc(&xb, (v >> 6) | 0xC0);
-	    agxbputc(&xb, (v & 0x3F) | 0x80);
+	    agxbputc(&xb, (char)((v >> 6) | 0xC0));
+	    agxbputc(&xb, (char)((v & 0x3F) | 0x80));
 	}
 	else {
-	    agxbputc(&xb, (v >> 12) | 0xE0);
-	    agxbputc(&xb, ((v >> 6) & 0x3F) | 0x80);
-	    agxbputc(&xb, (v & 0x3F) | 0x80);
+	    agxbputc(&xb, (char)((v >> 12) | 0xE0));
+	    agxbputc(&xb, (char)(((v >> 6) & 0x3F) | 0x80));
+	    agxbputc(&xb, (char)((v & 0x3F) | 0x80));
 	}
     }
     ns = agxbdisown(&xb);
@@ -1604,12 +1601,12 @@ utf8ToLatin1 (char* s)
 
     while ((c = *(unsigned char*)s++)) {
 	if (c < 0x7F)
-	    agxbputc(&xb, c);
+	    agxbputc(&xb, (char)c);
 	else {
 	    outc = (c & 0x03) << 6;
 	    c = *(unsigned char*)s++;
 	    outc = outc | (c & 0x3F);
-	    agxbputc(&xb, outc);
+	    agxbputc(&xb, (char)outc);
 	}
     }
     ns = agxbdisown(&xb);

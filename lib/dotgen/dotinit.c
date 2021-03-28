@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 
@@ -272,11 +269,11 @@ attach_phase_attrs (Agraph_t * g, int maxphase)
 
     for (n = agfstnode(g); n; n = agnxtnode(g,n)) {
 	if (maxphase >= 1) {
-	    sprintf(buf, "%d", ND_rank(n));
+	    snprintf(buf, sizeof(buf), "%d", ND_rank(n));
 	    ag_xset(n,rk,buf);
 	}
 	if (maxphase >= 2) {
-	    sprintf(buf, "%d", ND_order(n));
+	    snprintf(buf, sizeof(buf), "%d", ND_order(n));
 	    ag_xset(n,order,buf);
 	}
     }

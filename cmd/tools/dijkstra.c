@@ -1,6 +1,3 @@
-/* $Id$ $Revision$ */
-/* vim:set shiftwidth=4 ts=8: */
-
 /*************************************************************************
  * Copyright (c) 2011 AT&T Intellectual Property 
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: See CVS logs. Details at http://www.graphviz.org/
+ * Contributors: Details at https://graphviz.org
  *************************************************************************/
 
 #include "config.h"
@@ -166,13 +163,13 @@ static void post(Agraph_t * g)
 	psym = agattr(g, AGNODE, "prev", "");
 
     if (setall)
-	sprintf(dflt, "%.3lf", HUGE);
+	snprintf(dflt, sizeof(dflt), "%.3lf", HUGE);
 
     for (v = agfstnode(g); v; v = agnxtnode(g, v)) {
 	dist = getdist(v);
 	if (dist) {
 	    dist--;
-	    sprintf(buf, "%.3lf", dist);
+	    snprintf(buf, sizeof(buf), "%.3lf", dist);
 	    agxset(v, sym, buf);
 	    if (doPath && (prev = getprev(v)))
 		agxset(v, psym, agnameof(prev));
@@ -192,10 +189,10 @@ static void post(Agraph_t * g)
 	    if (oldmax > maxdist)
 		maxdist = oldmax;
 	}
-	sprintf(buf, "%.3lf", maxdist);
+	snprintf(buf, sizeof(buf), "%.3lf", maxdist);
 	agxset(g, sym, buf);
     } else {
-	sprintf(buf, "%.3lf", maxdist);
+	snprintf(buf, sizeof(buf), "%.3lf", maxdist);
 	agattr(g, AGRAPH, "maxdist", buf);
     }
 
